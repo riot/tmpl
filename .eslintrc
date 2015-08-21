@@ -203,7 +203,7 @@ rules:
     no-trailing-spaces: 2          # disallow trailing whitespace at the end of lines
     no-multiple-empty-lines: 0     # disallow multiple empty lines
     no-underscore-dangle: 0        # disallow dangling underscores in identifiers
-    no-extra-parens: 2                # disallow wrapping of non-IIFE statements in parens
+#   no-extra-parens: 2                # disallow wrapping of non-IIFE statements in parens
     one-var: 0                     # allow just one var statement per function
     padded-blocks: 0               # enforce padding within blocks
     quotes:                        # specify whether double or single quotes should be used

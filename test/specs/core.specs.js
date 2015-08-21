@@ -136,7 +136,6 @@ describe('Tmpl', function() {
     expect(render('{ "a b": yes }')).to.equal('a b')
 
     // errors in expressions are silently catched allowing shorter expressions
-//  expect(render('{ loading: !nonExistingVar.length }')).to.equal('loading')   //@not compatible
     expect(render('{ loading: !nonExistingVar.length }')).to.equal('')
 
     // expressions are just regular JavaScript
@@ -296,7 +295,8 @@ describe('Tmpl', function() {
     // handling quotes in regexp is not so complicated :)
     expect(render('{ /"\'/.source }')).to.be('"\'')
     expect(render('{ ok: /"\'/.test("\\\"\'") }')).to.be('ok')
-    expect(render('str = "/\\\\\"\'/"')).to.be('str = "/\\\"\'/"')
+    expect(render('rex = /\\\"\'/')).to.be('rex = /\\\"\'/')      // rex = /\"\'/
+    expect(render('str = "/\\\"\'/"')).to.be('str = "/\\\"\'/"')  // str = "\"\'"
 
     // no confusion with operators
     data.x = 2

@@ -7,19 +7,17 @@ COVERALLS = ./node_modules/coveralls/bin/coveralls.js
 UGLIFY = ./node_modules/uglify-js/bin/uglifyjs
 RMCOMMS = ./node_modules/rmcomms/bin/rmcomms-cli.js
 
-raw:
+build: eslint
+	# rebuild all
 	@ cat lib/utils.js lib/brackets.js lib/tmpl.js | $(RMCOMMS) > dist/tmpl.riot.js
-
-build: raw
-	# umd version
 	@ cat lib/wrap/start.frag dist/tmpl.riot.js lib/wrap/end.frag > dist/tmpl.js
 	@ $(UGLIFY) dist/tmpl.js --comments --mangle -o dist/tmpl.min.js
 
-test: eslint test-karma
-
-eslint: raw
+eslint: build
 	# check code style
 	@ $(ESLINT) -c ./.eslintrc lib
+
+test: build test-karma
 
 test-karma:
 	@ $(KARMA) start test/karma.conf.js
@@ -30,4 +28,4 @@ test-coveralls:
 debug: raw
 	@ node-debug $(MOCHA) -d test/runner.js
 
-.PHONY: raw build test eslint debug test-karma test-coveralls
+.PHONY: build test eslint debug test-karma test-coveralls

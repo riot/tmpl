@@ -1,5 +1,8 @@
-;(function(window, undefined) {
-//// tmpl/utils.js
+
+/*
+  -----------------------------------------------------------------------------
+  riot-tmpl/lib/utils.js
+*/
 
 var REGLOB = 'g'
 
@@ -11,7 +14,7 @@ function newRegExp(restr, opts) {
 
 /*
   -----------------------------------------------------------------------------
-  brackets.js
+  riot-tmpl/lib/brackets.js
 */
 
 var brackets = (function (defaults) {
@@ -25,13 +28,17 @@ var brackets = (function (defaults) {
     pairs = s.split(' ')
             .concat(s.replace(/(?=[$\.\?\+\*\[\(\)\|^\\])/g, '\\').split(' '))
 
-    pairs[4] = brackets(/\\({|})/g)
+    pairs[4] = brackets(pairs[1].length > 1 ? /{.*}/ : /{[^}]*}/)
+
+    pairs[5] = brackets(/^\s*({)\s*(([$\w]+)(?:\s*,\s*([$\w]+))?\s+in\s+([^\s]+?\s*}))\s*$/)
+
+    pairs[6] = brackets(/\\({|})/g)
 
     s = '(\\\\?)('
 
-    pairs[5] = newRegExp(s + pairs[2] + ')', REGLOB)
+    pairs[7] = newRegExp(s + pairs[2] + ')', REGLOB)
 
-    pairs[6] = s           +
+    pairs[8] = s           +
         '?:([{\\[\\(])|('  +
           pairs[3]         +
         '))'
@@ -62,18 +69,24 @@ var brackets = (function (defaults) {
 
 /*
   -----------------------------------------------------------------------------
-  tmpl.js
+  riot-tmpl/lib/tmpl.js
 */
 
 var tmpl = (function () {
 
-  var cache = {},
+  var cache = { '@#1@': function () { return 'name' } },
 
     ICH_QSTRING = '\uFFF1',
 
     RE_QSMARKER = /@(\d+)\uFFF1/g,
 
-    RE_QBLOCKS = /("[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*')|((?:^|[-\+\*%~^&\|!=><\?:{\(\[,;]|\/\s)\s*)(\/(?!\/)(?:\[[^\]]*\]|\\.|[^/\[\\]+)*\/[igm]*)/g
+    RE_QBLOCKS = /("[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*')|((?:^|[-\+\*%~^&\|!=><\?:{\(\[,;]|\/\s)\s*)(\/(?!\/)(?:\[[^\]]*\]|\\.|[^/\[\\]+)*\/[igm]*)/g,
+
+    RE_RMCOMMS = newRegExp(
+      RE_QBLOCKS.source +
+      '|/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/',
+      REGLOB
+    )
 
   function _tmpl(str, data) {
 
@@ -97,7 +110,10 @@ var tmpl = (function () {
       hqb = [],
       expr,
       i,
-      parts = _splitByPairs(str.replace(/\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\//g, ' '))
+      parts = _splitByPairs(
+        str.replace(RE_RMCOMMS, function (_, qs, r1, r2) {
+          return qs || (r1 + r2) || ' '
+        }))
 
     for (i = 1; i < parts.length; i += 2) {
 
@@ -105,7 +121,7 @@ var tmpl = (function () {
 
         if (match.length > 2) {
 
-          match = qstr || regex ?
+          match = (qstr || regex) ?
             (prere || '') + '@' + (hqb.push(regex || match) - 1) + ICH_QSTRING :
             ' '
         }
@@ -166,10 +182,10 @@ var tmpl = (function () {
       match,
       pos,
       isexpr,
-      eb  = brackets(4),
-      re  = brackets(5),
+      eb  = brackets(6),
+      re  = brackets(7),
 
-      REs = [re, newRegExp(brackets(6) + '|' + RE_QBLOCKS.source, REGLOB)]
+      REs = [re, newRegExp(brackets(8) + '|' + RE_QBLOCKS.source, REGLOB)]
 
     start = isexpr = 0
 
@@ -335,7 +351,6 @@ var tmpl = (function () {
     JS_VARSTART = newRegExp(
         '(^ *|[^$\\w\\.])' +
         '(?!(?:typeof|in|instanceof|void|new|function)[^$\\w]|true(?:[^$\\w]|$))' +
-
         '(' + SRE_VARNAME + ')'
       ),
 
@@ -383,7 +398,7 @@ var tmpl = (function () {
 
       if (wrap) {
         expr = '(function(D,v){try{v=' + expr +
-               '}catch(e){e}return ' + (asText ? 'v||v===0?v:""' : 'v') + '}).call(D,D)'
+               '}catch(e){}return ' + (asText ? 'v||v===0?v:""' : 'v') + '}).call(D,D)'
       }
     }
 
@@ -391,19 +406,7 @@ var tmpl = (function () {
 
   }
 
-  _tmpl.getCode = _getExpr
-
   return _tmpl
 
 })()
 
-  /* istanbul ignore next */
-  // support CommonJS, AMD & browser
-  if (typeof exports === 'object')
-    module.exports = tmpl
-  else if (typeof define === 'function' && define.amd)
-    define(function() { return tmpl })
-  else
-    window.tmpl = tmpl
-
-})(typeof window != 'undefined' ? window : undefined);

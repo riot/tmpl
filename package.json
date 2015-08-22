@@ -1,13 +1,15 @@
 {
   "name": "riot-tmpl",
   "version": "2.0.0-beta",
-  "description": "Riot template engine",
-  "main": "index.js",
+  "description": "The riot template engine",
+  "main": "dist/tmpl.js",
   "directories": {
-    "lib": "lib"
+    "lib": "lib",
+    "doc": "doc"
   },
   "scripts": {
-    "test": "make test"
+    "test": "make test",
+    "prepublish": "make build"
   },
   "repository": {
     "type": "git",
@@ -15,8 +17,8 @@
   },
   "keywords": [
     "riot",
-    "observable",
-    "events"
+    "tmpl",
+    "template"
   ],
   "devDependencies": {
     "coveralls": "^2.11.3",
@@ -25,12 +27,13 @@
     "karma": "^0.13.3",
     "karma-coverage": "^0.4.2",
     "karma-mocha": "^0.2.0",
-    "karma-phantomjs-launcher": "^0.2.0"
+    "karma-phantomjs-launcher": "^0.2.0",
+    "uglify-js": "latest"
   },
   "author": "Muut, Inc. and other contributors",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/riot/observable/issues"
+    "url": "https://github.com/riot/tmpl/issues"
   },
-  "homepage": "https://github.com/riot/observable#readme"
+  "homepage": "https://github.com/riot/tmpl#readme"
 }

@@ -12,7 +12,7 @@ module.exports = function(config) {
     files: [
       '../node_modules/mocha/mocha.js',
       '../node_modules/expect.js/index.js',
-      '../lib/index.js',
+      '../dist/tmpl.riot.js',
       'specs/core.specs.js'
     ],
 
@@ -20,7 +20,7 @@ module.exports = function(config) {
 
     reporters: ['progress', 'saucelabs', 'coverage'],
     preprocessors: {
-      '../lib/index.js': ['coverage']
+      '../dist/tmpl.riot.js': ['coverage']
     },
 
     coverageReporter: {

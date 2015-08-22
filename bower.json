@@ -1,20 +1,19 @@
 {
   "name": "riot-tmpl",
-  "main": "index.js",
+  "main": "dist/tmpl.js",
   "homepage": "https://github.com/riot/tmpl",
   "authors": ["Muut, Inc. and other contributors"],
-  "description": "Riot template engine",
+  "description": "The riot template engine",
   "keywords": [
     "riot",
-    "events",
-    "tmpl"
+    "tmpl",
+    "template"
   ],
   "license": "MIT",
   "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
-    "test",
-    "tests"
+    "test"
   ]
 }

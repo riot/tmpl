@@ -7,7 +7,7 @@
 
 # Tmpl
 
-Riot template engine
+The riot template engine
 
 ## Documentation
 

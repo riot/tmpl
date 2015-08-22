@@ -1,7 +1,5 @@
 describe('Tmpl', function() {
 
-
-
   var data = {
       yes: true,
       no: false,
@@ -23,7 +21,6 @@ describe('Tmpl', function() {
   // fake the riot object
   window.riot = {
     settings: {
-
     }
   }
 
@@ -209,7 +206,7 @@ describe('Tmpl', function() {
 
   })
 
-  it('compiles specs - 2015-07-16 tmpl update', function() {
+  it('compiles specs - 2.3 tmpl update', function() {
 
     riot.settings.brackets = null
 
@@ -399,6 +396,7 @@ describe('Tmpl', function() {
 
       riot.settings.brackets = undefined  // use default brackets
       for (i = 0; i < 2; i++) {
+        rs = newRegExp('{}')
         expect(brfn(rs)).to.be(rs)
         expect(brfn(0)).to.equal('{')
         expect(brfn(1)).to.equal('}')
@@ -412,7 +410,6 @@ describe('Tmpl', function() {
         rs = vals[i]
         bb = (riot.settings.brackets = rs[0]).split(' ')
         rs = rs[1]
-
         expect(brfn(/{ }/g).source).to.equal(rs)
         expect(brfn(0)).to.equal(bb[0])
         expect(brfn(1)).to.equal(bb[1]); bb = rs.split(' ')

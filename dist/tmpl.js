@@ -1,3 +1,5 @@
+/* Riot WIP, @license MIT, (c) 2015 Muut Inc. + contributors */
+;(function (window, undefined) {
 
 //// tmpl/utils.js
 
@@ -25,13 +27,17 @@ var brackets = (function (defaults) {
     pairs = s.split(' ')
             .concat(s.replace(/(?=[$\.\?\+\*\[\(\)\|^\\])/g, '\\').split(' '))
 
-    pairs[4] = brackets(/\\({|})/g)
+    pairs[4] = brackets(pairs[1].length > 1 ? /{.*}/ : /{[^}]*}/)
+
+    pairs[5] = brackets(/^\s*({)\s*(([$\w]+)(?:\s*,\s*([$\w]+))?\s+in\s+([^\s]+?\s*}))\s*$/)
+
+    pairs[6] = brackets(/\\({|})/g)
 
     s = '(\\\\?)('
 
-    pairs[5] = newRegExp(s + pairs[2] + ')', REGLOB)
+    pairs[7] = newRegExp(s + pairs[2] + ')', REGLOB)
 
-    pairs[6] = s           +
+    pairs[8] = s           +
         '?:([{\\[\\(])|('  +
           pairs[3]         +
         '))'
@@ -175,10 +181,10 @@ var tmpl = (function () {
       match,
       pos,
       isexpr,
-      eb  = brackets(4),
-      re  = brackets(5),
+      eb  = brackets(6),
+      re  = brackets(7),
 
-      REs = [re, newRegExp(brackets(6) + '|' + RE_QBLOCKS.source, REGLOB)]
+      REs = [re, newRegExp(brackets(8) + '|' + RE_QBLOCKS.source, REGLOB)]
 
     start = isexpr = 0
 
@@ -404,3 +410,25 @@ var tmpl = (function () {
 
 })()
 
+
+  // support CommonJS, AMD & browser
+  /* istanbul ignore next */
+  if (typeof exports === 'object') {
+    module.exports = {
+      'tmpl': tmpl,
+      'brackets': brackets
+    }
+  }
+  else if (typeof define === 'function' && define.amd) {
+    define(function() {
+      return {
+        'tmpl': tmpl,
+        'brackets': breackets }
+    })
+  }
+  else {
+    var o = (typeof riot !== 'undefined' && riot.util) ? riot.util : (window || global)
+    o.tmpl = tmpl
+    o.brackets = brackets
+  }
+})(typeof window !== 'undefined' ? window : void 0);

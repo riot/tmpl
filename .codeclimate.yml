@@ -1,7 +1,14 @@
+languages:
+  JavaScript: true
+
 engines:
   eslint:
     enabled: true
 
 ratings:
   paths:
-  - "lib/index.js"
+  - "lib/**"
+
+exclude_paths:
+  - "dist/**"
+  - "lib/wrap/**"

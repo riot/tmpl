@@ -47,7 +47,7 @@
   "requireSpaceBeforeBlockStatements": true,
   "requireSpacesInForStatement": true,
   "requireLineFeedAtFileEnd": true,
-  "disallowSpacesInsideObjectBrackets": "all",
+  /*"disallowSpacesInsideObjectBrackets": "all",*/
   "disallowSpacesInsideArrayBrackets": "all",
   "disallowSpacesInsideParentheses": true,
 

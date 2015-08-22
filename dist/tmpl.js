@@ -1,7 +1,10 @@
 /* Riot WIP, @license MIT, (c) 2015 Muut Inc. + contributors */
 ;(function (window, undefined) {
 
-//// tmpl/utils.js
+/*
+  -----------------------------------------------------------------------------
+  riot-tmpl/lib/utils.js
+*/
 
 var REGLOB = 'g'
 
@@ -13,7 +16,7 @@ function newRegExp(restr, opts) {
 
 /*
   -----------------------------------------------------------------------------
-  brackets.js
+  riot-tmpl/lib/brackets.js
 */
 
 var brackets = (function (defaults) {
@@ -68,12 +71,12 @@ var brackets = (function (defaults) {
 
 /*
   -----------------------------------------------------------------------------
-  tmpl.js
+  riot-tmpl/lib/tmpl.js
 */
 
 var tmpl = (function () {
 
-  var cache = {},
+  var cache = { '@#1@': function () { return 'name' } },
 
     ICH_QSTRING = '\uFFF1',
 
@@ -350,7 +353,6 @@ var tmpl = (function () {
     JS_VARSTART = newRegExp(
         '(^ *|[^$\\w\\.])' +
         '(?!(?:typeof|in|instanceof|void|new|function)[^$\\w]|true(?:[^$\\w]|$))' +
-
         '(' + SRE_VARNAME + ')'
       ),
 
@@ -398,7 +400,7 @@ var tmpl = (function () {
 
       if (wrap) {
         expr = '(function(D,v){try{v=' + expr +
-               '}catch(e){e}return ' + (asText ? 'v||v===0?v:""' : 'v') + '}).call(D,D)'
+               '}catch(e){}return ' + (asText ? 'v||v===0?v:""' : 'v') + '}).call(D,D)'
       }
     }
 
@@ -426,9 +428,8 @@ var tmpl = (function () {
         'brackets': breackets }
     })
   }
-  else {
-    var o = (typeof riot !== 'undefined' && riot.util) ? riot.util : (window || global)
-    o.tmpl = tmpl
-    o.brackets = brackets
+  else if (window) {
+    window.tmpl = tmpl
+    window.brackets = brackets
   }
 })(typeof window !== 'undefined' ? window : void 0);

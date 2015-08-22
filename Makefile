@@ -5,7 +5,7 @@ ESLINT = ./node_modules/eslint/bin/eslint.js
 MOCHA = ./node_modules/mocha/bin/_mocha
 COVERALLS = ./node_modules/coveralls/bin/coveralls.js
 UGLIFY = ./node_modules/uglify-js/bin/uglifyjs
-RMCOMMS = ./rmcomms.js
+RMCOMMS = ./node_modules/rmcomms/bin/rmcomms-cli.js
 
 raw:
 	@ cat lib/utils.js lib/brackets.js lib/tmpl.js | $(RMCOMMS) > dist/tmpl.riot.js

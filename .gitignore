@@ -22,6 +22,8 @@ $RECYCLE.BIN/
 *.msp
 *.lnk
 
+dist/*.html
+
 # --------------------
 # Sublime Text Files
 # --------------------

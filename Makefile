@@ -13,7 +13,7 @@ build: eslint
 	@ cat lib/wrap/start.frag dist/tmpl.riot.js lib/wrap/end.frag > dist/tmpl.js
 	@ $(UGLIFY) dist/tmpl.js --comments --mangle -o dist/tmpl.min.js
 
-eslint: build
+eslint:
 	# check code style
 	@ $(ESLINT) -c ./.eslintrc lib
 

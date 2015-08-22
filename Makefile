@@ -17,7 +17,7 @@ build: raw
 
 test: eslint test-karma
 
-eslint:
+eslint: raw
 	# check code style
 	@ $(ESLINT) -c ./.eslintrc lib
 

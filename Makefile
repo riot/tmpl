@@ -10,7 +10,7 @@ RMCOMMS = ./node_modules/rmcomms/bin/rmcomms-cli.js
 build: eslint
 	# rebuild all
 	@ cat lib/utils.js lib/brackets.js lib/tmpl.js | $(RMCOMMS) > dist/riot.tmpl.js
-	@ cat lib/wrap/start.frag dist/tmpl.riot.js lib/wrap/end.frag > dist/tmpl.js
+	@ cat lib/wrap/start.frag dist/riot.tmpl.js lib/wrap/end.frag > dist/tmpl.js
 	@ $(UGLIFY) dist/tmpl.js --comments --mangle -o dist/tmpl.min.js
 
 eslint:

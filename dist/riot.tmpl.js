@@ -20,7 +20,7 @@ function newRegExp(restr, opts) {
 var brackets = (function (defaults) {
 
   var cachedBrackets,
-      pairs
+    pairs
 
   function updateCache(s) {
     cachedBrackets = s
@@ -330,10 +330,10 @@ var tmpl = (function () {
       }
 
       list[n++] = [
-          match[2],
-          match[1],
-          str.slice(0, end.index)
-        ]
+        match[2],
+        match[1],
+        str.slice(0, end.index)
+      ]
 
       str = GRE.rightContext
     }

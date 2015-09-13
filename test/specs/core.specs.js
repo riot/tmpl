@@ -96,6 +96,7 @@ describe('Tmpl', function() {
     expect(render('{ $a }')).to.equal(0)
     expect(render('{ $a + $b }')).to.equal(1)
     expect(render('{ this.str }')).to.equal('x')
+    expect(render("{filterState==''?'empty':'notempty'}")).to.equal('notempty')
 
     // global vars are supported in expressions
     expect(render('{ globalVar }')).to.equal(globalVar)

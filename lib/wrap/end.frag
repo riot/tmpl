@@ -3,15 +3,16 @@
   /* istanbul ignore next */
   if (typeof exports === 'object') {
     module.exports = {
-      'tmpl': tmpl,
-      'brackets': brackets
+      tmpl: tmpl,
+      brackets: brackets
     }
   }
   else if (typeof define === 'function' && define.amd) {
     define(function() {
       return {
-        'tmpl': tmpl,
-        'brackets': breackets }
+        tmpl: tmpl,
+        brackets: brackets
+      }
     })
   }
   else if (window) {

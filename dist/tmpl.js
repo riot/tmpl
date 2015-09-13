@@ -22,7 +22,7 @@ function newRegExp(restr, opts) {
 var brackets = (function (defaults) {
 
   var cachedBrackets,
-      pairs
+    pairs
 
   function updateCache(s) {
     cachedBrackets = s
@@ -332,10 +332,10 @@ var tmpl = (function () {
       }
 
       list[n++] = [
-          match[2],
-          match[1],
-          str.slice(0, end.index)
-        ]
+        match[2],
+        match[1],
+        str.slice(0, end.index)
+      ]
 
       str = GRE.rightContext
     }
@@ -417,15 +417,16 @@ var tmpl = (function () {
   /* istanbul ignore next */
   if (typeof exports === 'object') {
     module.exports = {
-      'tmpl': tmpl,
-      'brackets': brackets
+      tmpl: tmpl,
+      brackets: brackets
     }
   }
   else if (typeof define === 'function' && define.amd) {
     define(function() {
       return {
-        'tmpl': tmpl,
-        'brackets': breackets }
+        tmpl: tmpl,
+        brackets: brackets
+      }
     })
   }
   else if (window) {

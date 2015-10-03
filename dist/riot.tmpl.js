@@ -1,193 +1,82 @@
+/* riot-tmpl WIP, @license MIT, (c) 2015 Muut Inc. + contributors */
 
-/*
-  -----------------------------------------------------------------------------
-  riot-tmpl/lib/utils.js
-*/
 
-var REGLOB = 'g'
+// lib/regex.js
 
-function newRegExp(restr, opts) {
+var regEx = (function () {
 
-  return new RegExp(restr, opts)
+  var _re = function _regEx(source, flags) { return new RegExp(source, flags) }
 
-}
+  _re.MLCOMMS = /\/\*[^*]*\*+(?:[^*\/][^*]*\*+)*\//g
+  _re.STRINGS = /"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'/g
 
-/*
-  -----------------------------------------------------------------------------
-  riot-tmpl/lib/brackets.js
-*/
+  var
+    DIVISOR = /(?:[$\w\)\]]|\+\+|--)\s*(\/)(?![*\/])/,
+    REGEXES = /\/(?=[^*\/])[^[\/\\]*(?:(?:\[(?:\\.|[^\]\\]*)*\]|\\.)[^[\/\\]*)*?(\/)[gim]*/
 
-var brackets = (function (defaults) {
+  _re.S_QBSRC = _re.STRINGS.source + '|' +
+                    DIVISOR.source + '|' +
+                    REGEXES.source
 
-  var cachedBrackets,
-    pairs
+  _re.PCE_TEST = /{#\d+#}/
+  _re.E_NUMBER = "{#01#}"
 
-  function updateCache(s) {
-    cachedBrackets = s
+  return _re
 
-    pairs = s.split(' ')
-            .concat(s.replace(/(?=[$\.\?\+\*\[\(\)\|^\\])/g, '\\').split(' '))
+})()
 
-    pairs[4] = brackets(pairs[1].length > 1 ? /{.*}/ : /{[^}]*}/)
+// lib/brackets.js
 
-    pairs[5] = brackets(/^\s*({)\s*(([$\w]+)(?:\s*,\s*([$\w]+))?\s+in\s+([^\s]+?\s*}))\s*$/)
+var brackets = (function () {
 
-    pairs[6] = brackets(/\\({|})/g)
+  var
+    cachedBrackets = '',
+    _regex,
+    _pairs,
+    _bp = [
+      '{', '}',
+      '{', '}',
+      /{[^}]*}/,
+      /\\({|})/g,
+      /(\\?)({)/g
+    ],
+    REGLOB = 'g'
 
-    s = '(\\\\?)('
-
-    pairs[7] = newRegExp(s + pairs[2] + ')', REGLOB)
-
-    pairs[8] = s           +
-        '?:([{\\[\\(])|('  +
-          pairs[3]         +
-        '))'
-  }
-
-  return function _brackets(reOrIdx) {
-
-    var s = riot ? riot.settings.brackets || defaults : defaults
-
-    if (cachedBrackets !== s) updateCache(s)
-
-    if (reOrIdx instanceof RegExp) {
-
-      return s === defaults ?
-        reOrIdx :
-
-        newRegExp(
-          reOrIdx.source.replace(/[{}]/g, function (b) { return pairs[(b === '}') + 2] }),
-          reOrIdx.global ? REGLOB : ''
-        )
-    }
-
-    return pairs[reOrIdx]
-
-  }
-
-})('{ }')
-
-/*
-  -----------------------------------------------------------------------------
-  riot-tmpl/lib/tmpl.js
-*/
-
-var tmpl = (function () {
-
-  var cache = { '@#1@': function () { return 'name' } },
-
-    ICH_QSTRING = '\uFFF1',
-
-    RE_QSMARKER = /@(\d+)\uFFF1/g,
-
-    RE_QBLOCKS = /("[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*')|((?:^|[-\+\*%~^&\|!=><\?:{\(\[,;]|\/\s)\s*)(\/(?!\/)(?:\[[^\]]*\]|\\.|[^/\[\\]+)*\/[igm]*)/g,
-
-    RE_RMCOMMS = newRegExp(
-      RE_QBLOCKS.source +
-      '|/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/',
-      REGLOB
+  function reWrite(r, p) {
+    return new RegExp(
+      r.source.replace(/{/g, p[2]).replace(/}/g, p[3]),
+      r.global ? REGLOB : ''
     )
-
-  function _tmpl(str, data) {
-
-    return str && (cache[str] || (cache[str] = _create(str))).call(data, data)
-
   }
 
-  function _create(str) {
-
-    if (str.indexOf(brackets(0)) < 0) {
-      str = str.replace(/\r\n?|\n/g, '\n')
-      return function () { return str }
-    }
-
-    return new Function('D', 'return ' + _getExpr(str) + ';')
+  function bFinish(b) {
+    b[7] = regEx('(\\\\?)(?:([[({])|(' + b[3] + '))|' + regEx.S_QBSRC, REGLOB)
+    b[8] = b[0] + ' ' + b[1]
   }
 
-  function _getExpr(str) {
+  _regex = _bp._re = function (r) { return r }
+  _pairs = _bp
+  bFinish(_bp)
 
-    var
-      hqb = [],
-      expr,
-      i,
-      parts = _splitByPairs(
-        str.replace(RE_RMCOMMS, function (_, qs, r1, r2) {
-          return qs || (r1 + r2) || ' '
-        }))
-
-    for (i = 1; i < parts.length; i += 2) {
-
-      parts[i] = parts[i].replace(RE_QBLOCKS, function (match, qstr, prere, regex) {
-
-        if (match.length > 2) {
-
-          match = (qstr || regex) ?
-            (prere || '') + '@' + (hqb.push(regex || match) - 1) + ICH_QSTRING :
-            ' '
-        }
-
-        return match
-      })
-    }
-
-    if (parts.length > 2 || parts[0]) {
-
-      var j, list = []
-
-      for (i = j = 0; i < parts.length; ++i) {
-
-        expr = parts[i]
-
-        if (expr && (expr =
-
-              i & 1 ?
-
-              _parseExpr(expr, 1, hqb) :
-
-              '"' + expr
-                .replace(/\r?\n|\r/g, '\\n')
-                .replace(/"/g, '\\"') +
-              '"'
-
-          )) list[j++] = expr
-
-      }
-
-      expr = j > 1 ?
-             '[' + list.join(',') + '].join("")' :
-             j ? '""+' + list[0] : '""'
-
-    }
-    else {
-
-      expr = _parseExpr(parts[1], 0, hqb)
-
-    }
-
-    expr = expr.replace(RE_QSMARKER, function (_, pos) {
-            return hqb[pos | 0]
-              .replace(/\n/g, '\\n')
-              .replace(/\r/g, '\\r')
-          })
-
-    return expr
-
+  var FINDBRACES = {
+    '(': regEx('([()])|'   + regEx.S_QBSRC, REGLOB),
+    '[': regEx('([[\\]])|' + regEx.S_QBSRC, REGLOB),
+    '{': regEx('([{}])|'   + regEx.S_QBSRC, REGLOB)
   }
 
-  function _splitByPairs(str) {
+  function _split(str, bp) {
+
+    if (!bp) bp = _pairs
 
     var
       parts = [],
-      start,
       match,
-      pos,
       isexpr,
-      eb  = brackets(6),
-      re  = brackets(7),
+      start,
+      pos,
+      re = bp[6]
 
-      REs = [re, newRegExp(brackets(8) + '|' + RE_QBLOCKS.source, REGLOB)]
-
-    start = isexpr = 0
+    isexpr = start = 0
 
     while (match = re.exec(str)) {
 
@@ -196,8 +85,7 @@ var tmpl = (function () {
       if (isexpr) {
 
         if (match[2]) {
-
-          re.lastIndex = skipBracketedPart(str, match[2], !!match[1] + pos, 1)
+          re.lastIndex = skipBraces(match[2], re.lastIndex)
           continue
         }
 
@@ -206,207 +94,304 @@ var tmpl = (function () {
       }
 
       if (!match[1]) {
-
         unescapeStr(str.slice(start, pos))
-
         start = re.lastIndex
-        re = REs[isexpr ^= 1]
+        re = bp[6 + (isexpr ^= 1)]
         re.lastIndex = start
       }
     }
 
-    if (start < str.length)
+    if (str && start < str.length) {
       unescapeStr(str.slice(start))
+    }
 
     return parts
 
     function unescapeStr(str) {
-      parts.push(str && str.replace(eb, '$1'))
+      parts.push(str && str.replace(bp[5], '$1'))
     }
 
-    function skipBracketedPart(str, opench, chpos) {
-
+    function skipBraces(ch, pos) {
       var
-        level = 0,
         match,
-        recch = newRegExp((
-                  opench === '(' ? '(\\(|\\))' :
-                  opench === '[' ? '(\\[|\\])' : '({|})'
-                  ) + '|' + RE_QBLOCKS.source,
-                REGLOB)
-
-      recch.lastIndex = chpos
+        recch = FINDBRACES[ch],
+        level = 1
+      recch.lastIndex = pos
 
       while (match = recch.exec(str)) {
-
-        if (match[1]) {
-          if (match[1] === opench)
-            ++level
-          else if (!--level)
-            break
-        }
+        if (match[1] &&
+          !(match[1] === ch ? ++level : --level)) break
       }
-
       return match ? recch.lastIndex : str.length
     }
-
   }
 
-  function _parseExpr(expr, mode, qstr) {
+  function _array(pair) {
+    var bp = _bp
 
-    expr = expr
-          .replace(/\s+/g, ' ')
-          .replace(/^ | ?([\(\[{},\?\.:]) ?| $/g, '$1')
+    if (pair && pair !== '{ }') {
 
-    if (!expr) return ''
-
-    var
-      csinfo = [],
-      cslist
-
-    if (!_extractCSList(expr, csinfo)) {
-
-      return _wrapExpr(expr, mode)
-    }
-
-    cslist = csinfo.map(function (kv) {
-
-      if (kv[0])
-        kv[1] = qstr[kv[0] | 0]
-          .slice(1, -1)
-          .replace(/\s+/g, ' ').trim()
-
-      return '(' +
-          _wrapExpr(kv[2], 0) +
-          ')?"'  + kv[1]  + '":""'
-
-    })
-
-    return cslist.length < 2 ?
-       cslist[0] :
-      '[' + cslist.join(',') + '].join(" ").trim()'
-
-  }
-
-  var CSNAME_PART = newRegExp(
-        '^(' +
-        RE_QSMARKER.source +
-        '|-?[_A-Za-z][-\\w]*' +
-        '):'
-      )
-
-  function _extractCSList(str, list) {
-
-    var
-      re = /,|([\[{\(])|$/g,
-      GRE = RegExp,
-      match,
-      end,
-      ch,
-      n = 0
-
-    while (str &&
-          (match = str.match(CSNAME_PART)) &&
-          !match.index
-      ) {
-
-      str = GRE.rightContext
-      re.lastIndex = 0
-
-      while ((end = re.exec(str)) && (ch = end[1])) {
-
-        var
-          rr = ch === '(' ? /[\(\)]/g : ch === '[' ? /[\[\]]/g : /[{}]/g,
-          lv = 1,
-          mm
-
-        rr.lastIndex = end.index + 1
-
-        while (lv && (mm = rr.exec(str))) {
-          mm[0] === ch ? ++lv : --lv
-        }
-
-        re.lastIndex = lv ? str.length : rr.lastIndex
+      bp = pair.split(' ')
+      if (bp.length !== 2 || /[\x00-\x1F<>a-zA-Z0-9'",;\\]/.test(pair)) {
+        throw new Error('Unsupported brackets "' + pair + '"')
       }
+      bp = bp.concat(pair.replace(/(?=[-[\]()*+?.^$|#])/g, '\\').split(' '))
+      bp[4] = reWrite(bp[1].length > 1 ? /{.*}/ : _bp[4], bp)
+      bp[5] = reWrite(_bp[5], bp)
+      bp[6] = reWrite(_bp[6], bp)
+      bFinish(bp)
+    }
+    return bp
+  }
 
-      list[n++] = [
-        match[2],
-        match[1],
-        str.slice(0, end.index)
-      ]
+  function _set(pair) {
+    if (cachedBrackets !== pair) {
+      _pairs = _array(pair)
+      _regex = _pairs._re || reWrite
+      _brackets.settings.brackets = cachedBrackets = pair
+    }
+  }
 
-      str = GRE.rightContext
+  function _brackets(reOrIdx) {
+    _set(_brackets.settings.brackets)
+    return reOrIdx instanceof RegExp ? _regex(reOrIdx, _pairs) : _pairs[reOrIdx]
+  }
+
+  _brackets.array = _array
+  _brackets.split = _split
+
+  _brackets.settings = typeof riot !== 'undefined' && riot.settings || {}
+  _brackets.set = _set
+
+  return _brackets
+
+})()
+
+// lib/tmpl.js
+
+var tmpl = (function () {
+  var
+    GLOBAL = typeof window !== 'object' ? global : window,
+
+    _cache = {
+      '#00': function () { return undefined },
+      '#01': function () { return 'number' }
     }
 
-    return n
+  _tmpl.errorHandler = null
 
+  function _tmpl(str, data) {
+    var x, v
+    if (!str) return str
+
+    if (x = str.match(/^{(#\d+)#}$/)) {
+      try {
+        v = _cache[x[1]].call(data, GLOBAL, shList)
+      } catch (e) {
+        logErr(e, x[1], data)
+      }
+      return v
+    }
+
+    return str.replace(/{(#\d+)#}/g, function (_, n) {
+      var s
+      try {
+        s = _cache[n].call(data, GLOBAL, shList)
+      } catch (e) {
+        logErr(e, n, data)
+      }
+      return s || s === 0 ? s : ''
+    })
+  }
+
+  function shList(data, list) {
+    var i, s, cs = ''
+
+    for (i = 0; i < list.length; ++i) {
+      try {
+        if (s = list[i].call(data, GLOBAL))
+          cs += (cs ? ' ' : cs) + s
+      } catch (e) {
+        logErr(e, 0, data)
+      }
+    }
+    return cs
+  }
+
+  function logErr(err, n, D) {
+    var s = n && !_cache[n] || _tmpl.errorHandler ? 'riot:' : ''
+    if (!s) return
+
+    if (D) {
+      s += ' ' + (D && D.root && D.root.tagName || '-no-name-')
+      s += ':' + ('_riot_id' in D ? D._riot_id : '-')
+    } else
+      s += ' -no-data-:-'
+
+    s += ' : ' + (err.stack || err)
+
+    if (_tmpl.errorHandler)
+      _tmpl.errorHandler(s)
+    else
+      throw new Error(s + ' : Missing expression "' + n + '"')
+  }
+
+  _tmpl.hasExpr = function hasExpr(str) {
+    return /{#\d+#}/.test(str)
+  }
+
+  _tmpl.loopKeys = function loopKeys(expr) {
+    var m = expr.match(/^([$\w]+),([^,]*),({#\d+#})/)
+    return m ? { key: m[1], pos: m[2], val: m[3] } : { val: expr }
+  }
+
+  _tmpl.insert = function insert(pcexpr) {
+    for (var hash in pcexpr) {
+      _cache[hash] = pcexpr[hash]
+    }
   }
 
   var
+    EACH_EXPR = /^(?:\^\s*)?([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S+)$/,
+    EACH_ATTR = /(^|\s)each\s*=\s*['"]?$/i
 
-    VAR_CONTEXT = '"in D?D:' + (typeof window === 'object' ? 'window' : 'global') + ').',
+  _tmpl.compile = function compile(str, opts, pcex, fn) {
+    if (!str) return str
+    var
+      look,
+      expr,
+      each,
+      hash,
+      parts = brackets.split(str, opts && opts._b)
 
-    SRE_VARNAME = '[$_A-Za-z][$\\w]*',
+    look = /\beach\s*=/.test(str)
 
-    JS_VARSTART = newRegExp(
-        '(^ *|[^$\\w\\.])' +
-        '(?!(?:typeof|in|instanceof|void|new|function)[^$\\w]|true(?:[^$\\w]|$))' +
-        '(' + SRE_VARNAME + ')'
-      ),
-
-    JS_OBJKEYS = newRegExp(
-        '(?=[,{]'   +
-        SRE_VARNAME +
-        ':)(.)',
-        REGLOB
-      )
-
-  function _wrapExpr(expr, asText) {
-
-    var okeys = ~expr.indexOf('{')
-    if (okeys)
-      expr = expr.replace(JS_OBJKEYS, '$1\uFFF30')
-
-    var match = expr.match(JS_VARSTART)
-    if (match) {
-
-      var
-        ss = [],
-        mvar,
-        wrap = 0,
-        GRE = RegExp
-
-      do {
-
-        ss.push(GRE.leftContext + (match[1] || ''))
-        expr = GRE.rightContext
-        mvar = match[2]
-
-        if (~['undefined', 'false', 'null', 'NaN'].indexOf(mvar))
-          ss.push(asText ? '""' : mvar)
-
-        else {
-          ss.push(~['this', 'window', 'global'].indexOf(mvar) ?
-            mvar : '("' + mvar + VAR_CONTEXT + mvar)
-
-          wrap = wrap || asText || /^[\[\(\.]/.test(expr)
-        }
-
-      } while (match = expr.match(JS_VARSTART))
-
-      expr = (ss.join('') + expr).trim()
-
-      if (wrap) {
-        expr = '(function(D,v){try{v=' + expr +
-               '}catch(e){}return ' + (asText ? 'v||v===0?v:""' : 'v') + '}).call(D,D)'
+    for (var i = 1; i < parts.length; i += 2) {
+      expr = parts[i].trim()
+      if (!expr) {
+        parts[i] = '{#00#}'
+        continue
       }
+      each = look && expr.match(EACH_EXPR)
+
+      if (each && EACH_ATTR.test(parts[i - 1])) {
+        parts[i - 1] += each[1] + ',' + (each[2] || '') + ','
+        expr = each[3]
+      }
+      else if (expr[0] === '^') {
+        expr = expr.slice(1).trim()
+      }
+      else if (fn) {
+        expr = fn(expr, opts)
+      }
+
+      parts[i] = '{' + (hash = hashCode(expr)) + '#}'
+      expr = parseExpr(expr)
+
+      if (pcex)
+        pcex.push('"' + hash + '":function(G,F){return ' + expr + '}')
+      else
+        _cache[hash] = new Function('G,F', 'return ' + expr + ';')
     }
 
-    return okeys ? expr.replace(/\uFFF30/g, '') : expr
+    return parts.join('')
+  }
 
+  function hashCode(str) {
+    var i, hash
+
+    for (i = hash = 0; i < str.length; ++i) {
+      hash = str.charCodeAt(i) + (hash << 6) + (hash << 16) - hash
+    }
+    return hash < 0 ? '#0' + hash * -1 : '#' + hash
+  }
+
+  var
+    RE_QBLOCK = regEx(regEx.S_QBSRC, 'g'),
+    RE_QBMARK = /\x01(\d+)~/g,
+    CS_IDENT  = /^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\x01(\d+)~):/
+
+  function parseExpr(expr) {
+
+    var qstr = []
+
+    expr = expr
+          .replace(RE_QBLOCK, function (str, div) {
+            return str.length > 2 && !div ? '\x01' + (qstr.push(str) - 1) + '~' : str
+          })
+          .replace(/\s+/g, ' ').trim()
+          .replace(/\ ?([[\({},?\.:])\ ?/g, '$1')
+
+    if (expr) {
+      var list = getCSList(expr, qstr)
+
+      expr = list ? 'F(this,[' + list.join(',') + '])' : wrapExpr(expr)
+
+      if (qstr[0]) {
+        expr = expr.replace(RE_QBMARK, function (_, pos) {
+          return qstr[pos].replace(/\r/g, '\\r').replace(/\n/g, '\\n')
+        })
+      }
+    }
+    return expr
+  }
+
+  function getCSList(expr, qstr) {
+    var
+      list = [],
+      cnt = 0,
+      match
+
+    while (expr &&
+          (match = expr.match(CS_IDENT)) &&
+          !match.index
+      ) {
+      var
+        key,
+        jsb,
+        re = /,|([[{(])|$/g
+
+      expr = RegExp.rightContext
+      key  = match[2] ? qstr[match[2]].slice(1, -1).trim().replace(/\s+/g, ' ') : match[1]
+
+      while (jsb = (match = re.exec(expr))[1]) {
+        var
+          lv = 1,
+          ir = jsb === '(' ? /[()]/g : jsb === '[' ? /[[\]]/g : /[{}]/g
+
+        ir.lastIndex = re.lastIndex
+
+        while (match = ir.exec(expr)) {
+          if (match[0] === jsb) ++lv
+          else if (!--lv) break
+        }
+        if (lv) return 0
+        re.lastIndex = ir.lastIndex
+      }
+
+      jsb  = expr.slice(0, match.index)
+      expr = RegExp.rightContext
+
+      list[cnt++] = 'function(){return (' + wrapExpr(jsb) + ')&&"' + key + '"}'
+    }
+
+    return cnt && list
+  }
+
+  var JS_VARNAME =
+    /[,{][$\w]+:|(^ *|[^$\w\.])(?!(?:this|global|typeof|true|false|null|in|instanceof|is(?:Finite|NaN)|void|NaN|new|Date|RegExp|Math)(?![$\w]))([$_A-Za-z][$\w]*)/g
+
+  function wrapExpr(expr) {
+
+    return expr.replace(JS_VARNAME, function (match, p, mvar) {
+      if (mvar)
+        match = p + (mvar === 'window' ? 'G' : '("' + mvar + '"in this?this:G).' + mvar)
+      return match
+    })
   }
 
   return _tmpl
 
 })()
+
 

@@ -2,7 +2,7 @@ var isNode = typeof window === 'undefined'
 
 describe('Observable Tests', function() {
   if (isNode) {
-    global.expect = require('expect.js')
+    require('./specs/core.specs.js')
   } else {
     mocha.run()
   }

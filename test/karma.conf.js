@@ -22,7 +22,6 @@ module.exports = function(config) {
     preprocessors: {
       '../dist/riot.tmpl.js': ['coverage']
     },
-
     coverageReporter: {
       dir: '../coverage/',
       reporters: [{

@@ -51,6 +51,7 @@ out/
 node_modules
 bower_components
 coverage
+dist
 
 !.gitmodules
 !.travis.yml
@@ -58,5 +59,5 @@ coverage
 *.log
 *.bak
 
-dist/**
-doc/code/**
+/doc/code/*
+dist/*

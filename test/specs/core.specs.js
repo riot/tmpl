@@ -392,6 +392,17 @@ describe('riot-tmpl', function() {
         expect(parts.slice(1, 3)).to.eql(['div', 1])
       })
 
+      it('do not duplicate the same precompiled expression (exact after trim)', function () {
+        var pcex = []     // pass to compiler.html to get pcexpr list
+
+        result = tmpl.compile('<p a={a<b} b={ a<b } >', {}, pcex)
+        expect(pcex).to.have.length(1)
+        // this is different
+        pcex = []
+        result = tmpl.compile('<p a={a <b} b={ a<b } >', {}, pcex)
+        expect(pcex).to.have.length(2)
+      })
+
     })
 
     describe('new helper functions in tmpl 2.4', function () {

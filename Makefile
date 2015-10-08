@@ -17,6 +17,7 @@ test: build test-karma
 
 build: eslint
 	# rebuild all
+	@ mkdir -p $(DIST)
 	@ $(JSPP) lib/index.js --indent 0 > $(DIST)riot.tmpl.js
 	@ $(JSPP) lib/index.js -D MODULE > $(DIST)tmpl.js
 

@@ -1,5 +1,5 @@
 # jspp flags
-#JSPP_FLAGS = "-D DEBUG"
+#JSPP_FLAGS = "-D DEBUG -D SHOW_PARSE_ERRORS"
 JSPP_FLAGS =
 
 # Command line paths
@@ -19,7 +19,6 @@ build: eslint
 	# rebuild all
 	@ $(JSPP) lib/index.js --indent 0 > $(DIST)riot.tmpl.js
 	@ $(JSPP) lib/index.js -D MODULE > $(DIST)tmpl.js
-	@ $(JSPP) lib/index.js -D PURE_PCEXPR > $(DIST)riot.tmpl-light.js
 
 eslint:
 	# check code style
@@ -32,9 +31,9 @@ test-coveralls:
 	@ RIOT_COV=1 cat ./coverage/lcov.info ./coverage/report-lcov/lcov.info | $(COVERALLS)
 
 test-mocha:
-	NODE_PATH=$NODE_PATH:$(DIST) $(MOCHA) test/specs/core.specs.js
+	NODE_PATH=$NODE_PATH:$(DIST) $(MOCHA) test/runner.js
 
-debug: build
-	NODE_PATH=$NODE_PATH:$(DIST) node-debug $(MOCHA) test/specs/core.specs.js
+debug:
+	NODE_PATH=$NODE_PATH:$(DIST) node-debug $(MOCHA) test/runner.js
 
 .PHONY: build test eslint debug test-karma test-mocha test-coveralls

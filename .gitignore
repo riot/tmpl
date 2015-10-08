@@ -51,13 +51,13 @@ out/
 node_modules
 bower_components
 coverage
-dist
+
 
 !.gitmodules
 !.travis.yml
 
+dist/
+doc/code/
 *.log
 *.bak
 
-/doc/code/*
-dist/*

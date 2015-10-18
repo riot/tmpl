@@ -1,7 +1,7 @@
 [![Build Status][travis-image]][travis-url]
 [![Code Quality][codeclimate-image]][codeclimate-url]
 [![NPM version][npm-version-image]][npm-url]
-[![NPM downloads][npm-downloads-image]][npm-url]
+[![NPM downloads][npm-dn-image]][npm-url]
 [![MIT License][license-image]][license-url]
 [![Coverage Status][coverage-image]][coverage-url]
 
@@ -80,54 +80,23 @@ If you don't need runtime construction of expressions, you can use the minimum v
 Precompiling all expressions avoids errors with restrictions on environments blocking the `Function` constructor (i.e. `eval`) 
 
 
-### Handling errors
-
-Since v2.4, tmpl can catch error information in your application.
-
-To enable this feature, set the `tmpl.errorHandler` property to any function that receive a string parameter (e.g. `console.error`). The parameter has the format "riot: %T:%I : %E", where
-* `%T` is the tag name where the error happens ('-no-name-' for unnamed tags)
-* `%I` is the tag _riot_id property ('-' for tags with no _riot_id)
-* `%E` is the full error stack or message
-
-If there's no tag available, `%T:%I` contains "-no-data-:-".  
-
-The message can be easily parsed. Next example logs the tag name, id, and error message, and discards the stack.
-
-```js
-function myHandler(msg) {
-  var parts = ('' + msg).match(/^riot\: ([^:]+):(-|\d+)? : (.+)/)
-  if (parts)
-    addToMyLogAndSendMeAnEmail('riot error', parts[1], parts[2], parts[3])  
-  else
-    console.log('Non riot error: ' + msg)
-}
-
-riot.util.tmpl.errorHandler = myHandler
-```
-
-### New restrictions
+## Changes in 2.3
 
 * Brackets can not contain characters in the set `[\x00-\x1F<>a-zA-Z0-9'",;\\]`
 * No comments in expressions, the compiler is the only that strip comments
 * Attributes with expressions containing `>` must be quoted
 
-Sorry, you can't use `<% %>` anymore.
-
-Remember, use double quotes around attributes when creating tags with riot.tag
+Please read the [CHANGES](doc/CHANGES.md) file in the doc folder.
 
 
-[travis-image]:https://img.shields.io/travis/riot/tmpl.svg?style=flat-square
-[travis-url]:https://travis-ci.org/riot/tmpl
-
-[license-image]:http://img.shields.io/badge/license-MIT-000000.svg?style=flat-square
-[license-url]:LICENSE.txt
-
-[npm-version-image]:http://img.shields.io/npm/v/riot-tmpl.svg?style=flat-square
-[npm-downloads-image]:http://img.shields.io/npm/dm/riot-tmpl.svg?style=flat-square
-[npm-url]:https://npmjs.org/package/riot-tmpl
-
-[coverage-image]:https://img.shields.io/coveralls/riot/tmpl/master.svg?style=flat-square
-[coverage-url]:https://coveralls.io/r/riot/tmpl/?branch=master
-
-[codeclimate-image]:https://img.shields.io/codeclimate/github/riot/tmpl.svg?style=flat-square
-[codeclimate-url]:https://codeclimate.com/github/riot/tmpl
+[npm-version-image]: https://img.shields.io/npm/v/riot-tmpl.svg?style=flat-square
+[npm-dn-image]:      https://img.shields.io/npm/dm/riot-tmpl.svg?style=flat-square
+[npm-url]:           https://npmjs.org/package/riot-tmpl
+[license-image]:     https://img.shields.io/badge/license-MIT-000000.svg?style=flat-square
+[license-url]:       LICENSE
+[travis-image]:      https://img.shields.io/travis/riot/tmpl.svg?style=flat-square
+[travis-url]:        https://travis-ci.org/riot/tmpl
+[coverage-image]:    https://img.shields.io/coveralls/riot/tmpl/master.svg?style=flat-square
+[coverage-url]:      https://coveralls.io/r/riot/tmpl/?branch=master
+[codeclimate-image]: https://img.shields.io/codeclimate/github/riot/tmpl.svg?style=flat-square
+[codeclimate-url]:   https://codeclimate.com/github/riot/tmpl

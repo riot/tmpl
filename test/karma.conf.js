@@ -14,8 +14,7 @@ module.exports = function(config) {
       '../node_modules/expect.js/index.js',
       '../dist/riot.tmpl.js',
       'specs/core.specs.js',
-      'specs/brackets.specs.js',
-      'specs/regex.specs.js'
+      'specs/brackets.specs.js'
     ],
 
     browsers: ['PhantomJS'],

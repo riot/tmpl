@@ -1,10 +1,12 @@
+/* eslint camelcase: false */
+/*
 if (typeof tmpl === 'undefined') {
   var
     expect = require('expect.js'),
     tmpl = require('tmpl').tmpl,
     brackets = require('tmpl').brackets
 }
-
+*/
 globalVar = 5
 
 var data = {}     // generated code run in this context
@@ -28,8 +30,8 @@ function generateData() {
 
 // send 1 or 2 in 'err' to enable internal information
 function render(str, dbg) {
-  if (dbg) data._debug_ = 2
-  return tmpl(tmpl.parse(str), data)
+  if (dbg) data._debug_ = 1
+  return tmpl(str, data)
 }
 
 describe('riot-tmpl', function() {
@@ -52,11 +54,13 @@ describe('riot-tmpl', function() {
       expect(render('{ null }')).to.equal(null)
       expect(render('{ no }')).to.equal(false)
       expect(render('{ yes }')).to.equal(true)
+      expect(render('{ $a }')).to.equal(0)
     })
 
     it('templates always return a string value', function () {
       expect(render('{ 1 } ')).to.equal('1 ')
       expect(render('{ obj } ')).to.equal('[object Object] ')
+      expect(render(' { yes }')).to.equal(' true')
     })
 
     //// empty arguments
@@ -81,9 +85,10 @@ describe('riot-tmpl', function() {
       expect(render('{ !nonExistingVar ? "yes" : "no" }')).to.equal('yes')
     })
 
-    it('in templates, false and undefined values result in empty string', function () {
+    it('in templates, falsy values result in empty string, except zero', function () {
       expect(render(' { nonExistingVar }')).to.equal(' ')
       expect(render(' { no }')).to.equal(' ')
+      expect(render(' { $a }')).to.equal(' 0')
     })
 
     //// expressions
@@ -190,7 +195,7 @@ describe('riot-tmpl', function() {
       expect(render('{ ok: ($b++, ($a > 0) || ($b & 1)) }')).to.be('ok')
     })
 
-    it('unwrapped keywords `void`, `window` and `global`, in addition to `this`', function () {
+    it('unwrapped keywords void, window and global, in addition to `this`', function () {
       data.$a = 5
       expect(render('{' + (typeof window === 'object' ? 'window' : 'global') +'.globalVar }')).to.be(5)
       expect(render('{ this.$a }')).to.be(5)
@@ -205,13 +210,11 @@ describe('riot-tmpl', function() {
     it('better recognition of literal regexps', function () {
       expect(render('{ /{}\\/\\n/.source }')).to.be('{}\\/\\n')
       expect(render('{ ok: /{}\\/\\n/.test("{}\\/\\n") }')).to.be('ok')
-      // in quoted text, openning riot bracket and backslashes need to be escaped!
-      expect(render('str = "/\\{}\\/\n/"')).to.be('str = "/{}\\/\n/"')
       // handling quotes in regexp is not so complicated :)
       expect(render('{ /"\'/.source }')).to.be('"\'')
-      expect(render('{ ok: /"\'/.test("\\\"\'") }')).to.be('ok')
-      expect(render('rex = /\\\"\'/')).to.be('rex = /\\\"\'/')      // rex = /\"\'/
-      expect(render('str = "/\\\"\'/"')).to.be('str = "/\\\"\'/"')  // str = "\"\'"
+      expect(render('{ ok: /"\'/.test("\\"\'") }')).to.be('ok')   // ok: /"'/.test("\"'")
+      // html template don't have escape
+      expect(render('rex = /"\'/')).to.be('rex = /"\'/')          // rex = /\"\'/
       // no confusion with operators
       data.x = 2
       expect(render('{ 10 /x+10/ 1 }')).to.be(15)
@@ -219,7 +222,10 @@ describe('riot-tmpl', function() {
       expect(render('{ x /2+"abc".search(/c/) }')).to.be(3)
       // in expressions, there's no ASI
       expect(render('{ x\n /2+x/ 1 }')).to.be(3)
+    })
 
+    it('in quoted text, only openning riot brackets need to be escaped!', function () {
+      expect(render('str = "/\\{}\\/\\n/"')).to.be('str = "/{}\\/\\n/"')
     })
 
     //// Better recognition of comments, including empty ones.
@@ -236,9 +242,9 @@ describe('riot-tmpl', function() {
       expect(render("{filterState==''?'empty':'notempty'}")).to.be('notempty')
       expect(render('{ "House \\"Atrides\\" wins" }')).to.be('House "Atrides" wins')
       expect(render('{ "Leto\'s house" }')).to.be("Leto's house")
-      expect(render(" In '{ \"Leto\\\\\\\'s house\" }' ")).to.be(" In 'Leto\\\'s house' ")  // « In '{ "Leto\\\'s house" }' » --> In 'Leto\'s house'
-      expect(render(' In "{ "Leto\'s house" }" ')).to.be(' In "Leto\'s house" ')            // « In "{ "Leto's house" }"    » --> In "Leto's house"
-      expect(render(' In "{ \'Leto\\\'s house\' }" ')).to.be(' In "Leto\'s house" ')        // « In "{ 'Leto\'s house' }"   » --> In "Leto's house"
+      expect(render("In '{ \"Leto\\\\\\\'s house\" }'")).to.be("In 'Leto\\\'s house'")  //« In '{ "Leto\\\'s house" }' » --> In 'Leto\'s house'
+      expect(render('In "{ "Leto\'s house" }"')).to.be('In "Leto\'s house"')            //« In "{ "Leto's house" }"    » --> In "Leto's house"
+      expect(render('In "{ \'Leto\\\'s house\' }"')).to.be('In "Leto\'s house"')        //« In "{ 'Leto\'s house' }"   » --> In "Leto's house"
     })
 
     //// Consistency?
@@ -283,6 +289,7 @@ describe('riot-tmpl', function() {
   })
   // end of tmpl 2.2.3
 
+
   describe('2.3.0', function() {
 
     it('support for 8 bit, ISO-8859-1 charset in shorthand names', function () {
@@ -291,18 +298,20 @@ describe('riot-tmpl', function() {
       expect(render('{ ä: 1 }')).to.be('ä')
     })
 
-    it('automatic use de `global` instead `window` in non-browser environment', function () {
-      expect(render('{ window.globalVar }')).to.be(5)       // w/o new feature, this fail in node
+    it('does not wrap global and window object names', function () {
+      var gw = typeof window === 'object' ? 'window' : 'global'
+      expect(render('{ ' + gw + '.globalVar }')).to.be(5)
       data.Date = '{}'
-      expect(render('{ +new window.Date() }')).to.be.a('number')
+      expect(render('{ +new ' + gw + '.Date() }')).to.be.a('number')
       delete data.Date
     })
 
-    it('more unwrapped keywords: isFinite, isNaN, Date, RegExp and Math', function () {
+    it('unwrapped keywords: Infinity, isFinite, isNaN, Date, RegExp and Math', function () {
       var i, a = ['isFinite', 'isNaN', 'Date', 'RegExp', 'Math']
       for (i = 0; i < a.length; ++i)
         data[a[i]] = 0
 
+      expect(render('{ Infinity }')).to.be.a('number')
       expect(render('{ isFinite(1) }')).to.be(true)
       expect(render('{ isNaN({}) }')).to.be(true)
       expect(render('{ Date.parse }')).to.be.a('function')
@@ -355,49 +364,63 @@ describe('riot-tmpl', function() {
       after(clearHandler)
 
       it('using a custom function', function () {
-        var result, message
-        tmpl.errorHandler = function (s) { message = s }
+        var result, err
+        tmpl.errorHandler = function (e) { err = e }
         // je, tmpl({x}, NaN) does not generate error... bug or danling var?
         //console.error('========== >>>> x: ' + x)        // error here
         //console.error('========== >>>> x: ' + global.x) // undefined here
-        message = ''
-        expect(tmpl(tmpl.parse('{x[0]}')), {}).to.be(undefined) // empty data
-        expect(message).to.match(/^riot: -no-name-:- : /)
+        err = 0
+        expect(tmpl('{x[0]}'), {}).to.be(undefined)       // empty data
+        expect(err instanceof Error).to.be(true)
+        expect(err.riotData).to.eql({tagName: undefined, _riot_id: undefined})
         // undefined as parameter for Function.call(`this`) defaults to global
-        message = ''
-        expect(tmpl(tmpl.parse('{x[0]}'))).to.be(undefined)
-        expect(message).to.match(/^riot: -no-name-:- : /)
+        err = 0
+        expect(tmpl('{x[0]}')).to.be(undefined)
+        expect(err instanceof Error).to.be(true)
+        expect(err.riotData).to.eql({tagName: undefined, _riot_id: undefined})
       })
 
       it('GOTCHA: null as param for call([this]) defaults to global too', function () {
-        var result, message
-        tmpl.errorHandler = function (s) { message = s }
-        message = ''
-        expect(tmpl(tmpl.parse('{x[0]}'), null)).to.be(undefined)
-        expect(message).to.match(/^riot: -no-name-:- : /)   // how detect -no-data-?
+        var result, err
+        tmpl.errorHandler = function (e) { err = e }
+        err = 0
+        expect(tmpl('{x[0]}', null)).to.be(undefined)
+        expect(err instanceof Error).to.be(true)
+        expect(err.riotData).to.eql({tagName: undefined, _riot_id: undefined})
       })
 
-      /* istanbul ignore next */
-      it('parsing the message with a regex', function () {
-        var result, parts = []
+      it('catching reading property of an undefined variable', function () {
+        var result, err
 
-        tmpl.errorHandler = function (msg) {
-          parts = msg.match(/^riot\: ([^:]+):(-|\d+)? : (.+)/)
-        }
-        data.root = {tagName: 'div'}
-        data._riot_id = 1                           // eslint-disable-line camelcase
-        result = render('{ x.undefined.var }')      // render as normal
-        tmpl.errorHandler = null
-        delete data.root
+        tmpl.errorHandler = function (e) { err = e }
+        data.root = {tagName: 'DIV'}
+        data._riot_id = 1
+        result = render('{ undefinedVar.property }')    // render as normal
         delete data._riot_id
+        delete data.root
 
         expect(result).to.be(undefined)
-        expect(parts.slice(1, 3)).to.eql(['div', 1])
+        expect(err instanceof Error).to.be(true)
+        expect(err.riotData).to.eql({tagName: 'DIV', _riot_id: 1})
+      })
+
+      it('top level undefined variables (properties) can\'t be catched', function () {
+        var result, err = 0
+
+        tmpl.errorHandler = function (e) { err = e }
+        result = render('{ undefinedVar }')        // render as normal
+        expect(result).to.be(undefined)
+        expect(err).to.be.a('number')
       })
 
       it('errors on instantiation of the getter always throws', function () {
         expect(render).withArgs('{ a: } }').to.throwError()  // SintaxError
         expect(render).withArgs('{ d c:1 }').to.throwError()
+      })
+
+      it('syntax errors on expressions throws exception', function () {
+        expect(render).withArgs('{ a:(1 }').to.throwError()  // SintaxError
+        expect(render).withArgs('{ c[0) }').to.throwError()
       })
 
     })
@@ -407,30 +430,29 @@ describe('riot-tmpl', function() {
       it('tmpl.loopKeys: extract keys from the value (for `each`)', function () {
         var i, s,
           atest = [
-            '{k,i in item}', {key: 'k', pos: 'i', val: '{#item#}'},
-            '{ k in i }', {key: 'k', pos: undefined, val: '{#i#}'},
-            '{^ item in i }', {key: 'item', pos: undefined, val: '{#i#}'},
-            '{^item,idx in items } ', {key: 'item', pos: 'idx', val: '{#items#}'},
-            '{ item}', {val: '{#item#}'},
+            '{k,i in item}', {key: 'k', pos: 'i', val: '{item}'},
+            '{ k in i }', {key: 'k', pos: undefined, val: '{i}'},
+            '{^ item in i }', {key: 'item', pos: undefined, val: '{i}'},
+            '{^item,idx in items } ', {key: 'item', pos: 'idx', val: '{items}'},
+            '{ item}  ', {val: '{ item}'},
             '{item', {val: '{item'},    // val is expected
-            '{}', {val: '{##}'},
+            '{}', {val: '{}'},
             '0', {val: '0'}
           ]
         for (i = 0; i < atest.length; i += 2) {
-          s = tmpl.parse(atest[i])
-          expect(tmpl.loopKeys(s)).to.eql(atest[i + 1])
+          expect(tmpl.loopKeys(atest[i])).to.eql(atest[i + 1])
         }
       })
 
-      it('tmpl.hasExpr: test for expression existence (insecure)', function () {
-        expect(tmpl.hasExpr('{#123#}')).to.be(true)
-        expect(tmpl.hasExpr('{#123}')).to.be(false)
-        expect(tmpl.hasExpr(' {##}')).to.be(true)
-        expect(tmpl.hasExpr('#}{#')).to.be(false)
-        expect(tmpl.hasExpr('{# "#"#}')).to.be(true)
-        expect(tmpl.hasExpr('\\{# ##}')).to.be(true)
-        expect(tmpl.hasExpr('{# # }')).to.be(false)
-        expect(tmpl.hasExpr('{#}')).to.be(false)
+      it('tmpl.hasExpr: test for expression existence', function () {
+        expect(tmpl.hasExpr('{}')).to.be(true)
+        expect(tmpl.hasExpr(' {} ')).to.be(true)
+        expect(tmpl.hasExpr('{ 123 } ')).to.be(true)
+        expect(tmpl.hasExpr('"{ "#" }"')).to.be(true)
+        expect(tmpl.hasExpr('"{ " }')).to.be(true)
+        expect(tmpl.hasExpr('\\{ 123 } ')).to.be(false)
+        expect(tmpl.hasExpr(' \\{}')).to.be(false)
+        expect(tmpl.hasExpr(' }{ ')).to.be(false)
       })
 
     })

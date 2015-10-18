@@ -1,30 +1,27 @@
+/*
 if (typeof tmpl === 'undefined') {
   var
     expect = require('expect.js'),
     tmpl = require('tmpl').tmpl,
     brackets = require('tmpl').brackets
-}
+}*/
 
 describe('brackets', function () {
 
-  var data = {
-    yes: true,
-    no: false,
-    x: 2,
-    str: 'x'
-  }
+  var data = { x: 2, str: 'x' }
 
   // send 1 or 2 in 'err' to enable internal information
-  function render(str) {
-    return tmpl(tmpl.parse(str), data)
+  function render(str, dbg) {
+    if (dbg) data._debug_ = 1
+    return tmpl(str, data)
   }
   function setBrackets(s) {
     brackets.set(s)
   }
   function resetBrackets() {
-    brackets.set()
+    brackets.set('{ }')
   }
-  function bracketPair() {
+  function bracketsPair() {
     return brackets(0) + ' ' + brackets(1)
   }
 
@@ -37,7 +34,7 @@ describe('brackets', function () {
     var ab = [null, '']
     for (var i = 0; i < 3; ++i) {
       setBrackets(ab[i])
-      expect(bracketPair()).to.equal('{ }')
+      expect(bracketsPair()).to.equal('{ }')
       expect(render('{ x }')).to.equal(2)
     }
   })
@@ -47,18 +44,18 @@ describe('brackets', function () {
 
     // single character brackets
     brackets.set('[ ]')
-    expect(bracketPair()).to.equal('[ ]')
+    expect(bracketsPair()).to.equal('[ ]')
     expect(render('[ x ]')).to.equal(2)
     expect(render('[ str\\[0\\] ]')).to.equal('x')
 
     // multi character brackets
     setBrackets('{{ }}')
-    expect(bracketPair()).to.equal('{{ }}')
+    expect(bracketsPair()).to.equal('{{ }}')
     expect(render('{{ x }}')).to.equal(2)
 
     // asymmetric brackets
     setBrackets('${ }')
-    expect(bracketPair()).to.equal('${ }')
+    expect(bracketsPair()).to.equal('${ }')
     expect(render('${ x }')).to.equal(2)
   })
 
@@ -123,6 +120,7 @@ describe('brackets', function () {
       it('with custom brackets to "[ ]" (bad idea)', function () {
         setBrackets('[ ]')
         expect(render('[ str[0] ]')).to.be('x')
+        expect(render('\\[[ str[0] ]]')).to.be('[x]')
         expect(render('[ [1].pop() ]')).to.be(1)
         expect(render('a,[["b", "c"]],d')).to.be('a,b,c,d')
       })
@@ -130,6 +128,7 @@ describe('brackets', function () {
       it('with custom brackets to "( )" (another bad idea)', function () {
         setBrackets('( )')
         expect(render('(str.charAt(0))')).to.be('x')
+        expect(render('\\((str.charAt(0)))')).to.be('(x)')
         expect(render('((1 + 1))')).to.be(2)
         expect(render('a,(("b"),("c")),d')).to.be('a,c,d')
       })
@@ -223,31 +222,24 @@ describe('brackets', function () {
         expect(setBrackets).withArgs(', ,').to.throwError()
         expect(setBrackets).withArgs('" "').to.throwError()
         expect(setBrackets).withArgs('a[ ]a').to.throwError()
-        expect(bracketPair()).to.be('{ }')
+        expect(bracketsPair()).to.be('{ }')
       })
 
     it('you can\'t use the pretty <% %> anymore', function () {
       expect(setBrackets).withArgs('<% %>').to.throwError()
     })
 
-    it('helper regex to test expression existence (insecure)', function () {
-      var re = brackets(4)
-      expect(re.test('{ 123 }')).to.be(true)
-      expect(re.test('}{')).to.be(false)
-      expect(re.test('{')).to.be(false)
-      expect(re.test('\\{}')).to.be(true)
-      expect(re.test('{}')).to.be(true)
-    })
-
-    it('host the precompiled value "number"', function () {
-      expect(tmpl(brackets.E_NUMBER)).to.be('number')
+    it('new function brackets.array() -- for internal use', function () {
+      var bp = brackets.array('[ ]')
+      expect(bp[0]).to.be('[')
+      expect(bp[1]).to.be(']')
     })
 
     describe('brackets.split', function () {
 
       it('the new kid in the town is a key function', function () {
         var
-          str = '<tag att="{ a }" expr1={a<1} expr2={a>2}>\n{body}\r\n</tag>\n'
+          str = '<tag att="{ a }" expr1={a<1} expr2={a>2}>\n\\{{body}}\r\n</tag>\n'
 
         resetBrackets()             // set brackets to default
         a = brackets.split(str)
@@ -256,23 +248,20 @@ describe('brackets', function () {
         expect(a[1]).to.be(' a ')
         expect(a[3]).to.be('a<1')
         expect(a[5]).to.be('a>2')
+        expect(a[6]).to.be('>\n\\{')
         expect(a[7]).to.be('body')
-        expect(a[8]).to.contain('</tag>')
+        expect(a[8]).to.be('}\r\n</tag>\n')
       })
 
-      it('can use different brackets that current ones', function () {
+      it('serve unescaped template to the tmpl module', function () {
         var
-          str = '<tag att1="$[a]" att2=$[a<1] att3=$[a>2]>\n{body}\r\n</tag>\n',
-          b = brackets.array('$[ ]'),   // get the custom brackets
-          a
-        resetBrackets()
-        a = brackets.split(str, b)
+          str = '<tag att="{ a }" expr1={a<1} expr2={a>2}>\n\\{{body}}\r\n</tag>\n'
 
-        expect(a).to.have.length(7)
-        expect(a[1]).to.be('a')
-        expect(a[3]).to.be('a<1')
-        expect(a[5]).to.be('a>2')
-        expect(a[6]).to.contain('{body}')
+        resetBrackets()
+        a = brackets.split(str, true)
+
+        expect(a).to.have.length(9)
+        expect(a[6]).to.be('>\n{')
       })
 
       it('handle single or double quotes inside quoted expressions', function () {
@@ -287,7 +276,7 @@ describe('brackets', function () {
         expect(a[3]).to.be('"a"')
         expect(a[5]).to.be("'a'")
         expect(a[7]).to.be("'a'")
-        expect(a[8]).to.contain('</tag>')
+        expect(a[8]).to.be('\'</tag>')
       })
 
       it('recognizes difficult literal regexes', function () {
@@ -299,7 +288,8 @@ describe('brackets', function () {
           [p1, '{x/y}', '', '{x/g}',  p2],  // <p a="{x/y}{x/g}">  : NOT regex: /y}{x/g
           [p1, '{a++/b}', '', '{/i}', p2],  // <p a="{a++/b}{/i}"> : NOT regex: /b}{/i
           [p1, '{\'\'+/b}{/i}',       p2],  // <p a="{""+/b}{/i}"> : regex:     /b}{/i
-          [p1, '{a==/b}{/i}',         p2]   // <p a="{a==/b}{/i">  : regex:     /b}{/i
+          [p1, '{a==/b}{/i}',         p2],  // <p a="{a==/b}{/i">  : regex:     /b}{/i
+          [p1, '{a=/{}}}}/}',         p2]   // <p a="{a=/{}}}}/">  : regex:     /{}}}}/
         ]
         resetBrackets()
 
@@ -321,5 +311,53 @@ describe('brackets', function () {
 
   })
   // end of brackets 2.4 suite
+
+})
+
+describe('regexes', function () {
+
+  it('literal strings with escaped quotes inside (double quotes)', function () {
+    var match = ' """\\"" "x" "a\\" "'.match(brackets.R_STRINGS)   // R_STRINGS has global flag
+
+    expect(match).to.have.length(4)
+    expect(match[0]).to.be('""')
+    expect(match[1]).to.be('"\\""')
+    expect(match[2]).to.be('"x"')
+    expect(match[3]).to.be('"a\\" "')
+  })
+
+  it('literal strings with escaped quotes inside (single quotes)', function () {
+    var match = " '''\\'' 'x' 'a\\' '".match(brackets.R_STRINGS)   // R_STRINGS has global flag
+
+    expect(match).to.have.length(4)
+    expect(match[0]).to.be("''")
+    expect(match[1]).to.be("'\\''")
+    expect(match[2]).to.be("'x'")
+    expect(match[3]).to.be("'a\\' '")
+  })
+
+  it('multiline javascript comments in almost all forms', function () {
+    var match = ' /* a *//**/ /*/**/ /*//\n*/ /\\*/**/'.match(brackets.R_MLCOMMS)
+
+    expect(match).to.have.length(5)
+    expect(match[0]).to.be('/* a */')
+    expect(match[1]).to.be('/**/')
+    expect(match[2]).to.be('/*/**/')
+    expect(match[3]).to.be('/*//\n*/')
+    expect(match[4]).to.be('/**/')
+  })
+
+  it('no problema with mixed quoted strings and comments', function () {
+    var
+      re = new RegExp(brackets.S_QBLOCKS + '|' + brackets.R_MLCOMMS.source, 'g'),
+      match = ' /* a */"" /*""*/ "/*\\"*/" \\\'/*2*/\\\'\'\''.match(re)
+
+    expect(match).to.have.length(5)
+    expect(match[0]).to.be('/* a */')
+    expect(match[1]).to.be('""')
+    expect(match[2]).to.be('/*""*/')
+    expect(match[3]).to.be('"/*\\"*/"')
+    expect(match[4]).to.be("'/*2*/\\\''")   // yes, the match is correct :)
+  })
 
 })

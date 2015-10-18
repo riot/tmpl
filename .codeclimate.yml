@@ -1,6 +1,3 @@
-languages:
-  JavaScript: true
-
 engines:
   eslint:
     enabled: true
@@ -11,4 +8,5 @@ ratings:
 
 exclude_paths:
   - "dist/**"
-  - "lib/wrap/**"
+  - "test/**"
+  - "lib/index.js"

@@ -56,8 +56,6 @@ coverage
 !.gitmodules
 !.travis.yml
 
-dist/
-doc/code/
-*.log
-*.bak
-
+dist/**/*.html
+**/*.log
+**/*.bak

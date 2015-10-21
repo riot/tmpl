@@ -1,427 +1,457 @@
-describe('Tmpl', function() {
+/* eslint-env node, mocha  */
+/* eslint camelcase: false */
 
-  var data = {
-      yes: true,
-      no: false,
-      str: 'x',
-      obj: {val: 2},
-      arr: [2],
-      x: 2,
-      $a: 0,
-      $b: 1,
-      esc: '\'\n\\',
-      fn: function(s) { return ['hi', s].join(' ') }
-    },
-    render = function (str) {
-      return tmpl(str, data)
-    }
+globalVar = 5
 
-  globalVar = 5
+var data = {
+  yes: true,
+  no: false,
+  str: 'x',
+  obj: {val: 2},
+  arr: [2],
+  x: 2,
+  $a: 0,
+  $b: 1,
+  esc: '\'\n\\',
+  fn: function(s) { return ['hi', s].join(' ') },
+  _debug_: 0
+}
 
-  // fake the riot object
-  window.riot = {
-    settings: {
-    }
-  }
+// send 1 or 2 in 'err' to enable internal information
+function render(str, dbg) {
+  if (dbg) data._debug_ = 1
+  return tmpl(str, data)
+}
 
-  it('compiles specs', function() {
+describe('riot-tmpl', function() {
 
-    this.timeout(5000)
+  describe('compiles specs', function() {
+
     //// return values
 
-    // expressions always return a raw value
-    expect(render('{ 1 }')).to.equal(1)
-    expect(render('{ x }')).to.equal(2)
-    expect(render('{ str }')).to.equal(data.str)
-    expect(render('{ obj }')).to.equal(data.obj)
-    expect(render('{ arr }')).to.equal(data.arr)
-    expect(render('{ fn }')).to.equal(data.fn)
-    expect(render('{ null }')).to.equal(null)
-    expect(render('{ no }')).to.equal(false)
-    expect(render('{ yes }')).to.equal(true)
+    it('expressions always return a raw value', function () {
+      expect(render('{ 1 }')).to.equal(1)
+      expect(render('{ x }')).to.equal(2)
+      expect(render('{ str }')).to.equal(data.str)
+      expect(render('{ obj }')).to.equal(data.obj)
+      expect(render('{ arr }')).to.equal(data.arr)
+      expect(render('{ fn }')).to.equal(data.fn)
+      expect(render('{ null }')).to.equal(null)
+      expect(render('{ no }')).to.equal(false)
+      expect(render('{ yes }')).to.equal(true)
+      expect(render('{ $a }')).to.equal(0)
+    })
 
-    // templates always return a string value
-    expect(render('{ 1 } ')).to.equal('1 ')
-    expect(render('{ obj } ')).to.equal('[object Object] ')
-
+    it('templates always return a string value', function () {
+      expect(render('{ 1 } ')).to.equal('1 ')
+      expect(render('{ obj } ')).to.equal('[object Object] ')
+      expect(render(' { yes }')).to.equal(' true')
+    })
 
     //// empty arguments
 
-    // empty expressions equal to undefined
-    expect(render()).to.be(undefined)
-    expect(render('{}')).to.be(undefined)
-    expect(render('{ }')).to.be(undefined)
+    it('empty expressions equal to undefined', function () {
+      expect(render()).to.be(undefined)
+      expect(render('{}')).to.be(undefined)
+      expect(render('{ }')).to.be(undefined)
+    })
 
-    // empty templates equal to empty string
-    expect(render('')).to.equal('')
-    expect(render('{ } ')).to.equal(' ')
-
+    it('empty templates equal to empty string', function () {
+      expect(render('')).to.equal('')
+      expect(render('{ } ')).to.equal(' ')
+    })
 
     //// undefined values
 
-    // ignore undefined value errors in expressions (catch the error, and set value to undefined)
-    expect(render('{ nonExistingVar }')).to.be(undefined)
-    expect(render('{ !nonExistingVar }')).to.equal(true)
-    expect(render('{ nonExistingVar ? "yes" : "no" }')).to.equal('no')
-    expect(render('{ !nonExistingVar ? "yes" : "no" }')).to.equal('yes')
+    it('undefined vars are catched in expressions and returns undefined', function () {
+      expect(render('{ nonExistingVar }')).to.be(undefined)
+      expect(render('{ !nonExistingVar }')).to.equal(true)
+      expect(render('{ nonExistingVar ? "yes" : "no" }')).to.equal('no')
+      expect(render('{ !nonExistingVar ? "yes" : "no" }')).to.equal('yes')
+    })
 
-    // in templates, false and undefined values result in empty string
-    expect(render(' { nonExistingVar }')).to.equal(' ')
-    expect(render(' { no }')).to.equal(' ')
-
+    it('in templates, falsy values result in empty string, except zero', function () {
+      expect(render(' { nonExistingVar }')).to.equal(' ')
+      expect(render(' { no }')).to.equal(' ')
+      expect(render(' { $a }')).to.equal(' 0')
+    })
 
     //// expressions
 
-    // expressions are just JavaScript
-    expect(render('{ obj.val }')).to.equal(2)
-    expect(render('{ obj["val"] }')).to.equal(2)
-    expect(render('{ arr[0] }')).to.equal(2)
-    expect(render('{ arr[0]; }')).to.equal(2)
-    expect(render('{ arr.pop() }')).to.equal(2)
-    expect(render('{ fn(str) }')).to.equal('hi x')
-    expect(render('{ yes && "ok" }')).to.equal('ok')
-    expect(render('{ no && "ok" }')).to.equal(false)
-    expect(render('{ false || null || !no && yes }')).to.equal(true)
-    expect(render('{ !no ? "yes" : "no" }')).to.equal('yes')
-    expect(render('{ !yes ? "yes" : "no" }')).to.equal('no')
-    expect(render('{ /^14/.test(+new Date()) }')).to.equal(true)
-    expect(render('{ typeof Math.random() }')).to.equal('number')
-    expect(render('{ fn("there") }')).to.equal('hi there')
-    expect(render('{ str == "x" }')).to.equal(true)
-    expect(render('{ /x/.test(str) }')).to.equal(true)
-    expect(render('{ true ? "a b c" : "foo" }')).to.equal('a b c')
-    expect(render('{ true ? "a \\"b\\" c" : "foo" }')).to.equal('a "b" c')
-    expect(render('{ str + " y" + \' z\'}')).to.equal('x y z')
-    expect(render('{ esc }')).to.equal(data.esc)
-    expect(render('{ $a }')).to.equal(0)
-    expect(render('{ $a + $b }')).to.equal(1)
-    expect(render('{ this.str }')).to.equal('x')
-    expect(render("{filterState==''?'empty':'notempty'}")).to.equal('notempty')
+    it('expressions are just regular JavaScript', function () {
+      expect(render('{ obj.val }')).to.be(2)
+      expect(render('{ obj["val"] }')).to.be(2)
+      expect(render('{ arr[0] }')).to.be(2)
+      expect(render('{ arr[0]; }')).to.be(2)
+      expect(render('{ arr.pop() }')).to.be(2)
+      expect(render('{ fn(str) }')).to.be('hi x')
+      expect(render('{ yes && "ok" }')).to.be('ok')
+      expect(render('{ no && "ok" }')).to.be(false)
+      expect(render('{ false || null || !no && yes }')).to.be(true)
+      expect(render('{ !no ? "yes" : "no" }')).to.be('yes')
+      expect(render('{ !yes ? "yes" : "no" }')).to.be('no')
+      expect(render('{ /^14/.test(+new Date()) }')).to.be(true)
+      expect(render('{ typeof Math.random() }')).to.be('number')
+      expect(render('{ fn("there") }')).to.be('hi there')
+      expect(render('{ str == "x" }')).to.be(true)
+      expect(render('{ /x/.test(str) }')).to.be(true)
+      expect(render('{ true ? "a b c" : "foo" }')).to.be('a b c')
+      expect(render('{ true ? "a \\"b\\" c" : "foo" }')).to.be('a "b" c')
+      expect(render('{ str + " y" + \' z\'}')).to.be('x y z')
+      expect(render('{ esc }')).to.be(data.esc)
+      expect(render('{ $a }')).to.be(0)
+      expect(render('{ $a + $b }')).to.be(1)
+      expect(render('{ this.str }')).to.be('x')
+    })
 
-    // global vars are supported in expressions
-    expect(render('{ globalVar }')).to.equal(globalVar)
+    it('global variables are supported in expressions', function () {
+      expect(render('{ globalVar }')).to.be(globalVar)
+    })
 
-    // all comments in expressions are stripped from the output
-    expect(render('{ /* comment */ /* as*/ }')).to.be(undefined)
-    expect(render(' { /* comment */ }')).to.equal(' ')
-    expect(render('{ 1 /* comment */ + 1 }')).to.equal(2)
-    expect(render('{ 1 /* comment */ + 1 } ')).to.equal('2 ')
-
+    it('all comments in expressions are stripped from the output (not anymore)', function () {
+      expect(render('{ /* comment */ /* as*/ }')).to.be(undefined)
+      expect(render('{ 1 /* comment */ + 1 }')).to.equal(2)
+      expect(render('{ 1 /* comment */ + 1 } ')).to.equal('2 ')
+    })
 
     //// templates
 
-    // all expressions are evaluted in template
-    expect(render('{ 1 }{ 1 }')).to.equal('11')
-    expect(render('{ 1 }{ 1 } ')).to.equal('11 ')
-    expect(render(' { 1 }{ 1 }')).to.equal(' 11')
-    expect(render('{ 1 } { 1 }')).to.equal('1 1')
+    it('all expressions are evaluted in template', function () {
+      expect(render('{ 1 }{ 1 }')).to.equal('11')
+      expect(render('{ 1 }{ 1 } ')).to.equal('11 ')
+      expect(render(' { 1 }{ 1 }')).to.equal(' 11')
+      expect(render('{ 1 } { 1 }')).to.equal('1 1')
+    })
 
-    // both templates and expressions are new-line-friendly
-    expect(render('\n  { yes \n ? 2 \n : 4} \n')).to.equal('\n  2 \n')
+    it('both templates and expressions are new-line-friendly', function () {
+      expect(render('\n  { yes \n ? 2 \n : 4} \n')).to.equal('\n  2 \n')
+    })
 
+    //// class shorthands
 
-    //// class shorthand
+    describe('class shorthands', function () {
 
-    // names can be single-quoted, double-quoted, unquoted
-    expect(render('{ ok : yes }')).to.equal('ok')
-    expect(render('{ "a" : yes, \'b\': yes, c: yes }')).to.equal('a b c')
-    expect(render('{ a_b-c3: yes }')).to.equal('a_b-c3')
+      it('names can be single-quoted, double-quoted, unquoted', function () {
+        expect(render('{ ok : yes }')).to.equal('ok')
+        expect(render('{ "a" : yes, \'b\': yes, c: yes }')).to.equal('a b c')
+        expect(render('{ a_b-c3: yes }')).to.equal('a_b-c3')
+      })
 
-    // even dashed names can be unquoted
-    expect(render('{ my-class: yes }')).to.equal('my-class')
+      it('even dashed names can be unquoted', function () {
+        expect(render('{ my-class: yes }')).to.equal('my-class')
+      })
 
-    // set two classes with one expression
-    expect(render('{ "a b": yes }')).to.equal('a b')
+      it('set two classes with one expression', function () {
+        expect(render('{ "a b": yes }')).to.equal('a b')
+      })
 
-    // errors in expressions are silently catched allowing shorter expressions
-    expect(render('{ loading: !nonExistingVar.length }')).to.equal('')
+      it('errors in expressions are catched silently', function () {
+        expect(render('{ loading: !nonExistingVar.length }')).to.equal('')
+      })
 
-    // expressions are just regular JavaScript
-    expect(render('{ a: !no, b: yes }')).to.equal('a b')
-    expect(render('{ y: false || null || !no && yes }')).to.equal('y')
-    expect(render('{ y: 4 > 2 }')).to.equal('y')
-    expect(render('{ y: fn() }')).to.equal('y')
-    expect(render('{ y: str == "x" }')).to.equal('y')
-    expect(render('{ y: new Date() }')).to.equal('y')
+      it('expressions are just regular JavaScript', function () {
+        expect(render('{ a: !no, b: yes }')).to.equal('a b')
+        expect(render('{ y: false || null || !no && yes }')).to.equal('y')
+        expect(render('{ y: 4 > 2 }')).to.equal('y')
+        expect(render('{ y: fn() }')).to.equal('y')
+        expect(render('{ y: str == "x" }')).to.equal('y')
+        expect(render('{ y: new Date() }')).to.equal('y')
+        expect(render('{ y: str[0] }')).to.equal('y')
+      })
 
-    // even function calls, objects and arrays are no problem
-    expect(render('{ ok: fn(1, 2) }')).to.equal('ok')
-    expect(render('{ ok: fn([1, 2]) }')).to.equal('ok')
-    expect(render('{ ok: fn({a: 1, b: 1}) }')).to.equal('ok')
+      it('even function calls, objects and arrays are no problem', function () {
+        expect(render('{ ok: fn(1, 2) }')).to.equal('ok')
+        expect(render('{ ok: fn([1, 2]) }')).to.equal('ok')
+        expect(render('{ ok: fn({a: 1, b: 1}) }')).to.equal('ok')
+      })
 
-
-    //// custom brackets
-
-    // single character brackets
-    riot.settings.brackets = '[ ]'
-    expect(render('[ x ]')).to.equal(2)
-    expect(render('[ str\\[0\\] ]')).to.equal('x')
-
-    // multi character brackets
-    riot.settings.brackets = '<% %>'
-    expect(render('<% x %>')).to.equal(2)
-
-    // asymmetric brackets
-    riot.settings.brackets = '${ }'
-    expect(render('${ x }')).to.equal(2)
-
-    // default to { } if setting is empty
-    riot.settings.brackets = null
-    expect(render('{ x }')).to.equal(2)
-
-
-    //// using brackets inside expressions
-
-    // brackets in expressions can always be escaped
-    expect(render('{ "\\{ 1 \\}" }')).to.equal('{ 1 }')
-    expect(render('\\{ 1 }')).to.equal('{ 1 }')
-    expect(render('{ "\\}" }')).to.equal('}')
-    expect(render('{ "\\{" }')).to.equal('{')
-
-    // though escaping is optional...
-    expect(render('{ JSON.stringify({ x: 5 }) }')).to.equal('{"x":5}')
-    expect(render('a{ "b{c}d" }e { "{f{f}}" } g')).to.equal('ab{c}de {f{f}} g')
-
-    // for custom brackets as well:
-
-    riot.settings.brackets = '[ ]'
-    expect(render('a[ "b[c]d" ]e [ "[f[f]]" ] g')).to.equal('ab[c]de [f[f]] g')
-
-    riot.settings.brackets = '{{ }}'
-    expect(render('a{{ "b{{c}}d" }}e {{ "{f{{f}}}" }} g')).to.equal('ab{{c}}de {f{{f}}} g')
-
-    riot.settings.brackets = '<% %>'
-    expect(render('a<% "b<%c%>d" %>e <% "<%f<%f%>%>" %> g')).to.equal('ab<%c%>de <%f<%f%>%> g')
-
-    riot.settings.brackets = null
-
-    // ...unless you're doing something very special. escaping is still needed if:
-
-    // - your inner brackets don't have matching closing/opening bracket, e.g. { "{" } instead of { "{ }" }
-    expect(render('a{ "b\\{cd" }e')).to.equal('ab{cde')
-
-    // - you're using asymmetric custom brackets, e.g.: ${ } instead of { }, [ ], {{ }}, <% %>
-    riot.settings.brackets = '${ }'
-    expect(render('a${ "b{c\\}d" }e')).to.equal('ab{c}de')
-    riot.settings.brackets = null
+    })
 
   })
 
-  it('compiles specs - 2.3 tmpl update', function() {
+  //// new in tmpl 2.2.3
 
-    riot.settings.brackets = null
+  describe('2.2.3', function () {
 
-  //// Fewer errors in recognizing complex expressions, even in class shorthands.
+    it('few errors in recognizing complex expressions', function () {
+      data.$a = 0
+      data.$b = 0
+      data.parent = { selectedId: 0 }
+      // FIX #784 - The shorthand syntax for class names doesn't support parentheses
+      expect(render('{ primary: (parent.selectedId === $a)  }')).to.be('primary')
+      // a bit more of complexity. note: using the comma operator requires parentheses
+      expect(render('{ ok: ($b++, ($a > 0) || ($b & 1)) }')).to.be('ok')
+    })
 
-    data.$a = 0
-    data.$b = 0
-    data.parent = { selectedId: 0 }
+    it('unwrapped keywords void, window and global, in addition to `this`', function () {
+      data.$a = 5
+      expect(render('{' + (typeof window === 'object' ? 'window' : 'global') +'.globalVar }')).to.be(5)
+      expect(render('{ this.$a }')).to.be(5)
+      expect(render('{ void 0 }')).to.be(undefined)
+      // without unprefixed global/window, default convertion to `new (D).Date()` throws here
+      data.Date = typeof window !== 'object' ? 'global' : 'window'
+      expect(render('{ new ' + data.Date + '.Date() }')).to.be.a('object')
+      delete data.Date
+    })
 
-    // FIX #784 - The shorthand syntax for class names doesn't support parentheses
-    expect(render('{ primary: (parent.selectedId === $a)  }')).to.be('primary')
+    //// Better recognition of literal regexps inside template and expressions.
+    it('better recognition of literal regexps', function () {
+      expect(render('{ /{}\\/\\n/.source }')).to.be('{}\\/\\n')
+      expect(render('{ ok: /{}\\/\\n/.test("{}\\/\\n") }')).to.be('ok')
+      // handling quotes in regexp is not so complicated :)
+      expect(render('{ /"\'/.source }')).to.be('"\'')
+      expect(render('{ ok: /"\'/.test("\\"\'") }')).to.be('ok')   // ok: /"'/.test("\"'")
+      // html template don't have escape
+      expect(render('rex = /"\'/')).to.be('rex = /"\'/')          // rex = /\"\'/
+      // no confusion with operators
+      data.x = 2
+      expect(render('{ 10 /x+10/ 1 }')).to.be(15)
+      expect(render('{ x /2+x/ 1 }')).to.be(3)
+      expect(render('{ x /2+"abc".search(/c/) }')).to.be(3)
+      // in expressions, there's no ASI
+      expect(render('{ x\n /2+x/ 1 }')).to.be(3)
+    })
 
-    // a bit more of complexity. note: using the comma operator requires parentheses
-    expect(render('{ ok: ($b++, ($a > 0) || ($b & 1)) }')).to.be('ok')
+    it('in quoted text, only openning riot brackets need to be escaped!', function () {
+      expect(render('str = "/\\{}\\/\\n/"')).to.be('str = "/{}\\/\\n/"')
+    })
 
-  //// Unprotected keywords `void`, `window` and `global`, in addition to `this`.
+    //// Better recognition of comments, including empty ones.
+    //// (moved to 2.4, now tmpl does not support comments)
 
-    globalVar = 5
-    data.$a = 5
-    expect(render('{' + (typeof window === 'object' ? 'window' : 'global') +'.globalVar }')).to.be(5)
-    expect(render('{ this.$a }')).to.be(5)
-    expect(render('{ void 0 }')).to.be(undefined)
+    it('you can include almost anything in quoted shorhand names', function () {
+      expect(render('{ "_\u221A": 1 }')).to.be('_\u221A')
+      expect(render('{ (this["\u221A"] = 1, this["\u221A"]) }')).to.be(1)
+    })
 
-    // without unprefixed global/window, default convertion to `new (D).Date()` throws here
-    data.Date = '?'
-    if (typeof window !== 'object')
-      expect(render('{ +new global.Date() }')).to.be.a('number')
-    else
-      expect(render('{ +new window.Date() }')).to.be.a('number')
+    //// Extra tests
 
-  //// Better recognition of nested brackets, escaping is almost unnecessary.
+    it('correct handling of quotes', function () {
+      expect(render("{filterState==''?'empty':'notempty'}")).to.be('notempty')
+      expect(render('{ "House \\"Atrides\\" wins" }')).to.be('House "Atrides" wins')
+      expect(render('{ "Leto\'s house" }')).to.be("Leto's house")
+      expect(render("In '{ \"Leto\\\\\\\'s house\" }'")).to.be("In 'Leto\\\'s house'")  //« In '{ "Leto\\\'s house" }' » --> In 'Leto\'s house'
+      expect(render('In "{ "Leto\'s house" }"')).to.be('In "Leto\'s house"')            //« In "{ "Leto's house" }"    » --> In "Leto's house"
+      expect(render('In "{ \'Leto\\\'s house\' }"')).to.be('In "Leto\'s house"')        //« In "{ 'Leto\'s house' }"   » --> In "Leto's house"
+    })
 
-    // inner brackets don't need to be escaped
-    expect(render('{{ str: "s" }}')).to.eql({ str: 's' })
-    expect(render(' {{str: {}}}+{{}}')).to.be(' [object Object]+[object Object]')
-    expect(render('{ "{}}" }')).to.be('{}}')
+    //// Consistency?
 
-    // inner custom brackets
-    riot.settings.brackets = '[ ]'
-    expect(render('[ str[0] ]')).to.be('x')
-    expect(render('[ [1].pop() ]')).to.be(1)
-    expect(render('a,[["b", "c"]],d')).to.be('a,b,c,d')
+    it('main inconsistence between expressions and class shorthands are gone', function () {
+      expect(render('{ !nonExistingVar.foo ? "ok" : "" }')).to.equal(undefined) // ok
+      expect(render('{ !nonExistingVar.foo ? "ok" : "" } ')).to.equal(' ')      // ok
+    //expect(render('{ ok: !nonExistingVar.foo }')).to.equal('ok')              // what?
+      expect(render('{ ok: !nonExistingVar.foo }')).to.equal('')                // ok ;)
+    })
 
-    riot.settings.brackets = '<% %>'
-    expect(render('<% "%><% %>" %>')).to.be('%><% %>')
+    //// Mac/Win EOL's normalization avoids unexpected results with some editors.
+    //// (moved to 2.4, now tmpl don't touch non-expression parts)
 
-    // multi character brackets
-    riot.settings.brackets = '(( ))'
-    expect(render('((({})))')).to.eql({})
-    expect(render('(((("o"))))="o"')).to.be('o="o"')
-    expect(render('((( ("o") )))="o"')).to.be('o="o"')
 
-    // brackets inside strings, even unbalanced, are ignored
-    riot.settings.brackets = null
-    expect(render('a{ "b{cd" }e')).to.be('ab{cde')
-    expect(render('a{ "b}cd" }e')).to.be('ab}cde')
+    describe('whitespace', function () {
 
-    // asymmetric custom brackets
-    riot.settings.brackets = '${ }'
-    expect(render('a${ "b${c}d" }e')).to.be('ab${c}de')
+      it('is compacted to a space in expressions', function () {
+        // you need see at generated code
+        expect(render(' { yes ?\n\t2 : 4} ')).to.be(' 2 ')
+        expect(render('{ \t \nyes !== no\r\n }')).to.be(true)
+      })
 
-    // silly brackets?
-    riot.settings.brackets = '[ ]]'
-    expect(render('a[ "[]]"]]b')).to.be('a[]]b')
-    expect(render('[[[]]]]')).to.eql([[]])
+      it('is compacted and trimmed in quoted shorthand names', function () {
+        expect(render('{ " \ta\n \r \r\nb\n ": yes }')).to.be('a b')
+      })
 
-    riot.settings.brackets = '( ))'
-    expect(render('a( "b))" ))c')).to.be('ab))c')
-    expect(render('a( (("bc))")) ))')).to.be('abc))')
-    expect(render('a( ("(((b))") ))c')).to.be('a(((b))c')
-    expect(render('a( ("b" + (")c" ))))')).to.be('ab)c')    // test skipBracketedPart()
+      it('is preserved in literal javascript strings', function () {
+        expect(render('{ "\r\n \n \r" }')).to.be('\r\n \n \r')
+        expect(render('{ ok: "\r\n".charCodeAt(0) === 13 }')).to.be('ok')
+      })
 
-    riot.settings.brackets = null
+      it('eols (mac/win) are normalized to unix in html text', function () {
+        expect(render('\r\n \n \r \n\r')).to.be('\n \n \n \n\n')
+        expect(render('\r\n { \r"\n" } \r\n')).to.be('\n \n \n')
+        // ...even in their quoted parts
+        expect(render('foo="\r\n \n \r"')).to.be('foo="\n \n \n"')
+        expect(render('style="\rtop:0\r\n"')).to.be('style="\ntop:0\n"')
+      })
 
-  //// Better recognition of literal regexps inside template and expressions.
-
-    expect(render('{ /{}\\/\\n/.source }')).to.be('{}\\/\\n')
-    expect(render('{ ok: /{}\\/\\n/.test("{}\\/\\n") }')).to.be('ok')
-
-    // in quoted text, left bracket and backslashes need to be escaped!
-    expect(render('str = "/\\{}\\\\/\\\\n/"')).to.be('str = "/{}\\/\\n/"')
-
-    // handling quotes in regexp is not so complicated :)
-    expect(render('{ /"\'/.source }')).to.be('"\'')
-    expect(render('{ ok: /"\'/.test("\\\"\'") }')).to.be('ok')
-    expect(render('rex = /\\\"\'/')).to.be('rex = /\\\"\'/')      // rex = /\"\'/
-    expect(render('str = "/\\\"\'/"')).to.be('str = "/\\\"\'/"')  // str = "\"\'"
-
-    // no confusion with operators
-    data.x = 2
-    expect(render('{ 10 /x+10/ 1 }')).to.be(15)
-    expect(render('{ x /2+x/ 1 }')).to.be(3)
-    expect(render('{ x /2+"abc".search(/c/) }')).to.be(3)
-
-    // in expressions, there's no ASI support
-    expect(render('{ x\n /2+x/ 1 }')).to.be(3)
-
-  //// Better recognition of comments, including empty ones.
-
-    // comments within expresions are converted to spaces, in concordance with js specs
-    expect(render('{ typeof/**/str === "string" }')).to.be(true)
-    expect(render('{ 1+/* */+2 }')).to.be(3)
-
-    // comments in template text is preserved
-    expect(render(' /*/* *\/ /**/ ')).to.be(' /*/* *\/ /**/ ')
-    expect(render('/*/* "note" /**/')).to.be('/*/* "note" /**/')
-
-    // riot parse correctamente empty and exotic comments
-    expect(render('{ /**/ }')).to.be(undefined)               // empty comment
-    expect(render('{ /*/* *\/ /**/ }')).to.be(undefined)      // nested comment sequences
-
-    // there's no problem in shorthands
-    expect(render('{ ok: 0+ /*{no: 1}*/ 1 }')).to.be('ok')
-    expect(render('{ ok: 1 /*, no: 1*/ }')).to.be('ok')
-    expect(render('{ ok/**/: 1 }')).to.be('ok')
-
-    // nor in the template text, comments inside strings are preserved
-    expect(render('{ "/* ok */" }')).to.be('/* ok */')
-    expect(render('{ "/*/* *\/ /**/" }')).to.be('/*/* *\/ /**/')
-    expect(render('{ "/* \\"comment\\" */" }')).to.be('/* "comment" */')
-
-  //// Support for full ISO-8859-1 charset in js var and class names
-  /*
-    expect(render('{ neón: 1 }')).to.be('neón')
-    expect(render('{ -ä: 1 }')).to.be('-ä')                   // '-ä' is a valid class name
-    expect(render('{ ä: 1 }')).to.be('ä')
-    expect(render('{ (this["neón"] = 0, ++neón) }')).to.be(1)
-    expect(render('{ (this["_ä"] = 1, _ä) }')).to.be(1)       // '-ä'' is not a var name
-    expect(render('{ (this["ä"] = 1, ä) }')).to.be(1)
-  */
-    // but you can include almost anything in quoted names
-    expect(render('{ "_\u221A": 1 }')).to.be('_\u221A')
-    expect(render('{ (this["\u221A"] = 1, this["\u221A"]) }')).to.be(1)
-
-  //// Mac/Win EOL's normalization avoids unexpected results with some editors.
-
-    // win eols are normalized in template text
-    expect(render('\r\n \n \r \n\r')).to.be('\n \n \n \n\n')
-    expect(render('\r\n { 0 } \r\n')).to.be('\n 0 \n')
-
-    // ...even in their quoted parts
-    expect(render('style="\rtop:0\r\n"')).to.be('style="\ntop:0\n"')
-
-    // whitespace are compacted in expressions (see generated code)
-    expect(render(' { yes ?\n\t2 : 4} ')).to.be(' 2 ')
-    expect(render('{ \t \nyes !== no\r\n }')).to.be(true)
-
-    // ...but is preserved in js quoted strings
-    expect(render('{ "\r\n \n \r" }')).to.be('\r\n \n \r')
-    expect(render('{ ok: "\r\n".charCodeAt(0) === 13 }')).to.be('ok')
-
-    // in shorthand names, whitespace will be compacted.
-    expect(render('{ " \ta\n \r \r\nb\n ": yes }')).to.be('a b')
-
-  //// Extra tests
-
-    // correct handling of quotes
-    expect(render('{ "House \\"Atrides\\" wins" }')).to.be('House "Atrides" wins')
-    expect(render('{ "Leto\'s house" }')).to.be("Leto's house")
-    expect(render(" In '{ \"Leto\\\\\\\'s house\" }' ")).to.be(" In 'Leto\\\'s house' ")  // « In '{ "Leto\\\'s house" }' » --> In 'Leto\'s house'
-    expect(render(' In "{ "Leto\'s house" }" ')).to.be(' In "Leto\'s house" ')            // « In "{ "Leto's house" }"    » --> In "Leto's house"
-    expect(render(' In "{ \'Leto\\\'s house\' }" ')).to.be(' In "Leto\'s house" ')        // « In "{ 'Leto\'s house' }"   » --> In "Leto's house"
-
-  //// Consistency?
-
-    // the main inconsistence between expressions and class shorthands
-    expect(render('{ !nonExistingVar.foo ? "ok" : "" }')).to.equal(undefined) // ok
-    expect(render('{ !nonExistingVar.foo ? "ok" : "" } ')).to.equal(' ')      // ok
-  //expect(render('{ ok: !nonExistingVar.foo }')).to.equal('ok')              // what?
-    expect(render('{ ok: !nonExistingVar.foo }')).to.equal('')                // ok ;)
-
-  //// Custom brackets
-
-    // brackets RegEx generation and info, discards /im, escape each char in regexp
-    !(function testBrackets(brfn) {
-
-      var vals = [
-      // source     brackets(2) + brackets(3)
-        ['<% %>',   '<% %>'    ],
-        ['[! !]',   '\\[! !]'  ],
-        ['·ʃ< ]]',  '·ʃ< ]]'   ],
-        ['{$ $}',   '{\\$ \\$}'],
-        ['${ }',    '\\${ }'   ],
-        ['_( )_',   '_\\( \\)_']
-      ]
-      var rs, bb, i
-
-      riot.settings.brackets = undefined  // use default brackets
-      for (i = 0; i < 2; i++) {
-        rs = newRegExp('{}')
-        expect(brfn(rs)).to.be(rs)
-        expect(brfn(0)).to.equal('{')
-        expect(brfn(1)).to.equal('}')
-        expect(brfn(2)).to.equal('{')
-        expect(brfn(3)).to.equal('}')
-        riot.settings.brackets = '{ }'    // same as defaults
-      }
-      for (i = 0; i < vals.length; i++) {
-
-        // set another brackets
-        rs = vals[i]
-        bb = (riot.settings.brackets = rs[0]).split(' ')
-        rs = rs[1]
-        expect(brfn(/{ }/g).source).to.equal(rs)
-        expect(brfn(0)).to.equal(bb[0])
-        expect(brfn(1)).to.equal(bb[1]); bb = rs.split(' ')
-        expect(brfn(2)).to.equal(bb[0])
-        expect(brfn(3)).to.equal(bb[1])
-      }
-
-      riot.settings.brackets = null
-
-    })(brackets)
+    })
 
   })
+  // end of tmpl 2.2.3
+
+  //// new in tmpl 2.3.0
+
+  describe('2.3.0', function() {
+
+    it('support for 8 bit, ISO-8859-1 charset in shorthand names', function () {
+      expect(render('{ neón: 1 }')).to.be('neón')
+      expect(render('{ -ä: 1 }')).to.be('-ä')               // '-ä' is a valid class name
+      expect(render('{ ä: 1 }')).to.be('ä')
+    })
+
+    it('does not wrap global and window object names', function () {
+      var gw = typeof window === 'object' ? 'window' : 'global'
+      expect(render('{ ' + gw + '.globalVar }')).to.be(5)
+      data.Date = '{}'
+      expect(render('{ +new ' + gw + '.Date() }')).to.be.a('number')
+      delete data.Date
+    })
+
+    it('unwrapped keywords: Infinity, isFinite, isNaN, Date, RegExp and Math', function () {
+      var i, a = ['isFinite', 'isNaN', 'Date', 'RegExp', 'Math']
+      for (i = 0; i < a.length; ++i)
+        data[a[i]] = 0
+
+      expect(render('{ Infinity }')).to.be.a('number')
+      expect(render('{ isFinite(1) }')).to.be(true)
+      expect(render('{ isNaN({}) }')).to.be(true)
+      expect(render('{ Date.parse }')).to.be.a('function')
+      expect(render('{ RegExp.$1 }')).to.be.a('string')
+      expect(render('{ Math.floor(0) }')).to.be.a('number')
+
+      for (i = 0; i < a.length; ++i)
+        delete data[a[i]]
+    })
+
+    describe('support for comments has been dropped', function () {
+      // comments within expresions are converted to spaces, in concordance with js specs
+      it('if included, the expression may work, but...', function () {
+        expect(render('{ typeof/**/str === "string" }')).to.be(true)
+        expect(render('{ 1+/* */+2 }')).to.be(3)
+
+        // comments in template text is preserved
+        expect(render(' /*/* *\/ /**/ ')).to.be(' /*/* *\/ /**/ ')
+        expect(render('/*/* "note" /**/')).to.be('/*/* "note" /**/')
+
+        // riot parse correctamente empty and exotic comments
+        expect(render('{ /**/ }')).to.be(undefined)               // empty comment
+        expect(render('{ /*/* *\/ /**/ }')).to.be(undefined)      // nested comment sequences
+        expect(render('{ /*dummy*/ }')).to.be(undefined)
+
+        // there's no problem in shorthands
+        expect(render('{ ok: 0+ /*{no: 1}*/ 1 }')).to.be('ok')
+
+        // nor in the template text, comments inside strings are preserved
+        expect(render('{ "/* ok */" }')).to.be('/* ok */')
+        expect(render('{ "/*/* *\/ /**/" }')).to.be('/*/* *\/ /**/')
+        expect(render('{ "/* \\"comment\\" */" }')).to.be('/* "comment" */')
+      })
+
+      it('something like `{ ok:1 /*,no:1*/ } give incorrect result ("no")', function () {
+        expect(render('{ ok: 1 /*, no: 1*/ }')).to.be('no')
+      })
+
+      it('others can break your application, e.g. { ok/**/: 1 }', function () {
+        expect(render).withArgs('{ ok/**/: 1 }').to.throwError()
+        expect(render).withArgs(' { /* comment */ }').to.throwError()
+      })
+    })
+
+    //// error handler
+
+    describe('catch errors in expressions with tmpl.errorHandler', function () {
+      var clearHandler = function () { tmpl.errorHandler = null }
+
+      beforeEach(clearHandler)
+      afterEach(clearHandler)
+      after(clearHandler)
+
+      it('using a custom function', function () {
+        var result, err
+        tmpl.errorHandler = function (e) { err = e }
+        // je, tmpl({x}, NaN) does not generate error... bug or danling var?
+        //console.error('========== >>>> x: ' + x)        // error here
+        //console.error('========== >>>> x: ' + global.x) // undefined here
+        err = 0
+        expect(tmpl('{x[0]}'), {}).to.be(undefined)       // empty data
+        expect(err instanceof Error).to.be(true)
+        expect(err.riotData).to.eql({tagName: undefined, _riot_id: undefined})
+        // undefined as parameter for Function.call(`this`) defaults to global
+        err = 0
+        expect(tmpl('{x[0]}')).to.be(undefined)
+        expect(err instanceof Error).to.be(true)
+        expect(err.riotData).to.eql({tagName: undefined, _riot_id: undefined})
+      })
+
+      it('GOTCHA: null as param for call([this]) defaults to global too', function () {
+        var result, err
+        tmpl.errorHandler = function (e) { err = e }
+        err = 0
+        expect(tmpl('{x[0]}', null)).to.be(undefined)
+        expect(err instanceof Error).to.be(true)
+        expect(err.riotData).to.eql({tagName: undefined, _riot_id: undefined})
+      })
+
+      it('catching reading property of an undefined variable', function () {
+        var result, err
+
+        tmpl.errorHandler = function (e) { err = e }
+        data.root = {tagName: 'DIV'}
+        data._riot_id = 1
+        result = render('{ undefinedVar.property }')    // render as normal
+        delete data._riot_id
+        delete data.root
+
+        expect(result).to.be(undefined)
+        expect(err instanceof Error).to.be(true)
+        expect(err.riotData).to.eql({tagName: 'DIV', _riot_id: 1})
+      })
+
+      it('top level undefined variables (properties) can\'t be catched', function () {
+        var result, err = 0
+
+        tmpl.errorHandler = function (e) { err = e }
+        result = render('{ undefinedVar }')        // render as normal
+        expect(result).to.be(undefined)
+        expect(err).to.be.a('number')
+      })
+
+      it('errors on instantiation of the getter always throws', function () {
+        expect(render).withArgs('{ a: } }').to.throwError()  // SintaxError
+        expect(render).withArgs('{ d c:1 }').to.throwError()
+      })
+
+      it('syntax errors on expressions throws exception', function () {
+        expect(render).withArgs('{ a:(1 }').to.throwError()  // SintaxError
+        expect(render).withArgs('{ c[0) }').to.throwError()
+      })
+
+    })
+
+    //// helper functions
+
+    describe('new helper functions', function () {
+
+      it('tmpl.loopKeys: extract keys from the value (for `each`)', function () {
+        var i, s,
+          atest = [
+            '{k,i in item}', {key: 'k', pos: 'i', val: '{item}'},
+            '{ k in i }', {key: 'k', pos: undefined, val: '{i}'},
+            '{^ item in i }', {key: 'item', pos: undefined, val: '{i}'},
+            '{^item,idx in items } ', {key: 'item', pos: 'idx', val: '{items}'},
+            '{ item}  ', {val: '{ item}'},
+            '{item', {val: '{item'},    // val is expected
+            '{}', {val: '{}'},
+            '0', {val: '0'}
+          ]
+        for (i = 0; i < atest.length; i += 2) {
+          expect(tmpl.loopKeys(atest[i])).to.eql(atest[i + 1])
+        }
+      })
+
+      it('tmpl.hasExpr: test for expression existence', function () {
+        expect(tmpl.hasExpr('{}')).to.be(true)
+        expect(tmpl.hasExpr(' {} ')).to.be(true)
+        expect(tmpl.hasExpr('{ 123 } ')).to.be(true)
+        expect(tmpl.hasExpr('"{ "#" }"')).to.be(true)
+        expect(tmpl.hasExpr('"{ " }')).to.be(true)
+        expect(tmpl.hasExpr('\\{ 123 } ')).to.be(false)
+        expect(tmpl.hasExpr(' \\{}')).to.be(false)
+        expect(tmpl.hasExpr(' }{ ')).to.be(false)
+      })
+
+    })
+
+  })
+  // end of tmpl 2.3.0
 
 })

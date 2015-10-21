@@ -1,14 +1,12 @@
-languages:
-  JavaScript: true
-
 engines:
   eslint:
     enabled: true
 
 ratings:
   paths:
-  - "lib/**"
+  - "dist/tmpl.js"
 
 exclude_paths:
-  - "dist/**"
-  - "lib/wrap/**"
+  - "dist/riot.tmpl.js"
+  - "test/**/*"
+  - "lib/**/*"

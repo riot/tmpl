@@ -22,8 +22,6 @@ $RECYCLE.BIN/
 *.msp
 *.lnk
 
-dist/*.html
-
 # --------------------
 # Sublime Text Files
 # --------------------
@@ -44,7 +42,6 @@ out/
 # --------------------
 .project
 .metadata
-*.bak
 .classpath
 .settings/
 
@@ -52,9 +49,21 @@ out/
 # App Files
 # --------------------
 node_modules
-npm-debug.log
 bower_components
 coverage
 
+# these files are generated anyway
+dist/
+
 !.gitmodules
 !.travis.yml
+
+logs
+pids
+**/*.log
+**/*.bak
+*.pid
+*.seed
+
+# node-waf configuration
+.lock-wscript

@@ -1,31 +1,50 @@
+# jspreproc flags
+#JSPP_DEBUG = -D DEBUG -D SHOW_PARSE_ERRORS
+JSPP_FLAGS = -F istanbul -F eslint --custom-filter "\s@(module|version)\b" --headers ""
+JSPP_RIOT_FLAGS = $(JSPP_FLAGS) -D RIOT
+JSPP_NODE_FLAGS = $(JSPP_FLAGS) -D NODE --indent 2
+
 # Command line paths
-KARMA = ./node_modules/karma/bin/karma
-ISTANBUL = ./node_modules/karma-coverage/node_modules/.bin/istanbul
-ESLINT = ./node_modules/eslint/bin/eslint.js
-MOCHA = ./node_modules/mocha/bin/_mocha
+KARMA     = ./node_modules/karma/bin/karma
+ESLINT    = ./node_modules/eslint/bin/eslint.js
+ISTANBUL  = ./node_modules/karma-coverage/node_modules/.bin/istanbul
+MOCHA     = ./node_modules/mocha/bin/_mocha
 COVERALLS = ./node_modules/coveralls/bin/coveralls.js
-UGLIFY = ./node_modules/uglify-js/bin/uglifyjs
-RMCOMMS = ./node_modules/rmcomms/bin/rmcomms-cli.js
+JSPP      = ./node_modules/jspreproc/bin/jspp.js
+
+TESTCOVER = $(TRAVIS_BRANCH) $(TRAVIS_NODE_VERSION)
+
+# folders
+DIST = "./dist/"
+
+test: build test-mocha test-karma
 
 build: eslint
 	# rebuild all
-	@ cat lib/utils.js lib/brackets.js lib/tmpl.js | $(RMCOMMS) > dist/riot.tmpl.js
-	@ cat lib/wrap/start.frag dist/riot.tmpl.js lib/wrap/end.frag > dist/tmpl.js
-	@ $(UGLIFY) dist/tmpl.js --comments --mangle -o dist/tmpl.min.js
+	@ mkdir -p $(DIST)
+	@ $(JSPP) $(JSPP_RIOT_FLAGS) lib/index.js > $(DIST)riot.tmpl.js
+	@ $(JSPP) $(JSPP_NODE_FLAGS) lib/index.js > $(DIST)tmpl.js
 
 eslint:
 	# check code style
 	@ $(ESLINT) -c ./.eslintrc lib
 
-test: build test-karma
-
 test-karma:
 	@ $(KARMA) start test/karma.conf.js
 
-test-coveralls:
-	@ RIOT_COV=1 cat ./coverage/lcov.info ./coverage/report-lcov/lcov.info | $(COVERALLS)
+test-mocha:
+	@ $(ISTANBUL) cover --dir ./coverage/ist $(MOCHA) -- test/runner.js
 
-debug: raw
-	@ node-debug $(MOCHA) -d test/runner.js
+debug: build
+	NODE_PATH=$NODE_PATH:$(DIST) node-debug $(MOCHA) test/runner.js
 
-.PHONY: build test eslint debug test-karma test-coveralls
+send-coverage:
+	@ RIOT_COV=1 cat ./coverage/ist/lcov.info ./coverage/report-lcov/lcov.info | $(COVERALLS)
+ifeq ($(TESTCOVER),master 4.2)
+	@ npm install codeclimate-test-reporter
+	@ codeclimate-test-reporter < coverage/ist/lcov.info
+else
+	@ echo Send in master 4.2
+endif
+
+.PHONY: test build eslint test-karma test-mocha debug send-coverage

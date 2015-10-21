@@ -35,7 +35,7 @@ test-karma:
 test-mocha:
 	@ $(ISTANBUL) cover --dir ./coverage/ist $(MOCHA) -- test/runner.js
 
-debug:
+debug: build
 	NODE_PATH=$NODE_PATH:$(DIST) node-debug $(MOCHA) test/runner.js
 
 send-coverage:
@@ -47,4 +47,4 @@ else
 	@ echo Send in master 4.2
 endif
 
-.PHONY: test build eslint test-karma test-mocha debug send-coveralls
+.PHONY: test build eslint test-karma test-mocha debug send-coverage

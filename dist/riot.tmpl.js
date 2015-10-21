@@ -1,13 +1,26 @@
 
 /**
  * The riot template engine
- * @module tmpl
- * @version "0"
+ * @version 2.3.0-beta.3
  */
 
-// lib/brackets.js
+/**
+ * @module brackets
+ *
+ * `brackets         `  Returns a string or regex based on its parameter:
+ *                      With a number returns the current left (0) or right (1) brackets.
+ *                      With a regex, returns the original regex if the current brackets
+ *                      are the default, or a new one with the default brackets replaced
+ *                      by the current custom brackets.
+ *                      WARNING: recreated regexes discards the `/i` and `/m` flags.
+ * `brackets.settings`  This object mirrors the `riot.settings` object, you can assign this
+ *                      if riot is not in context.
+ * `brackets.set     `  The recommended option to change the current tiot brackets, check
+ *                      its parameter and reconfigures the internal state immediately.
+ */
 
 var brackets = function (onchange, UNDEF) {
+  'use strict'              // eslint-disable-line
 
   var
     REGLOB  = 'g',
@@ -71,7 +84,7 @@ var brackets = function (onchange, UNDEF) {
   function _set(pair) {
     if (cachedBrackets !== pair) {
       _reset(pair)
-      if (onchange) onchange(_pairs)
+      onchange && onchange(_pairs)
     }
   }
 
@@ -162,8 +175,6 @@ var brackets = function (onchange, UNDEF) {
 
 }
 
-// lib/tmpl.js
-
 /**
  * @module tmpl
  *
@@ -173,10 +184,11 @@ var brackets = function (onchange, UNDEF) {
  */
 
 var tmpl = (function () {
+  'use strict'              // eslint-disable-line
 
   var
-    FALSE   = !1,
-    _cache  = {},
+    FALSE  = !1,
+    _cache = {},
     _reKeys,
     _bp
 
@@ -334,8 +346,9 @@ var tmpl = (function () {
     }
   }
 
-  var JS_VARNAME = /[,{][$\w]+:|(^ *|[^$\w\.])(?!(?:typeof|true|false|null|undefined|in|instanceof|is(?:Finite|NaN)|void|NaN|new|Date|RegExp|Math)(?![$\w]))([$_A-Za-z][$\w]*)/g
+  // istanbul ignore next: not both
   var JS_CONTEXT = '"in this?this:' + (typeof window !== 'object' ? 'global' : 'window') + ').'
+  var JS_VARNAME = /[,{][$\w]+:|(^ *|[^$\w\.])(?!(?:typeof|true|false|null|undefined|in|instanceof|is(?:Finite|NaN)|void|NaN|new|Date|RegExp|Math)(?![$\w]))([$_A-Za-z][$\w]*)/g
 
   function _wrapExpr(expr, asText, key) {
     var tb = FALSE

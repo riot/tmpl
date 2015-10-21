@@ -1,6 +1,6 @@
 {
   "name": "riot-tmpl",
-  "version": "2.3.0-beta.2",
+  "version": "2.3.0-beta.3",
   "description": "The riot template engine",
   "main": "dist/tmpl.js",
   "directories": {
@@ -29,14 +29,15 @@
   ],
   "devDependencies": {
     "coveralls": "^2.11.4",
-    "eslint": "1.6.0",
+    "eslint": "^1.7.2",
     "expect.js": "^0.3.1",
-    "jspreproc": "latest",
-    "karma": "^0.13.10",
-    "karma-coverage": "^0.5.2",
+    "jspreproc": "^0.2.3",
+    "karma": "^0.13.11",
+    "karma-coverage": "^0.5.3",
     "karma-mocha": "^0.2.0",
     "karma-phantomjs-launcher": "^0.2.1",
-    "mocha": "^2.3.3"
+    "mocha": "^2.3.3",
+    "phantomjs": "^1.9.18"
   },
   "author": "Muut, Inc. and other contributors",
   "license": "MIT",

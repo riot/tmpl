@@ -2,7 +2,6 @@ module.exports = function(config) {
 
   config.set({
     basePath: '',
-    autoWatch: true,
     frameworks: ['mocha'],
     plugins: [
       'karma-mocha',
@@ -10,7 +9,6 @@ module.exports = function(config) {
       'karma-phantomjs-launcher'
     ],
     files: [
-      '../node_modules/mocha/mocha.js',
       '../node_modules/expect.js/index.js',
       '../dist/riot.tmpl.js',
       'specs/core.specs.js',

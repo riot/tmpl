@@ -1,31 +1,20 @@
+/* eslint-env node, mocha  */
 /* eslint camelcase: false */
-/*
-if (typeof tmpl === 'undefined') {
-  var
-    expect = require('expect.js'),
-    tmpl = require('tmpl').tmpl,
-    brackets = require('tmpl').brackets
-}
-*/
+
 globalVar = 5
 
-var data = {}     // generated code run in this context
-
-function generateData() {
-  data = {
-    yes: true,
-    no: false,
-    str: 'x',
-    obj: {val: 2},
-    arr: [2],
-    x: 2,
-    $a: 0,
-    $b: 1,
-    esc: '\'\n\\',
-    fn: function(s) { return ['hi', s].join(' ') },
-    _debug_: 0
-  }
-  return data
+var data = {
+  yes: true,
+  no: false,
+  str: 'x',
+  obj: {val: 2},
+  arr: [2],
+  x: 2,
+  $a: 0,
+  $b: 1,
+  esc: '\'\n\\',
+  fn: function(s) { return ['hi', s].join(' ') },
+  _debug_: 0
 }
 
 // send 1 or 2 in 'err' to enable internal information
@@ -36,11 +25,7 @@ function render(str, dbg) {
 
 describe('riot-tmpl', function() {
 
-  generateData()
-
   describe('compiles specs', function() {
-
-    this.timeout(5000)
 
     //// return values
 
@@ -171,6 +156,7 @@ describe('riot-tmpl', function() {
         expect(render('{ y: fn() }')).to.equal('y')
         expect(render('{ y: str == "x" }')).to.equal('y')
         expect(render('{ y: new Date() }')).to.equal('y')
+        expect(render('{ y: str[0] }')).to.equal('y')
       })
 
       it('even function calls, objects and arrays are no problem', function () {
@@ -182,6 +168,8 @@ describe('riot-tmpl', function() {
     })
 
   })
+
+  //// new in tmpl 2.2.3
 
   describe('2.2.3', function () {
 
@@ -259,6 +247,7 @@ describe('riot-tmpl', function() {
     //// Mac/Win EOL's normalization avoids unexpected results with some editors.
     //// (moved to 2.4, now tmpl don't touch non-expression parts)
 
+
     describe('whitespace', function () {
 
       it('is compacted to a space in expressions', function () {
@@ -289,6 +278,7 @@ describe('riot-tmpl', function() {
   })
   // end of tmpl 2.2.3
 
+  //// new in tmpl 2.3.0
 
   describe('2.3.0', function() {
 
@@ -355,6 +345,8 @@ describe('riot-tmpl', function() {
         expect(render).withArgs(' { /* comment */ }').to.throwError()
       })
     })
+
+    //// error handler
 
     describe('catch errors in expressions with tmpl.errorHandler', function () {
       var clearHandler = function () { tmpl.errorHandler = null }
@@ -425,7 +417,9 @@ describe('riot-tmpl', function() {
 
     })
 
-    describe('new helper functions in tmpl 2.3.0', function () {
+    //// helper functions
+
+    describe('new helper functions', function () {
 
       it('tmpl.loopKeys: extract keys from the value (for `each`)', function () {
         var i, s,

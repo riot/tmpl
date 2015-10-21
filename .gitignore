@@ -52,10 +52,18 @@ node_modules
 bower_components
 coverage
 
+# these files are generated anyway
+dist/
 
 !.gitmodules
 !.travis.yml
 
-dist/**/*.html
+logs
+pids
 **/*.log
 **/*.bak
+*.pid
+*.seed
+
+# node-waf configuration
+.lock-wscript

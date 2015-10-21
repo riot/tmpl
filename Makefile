@@ -1,21 +1,23 @@
 # jspreproc flags
-#JSPP_DEBUG = -D DEBUG -D SHOW_PARSE_ERRORS -F istanbul -F eslint
-JSPP_DEBUG = -F istanbul -F eslint
-JSPP_RIOT_FLAGS = $(JSPP_DEBUG) --custom-filter "\s@module\b"
-JSPP_NODE_FLAGS = $(JSPP_DEBUG) -D NODE --indent 2
+#JSPP_DEBUG = -D DEBUG -D SHOW_PARSE_ERRORS
+JSPP_FLAGS = -F istanbul -F eslint --custom-filter "\s@(module|version)\b" --headers ""
+JSPP_RIOT_FLAGS = $(JSPP_FLAGS) -D RIOT
+JSPP_NODE_FLAGS = $(JSPP_FLAGS) -D NODE --indent 2
 
 # Command line paths
-KARMA = ./node_modules/karma/bin/karma
-ISTANBUL = ./node_modules/karma-coverage/node_modules/.bin/istanbul
-ESLINT = ./node_modules/eslint/bin/eslint.js
-MOCHA = ./node_modules/mocha/bin/_mocha
+KARMA     = ./node_modules/karma/bin/karma
+ESLINT    = ./node_modules/eslint/bin/eslint.js
+ISTANBUL  = ./node_modules/karma-coverage/node_modules/.bin/istanbul
+MOCHA     = ./node_modules/mocha/bin/_mocha
 COVERALLS = ./node_modules/coveralls/bin/coveralls.js
-JSPP = ./node_modules/jspreproc/bin/jspp.js
+JSPP      = ./node_modules/jspreproc/bin/jspp.js
+
+TESTCOVER = $(TRAVIS_BRANCH) $(TRAVIS_NODE_VERSION)
 
 # folders
 DIST = "./dist/"
 
-test: build test-karma
+test: build test-mocha test-karma
 
 build: eslint
 	# rebuild all
@@ -30,13 +32,19 @@ eslint:
 test-karma:
 	@ $(KARMA) start test/karma.conf.js
 
-test-coveralls:
-	@ RIOT_COV=1 cat ./coverage/lcov.info ./coverage/report-lcov/lcov.info | $(COVERALLS)
-
 test-mocha:
-	NODE_PATH=$NODE_PATH:$(DIST) $(MOCHA) test/runner.js
+	@ $(ISTANBUL) cover --dir ./coverage/ist $(MOCHA) -- test/runner.js
 
 debug:
 	NODE_PATH=$NODE_PATH:$(DIST) node-debug $(MOCHA) test/runner.js
 
-.PHONY: test build eslint test-karma test-coveralls test-mocha debug
+send-coverage:
+	@ RIOT_COV=1 cat ./coverage/ist/lcov.info ./coverage/report-lcov/lcov.info | $(COVERALLS)
+ifeq ($(TESTCOVER),master 4.2)
+	@ npm install codeclimate-test-reporter
+	@ codeclimate-test-reporter < coverage/ist/lcov.info
+else
+	@ echo Send in master 4.2
+endif
+
+.PHONY: test build eslint test-karma test-mocha debug send-coveralls

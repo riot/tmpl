@@ -1,8 +1,21 @@
-/* riot-tmpl "0", @license MIT, (c) 2015 Muut Inc. + contributors */
+/* riot-tmpl 2.3.0-beta.3, @license MIT, (c) 2015 Muut Inc. + contributors */
 ;(function (window) {
   'use strict'              // eslint-disable-line
 
-  // lib/brackets.js
+  /**
+   * @module brackets
+   *
+   * `brackets         `  Returns a string or regex based on its parameter:
+   *                      With a number returns the current left (0) or right (1) brackets.
+   *                      With a regex, returns the original regex if the current brackets
+   *                      are the default, or a new one with the default brackets replaced
+   *                      by the current custom brackets.
+   *                      WARNING: recreated regexes discards the `/i` and `/m` flags.
+   * `brackets.settings`  This object mirrors the `riot.settings` object, you can assign this
+   *                      if riot is not in context.
+   * `brackets.set     `  The recommended option to change the current tiot brackets, check
+   *                      its parameter and reconfigures the internal state immediately.
+   */
 
   var brackets = function (onchange, UNDEF) {
 
@@ -68,7 +81,7 @@
     function _set(pair) {
       if (cachedBrackets !== pair) {
         _reset(pair)
-        if (onchange) onchange(_pairs)
+        onchange && onchange(_pairs)
       }
     }
 
@@ -159,13 +172,19 @@
 
   }
 
-  // lib/tmpl.js
+  /**
+   * @module tmpl
+   *
+   * tmpl          - Root function, returns the template value, render with data
+   * tmpl.hasExpr  - Test the existence of a expression inside a string
+   * tmpl.loopKeys - Get the keys for an 'each' loop (used by `_each`)
+   */
 
   var tmpl = (function () {
 
     var
-      FALSE   = !1,
-      _cache  = {},
+      FALSE  = !1,
+      _cache = {},
       _reKeys,
       _bp
 
@@ -323,8 +342,9 @@
       }
     }
 
-    var JS_VARNAME = /[,{][$\w]+:|(^ *|[^$\w\.])(?!(?:typeof|true|false|null|undefined|in|instanceof|is(?:Finite|NaN)|void|NaN|new|Date|RegExp|Math)(?![$\w]))([$_A-Za-z][$\w]*)/g
+    // istanbul ignore next: not both
     var JS_CONTEXT = '"in this?this:' + (typeof window !== 'object' ? 'global' : 'window') + ').'
+    var JS_VARNAME = /[,{][$\w]+:|(^ *|[^$\w\.])(?!(?:typeof|true|false|null|undefined|in|instanceof|is(?:Finite|NaN)|void|NaN|new|Date|RegExp|Math)(?![$\w]))([$_A-Za-z][$\w]*)/g
 
     function _wrapExpr(expr, asText, key) {
       var tb = FALSE
@@ -370,15 +390,13 @@
   /* istanbul ignore else */
   if (typeof module === 'object' && module.exports) {
     module.exports = {
-      'tmpl': tmpl,
-      'brackets': brackets
+      'tmpl': tmpl, 'brackets': brackets
     }
   }
   else if (typeof define === 'function' && define.amd) {
     define(function () {
       return {
-        'tmpl': tmpl,
-        'brackets': breackets
+        'tmpl': tmpl, 'brackets': breackets
       }
     })
   }
@@ -387,4 +405,5 @@
     window.brackets = brackets
   }
 
-})(typeof window !== 'object' ? void 0 : window) // eslint-disable-line no-void
+})(typeof window === 'object' ? /* istanbul ignore next */ window : void 0) // eslint-disable-line no-void
+

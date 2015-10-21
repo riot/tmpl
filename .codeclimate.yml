@@ -4,9 +4,9 @@ engines:
 
 ratings:
   paths:
-  - "dist/**"
+  - "dist/tmpl.js"
 
 exclude_paths:
   - "dist/riot.tmpl.js"
-  - "test/**"
-  - "lib/**"
+  - "test/**/*"
+  - "lib/**/*"

@@ -5,11 +5,11 @@ JSPP_RIOT_FLAGS = $(JSPP_FLAGS) -D RIOT
 JSPP_NODE_FLAGS = $(JSPP_FLAGS) -D NODE --indent 2
 
 # Command line paths
-KARMA     = ./node_modules/karma/bin/karma
+COVERALLS = ./node_modules/coveralls/bin/coveralls.js
 ESLINT    = ./node_modules/eslint/bin/eslint.js
 ISTANBUL  = ./node_modules/karma-coverage/node_modules/.bin/istanbul
+KARMA     = ./node_modules/karma/bin/karma
 MOCHA     = ./node_modules/mocha/bin/_mocha
-COVERALLS = ./node_modules/coveralls/bin/coveralls.js
 JSPP      = ./node_modules/jspreproc/bin/jspp.js
 
 TESTCOVER = $(TRAVIS_BRANCH) $(TRAVIS_NODE_VERSION)
@@ -35,9 +35,6 @@ test-karma:
 test-mocha:
 	@ $(ISTANBUL) cover --dir ./coverage/ist $(MOCHA) -- test/runner.js
 
-debug: build
-	NODE_PATH=$NODE_PATH:$(DIST) node-debug $(MOCHA) test/runner.js
-
 send-coverage:
 	@ RIOT_COV=1 cat ./coverage/ist/lcov.info ./coverage/report-lcov/lcov.info | $(COVERALLS)
 ifeq ($(TESTCOVER),master 4.2)
@@ -47,4 +44,10 @@ else
 	@ echo Send in master 4.2
 endif
 
-.PHONY: test build eslint test-karma test-mocha debug send-coverage
+debug: build
+	@ node-debug $(MOCHA) test/runner.js
+
+perf: build
+	@ node --expose-gc test/perf.js
+
+.PHONY: test build eslint test-karma test-mocha send-coverage debug perf

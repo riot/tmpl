@@ -17,7 +17,7 @@
    *                      its parameter and reconfigures the internal state immediately.
    */
 
-  var brackets = function (onchange, UNDEF) {
+  var brackets = (function (UNDEF) {
 
     var
       REGLOB  = 'g',
@@ -73,6 +73,7 @@
         _pairs[5] = _regex(/\\({|})/g)
         _pairs[6] = _regex(/(\\?)({)/g)
         _pairs[7] = _regExp('(\\\\?)(?:([[({])|(' + _pairs[3] + '))|' + S_QBSRC, REGLOB)
+        _pairs[9] = _regExp(/^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S+)\s*}/)
         _pairs[8] = pair
       }
       _brackets.settings.brackets = cachedBrackets = pair
@@ -81,7 +82,6 @@
     function _set(pair) {
       if (cachedBrackets !== pair) {
         _reset(pair)
-        onchange && onchange(_pairs)
       }
     }
 
@@ -153,6 +153,16 @@
       }
     }
 
+    _brackets.hasExpr = function hasExpr(str) {
+      return _pairs[4].test(str)
+    }
+
+    _brackets.loopKeys = function loopKeys(expr) {
+      var m = expr.match(_pairs[9])
+      return m ?
+        { key: m[1], pos: m[2], val: _pairs[0] + m[3] + _pairs[1] } : { val: expr.trim() }
+    }
+
     _brackets.array = function array(pair) {
       if (pair != null) _reset(pair)
       return _pairs
@@ -170,7 +180,7 @@
 
     return _brackets
 
-  }
+  })()
 
   /**
    * @module tmpl
@@ -184,12 +194,7 @@
 
     var
       FALSE  = !1,
-      _cache = {},
-      _reKeys,
-      _bp
-
-    brackets = brackets(_changebp)
-    _changebp(brackets.array())
+      _cache = {}
 
     function _tmpl(str, data) {
       if (!str) return str
@@ -197,15 +202,9 @@
       return (_cache[str] || (_cache[str] = _create(str))).call(data, _logErr)
     }
 
-    _tmpl.hasExpr = function hasExpr(str) {
-      return _bp[4].test(str)
-    }
+    _tmpl.hasExpr = brackets.hasExpr
 
-    _tmpl.loopKeys = function loopKeys(expr) {
-      var m = expr.match(_reKeys)
-      return m ?
-        { key: m[1], pos: m[2], val: _bp[0] + m[3] + _bp[1] } : { val: expr.trim() }
-    }
+    _tmpl.loopKeys = brackets.loopKeys
 
     _tmpl.errorHandler = FALSE
 
@@ -219,11 +218,6 @@
         }
         _tmpl.errorHandler(err)
       }
-    }
-
-    function _changebp(bp) {
-      _bp = bp
-      _reKeys = brackets(/^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S+)\s*}/)
     }
 
     function _create(str) {
@@ -383,7 +377,7 @@
       return expr
     }
 
-    // istanbul ignore next
+    // istanbul ignore next: compatibility fix for beta versions
     _tmpl.parse = function (s) { return s }
 
     return _tmpl

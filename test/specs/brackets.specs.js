@@ -360,4 +360,14 @@ describe('regexes', function () {
     expect(match[4]).to.be("'/*2*/\\\''")   // yes, the match is correct :)
   })
 
+  it('don\'t use internal functions', function () {
+    var bp
+
+    bp = brackets.array(null)
+    expect(bp[0] + bp[1]).to.be('{}')
+    bp = brackets.array('~ ~')
+    expect(bp[0] + bp[1]).to.be('~~')
+    bp = brackets.array(null)
+  })
+
 })

@@ -71,6 +71,7 @@ tmpl('{ 0 }', {})          // 0
 * Brackets can not contain characters in the set `[\x00-\x1F<>a-zA-Z0-9'",;\\]`
 * No comments in expressions, the compiler is the only that strip comments
 * Attributes with expressions containing `>` must be quoted
+* The new `brackets.set` function avoids direct assignment to `riot.settings.brackets`
 
 Please read the [CHANGES](doc/CHANGES.md) file in the doc folder.
 

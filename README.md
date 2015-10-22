@@ -1,9 +1,9 @@
 [![Build Status][travis-image]][travis-url]
 [![Code Quality][codeclimate-image]][codeclimate-url]
+[![Coverage Status][coverage-image]][coverage-url]
 [![NPM version][npm-version-image]][npm-url]
 [![NPM downloads][npm-dn-image]][npm-url]
 [![MIT License][license-image]][license-url]
-[![Coverage Status][coverage-image]][coverage-url]
 
 # Tmpl
 
@@ -52,33 +52,19 @@ tmpl('<h1>{ title }</h1>{ body }', data)
 ```
 
 
-### Falsy expressions in templates
+### Falsy expressions
 
 In templates (as opposed to single expressions) all falsy values except zero (undefined/null/false) will default to empty string:
 
 ```js
 tmpl('{ undefined } - { false } - { null } - { 0 }', {})
 // will return: " - - - 0"
+
+tmpl('{}')                 // undefined
+tmpl('{ false }', {})      // false
+tmpl('{ null }', {})       // null
+tmpl('{ 0 }', {})          // 0
 ```
-
-### Precompiled expressions
-
-tmpl has separated the evaluation process of the compilation, now you need to call `tmpl.compile()` for pre-compilate the expression before using `tmpl()`, like in this example:
-
-```js
-var tmpl = riot.util.tmpl    // or require('tmpl').tmpl
-var expr = '{ msg }'
-var pcexpr = tmpl.compile(expr)
-// now you can assign pcexpr to an attribute value or evaluate anywhere
-console.log(tmpl(pcexpr, {msg: "Hi"}))    // outputs "Hi"
-```
-
-The riot compiler can be used for pre-compilate all expressions in your application.
-If you don't need runtime construction of expressions, you can use the minimum version of riot: _riot-light.js_, that exclude the expression compiler.
-
-**NOTE:**
-Precompiling all expressions avoids errors with restrictions on environments blocking the `Function` constructor (i.e. `eval`) 
-
 
 ## Changes in 2.3
 

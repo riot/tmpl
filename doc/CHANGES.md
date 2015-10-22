@@ -35,9 +35,9 @@ Here the browser (some version of IE) receives invalid markup and try to render 
 
 ## Escaped brackets, backslashes, and EOLs
 
-Escaped brackets are unescaped, except in JavaScript strings and regexes where are not touched. So far, I have not found a case where literal brackets needs to remain escaped.
+Escaped brackets _inside expressions_ are unescaped, except in JavaScript strings and regexes where are not touched. So far, I have not found a case where literal brackets needs to remain escaped.
 
-Other backslashes are preserved (escaped) in the HTML parts. In the expressions, they are passed unchanged to the evaluation function.
+Other backslashes in the HTML parts, strings, and regexes, are preserved.
 
 EOLs are normalized to `\n` in the HTML, converted to compact spaces in expressions, and preserved in JavaScript strings and regexes.
 

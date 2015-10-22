@@ -1,6 +1,6 @@
 {
   "name": "riot-tmpl",
-  "version": "2.3.0-beta.6",
+  "version": "2.3.0-beta.7",
   "description": "The riot template engine",
   "main": "dist/tmpl.js",
   "directories": {

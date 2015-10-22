@@ -98,7 +98,7 @@
         isexpr,
         start,
         pos,
-        re = _pairs[6]
+        re = _brackets(6)
 
       isexpr = start = re.lastIndex = 0
 
@@ -154,11 +154,11 @@
     }
 
     _brackets.hasExpr = function hasExpr(str) {
-      return _pairs[4].test(str)
+      return _brackets(4).test(str)
     }
 
     _brackets.loopKeys = function loopKeys(expr) {
-      var m = expr.match(_pairs[9])
+      var m = expr.match(_brackets(9))
       return m ?
         { key: m[1], pos: m[2], val: _pairs[0] + m[3] + _pairs[1] } : { val: expr.trim() }
     }

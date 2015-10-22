@@ -383,6 +383,9 @@
       return expr
     }
 
+    // istanbul ignore next
+    _tmpl.parse = function (s) { return s }
+
     return _tmpl
 
   })()

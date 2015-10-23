@@ -65,9 +65,12 @@ describe('riot-tmpl', function() {
 
     it('undefined vars are catched in expressions and returns undefined', function () {
       expect(render('{ nonExistingVar }')).to.be(undefined)
+      data.parent = undefined
+      expect(render('{ parent.some.thing }')).to.be(undefined)
       expect(render('{ !nonExistingVar }')).to.equal(true)
       expect(render('{ nonExistingVar ? "yes" : "no" }')).to.equal('no')
       expect(render('{ !nonExistingVar ? "yes" : "no" }')).to.equal('yes')
+      delete data.parent
     })
 
     it('in templates, falsy values result in empty string, except zero', function () {

@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version 2.3.0-beta.3
+ * @version 2.3.0-beta.8
  */
 
 /**
@@ -215,8 +215,8 @@ var tmpl = (function () {
     if (_tmpl.errorHandler) {
 
       err.riotData = {
-        tagName: ctx.root && ctx.root.tagName,
-        _riot_id: ctx._riot_id  //eslint-disable-line camelcase
+        tagName: ctx && ctx.root && ctx.root.tagName,
+        _riot_id: ctx && ctx._riot_id  //eslint-disable-line camelcase
       }
       _tmpl.errorHandler(err)
     }
@@ -345,16 +345,16 @@ var tmpl = (function () {
   function _wrapExpr(expr, asText, key) {
     var tb = FALSE
 
-    expr = expr.replace(JS_VARNAME, function (match, p, mvar) {
+    expr = expr.replace(JS_VARNAME, function (match, p, mvar, pos, s) {
       if (mvar) {
-        var s = tb ? FALSE : RegExp.rightContext
+        pos = tb ? 0 : pos + match.length
 
         if (mvar !== 'this' && mvar !== 'global' && mvar !== 'window') {
           match = p + '("' + mvar + JS_CONTEXT + mvar
-          if (s) tb = /^[.[(]/.test(s)
+          if (pos) tb = (s = s[pos]) === '.' || s === '(' || s === '['
         }
-        else if (s)
-          tb = !/^(?=(\.[$\w]+))\1(?:[^.[(]|$)/.test(s)
+        else if (pos)
+          tb = !/^(?=(\.[$\w]+))\1(?:[^.[(]|$)/.test(s.slice(pos))
       }
       return match
     })

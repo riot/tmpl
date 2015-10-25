@@ -5,9 +5,7 @@ module.exports = function(config) {
 
   if (process.env.BROWSERSTACK) {
     browsers = Object.keys(customLaunchers)
-    /* eslint-disable */
-    browsers.forEach(browser => customLaunchers[browser].base = 'BrowserStack')
-    /* eslint-enable */
+    browsers.forEach(function(browser) { customLaunchers[browser].base = 'BrowserStack' })
   }
   else
     browsers = ['PhantomJS']

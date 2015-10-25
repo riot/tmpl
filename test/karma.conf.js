@@ -1,13 +1,27 @@
 module.exports = function(config) {
 
+  var browsers,
+    customLaunchers = require('./browsers')
+
+  if (process.env.BROWSERSTACK) {
+    browsers = Object.keys(customLaunchers)
+    /* eslint-disable */
+    browsers.forEach(browser => customLaunchers[browser].base = 'BrowserStack')
+    /* eslint-enable */
+  }
+  else
+    browsers = ['PhantomJS']
+
   config.set({
     basePath: '',
     frameworks: ['mocha'],
     plugins: [
       'karma-mocha',
       'karma-coverage',
+      'karma-browserstack-launcher',
       'karma-phantomjs-launcher'
     ],
+
     files: [
       '../node_modules/expect.js/index.js',
       '../dist/riot.tmpl.js',
@@ -15,7 +29,9 @@ module.exports = function(config) {
       'specs/brackets.specs.js'
     ],
 
-    browsers: ['PhantomJS'],
+    browsers: browsers,
+
+    customLaunchers: customLaunchers,
 
     reporters: ['progress', 'coverage'],
     preprocessors: {
@@ -28,7 +44,6 @@ module.exports = function(config) {
         subdir: 'report-lcov'
       }]
     },
-
-    singleRun: false
+    singleRun: true
   })
 }

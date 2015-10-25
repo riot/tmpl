@@ -17,7 +17,7 @@ TESTCOVER = $(TRAVIS_BRANCH) $(TRAVIS_NODE_VERSION)
 # folders
 DIST = "./dist/"
 
-test: build test-mocha test-karma
+test: build test-mocha test-karma test-browsers
 
 build: eslint
 	# rebuild all
@@ -31,6 +31,9 @@ eslint:
 
 test-karma:
 	@ $(KARMA) start test/karma.conf.js
+
+test-browsers:
+	@ BROWSERSTACK=1 $(KARMA) start test/karma.conf.js
 
 test-mocha:
 	@ $(ISTANBUL) cover --dir ./coverage/ist $(MOCHA) -- test/runner.js

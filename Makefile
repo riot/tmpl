@@ -17,7 +17,7 @@ TESTCOVER = $(TRAVIS_BRANCH) $(TRAVIS_NODE_VERSION)
 # folders
 DIST = "./dist/"
 
-test: build test-mocha test-karma test-browsers
+test: build test-mocha test-karma
 
 build: eslint
 	# rebuild all

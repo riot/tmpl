@@ -1,9 +1,10 @@
 module.exports = function(config) {
 
   var browsers,
-    customLaunchers = require('./browsers')
+    customLaunchers = []
 
   if (process.env.BROWSERSTACK) {
+    customLaunchers = require('./browsers')
     browsers = Object.keys(customLaunchers)
     browsers.forEach(function(browser) { customLaunchers[browser].base = 'BrowserStack' })
   }

@@ -6,7 +6,7 @@ branches:
   only:
   - master
   - dev
-script: make test && make test-browsers
+
 after_success: make send-coverage
 notifications:
   email: false

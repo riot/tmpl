@@ -53,4 +53,4 @@ debug: build
 perf: build
 	@ node --expose-gc test/perf.js
 
-.PHONY: test build eslint test-karma test-mocha send-coverage debug perf
+.PHONY: test build eslint test-karma test-browsers test-mocha send-coverage debug perf

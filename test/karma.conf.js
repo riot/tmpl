@@ -1,13 +1,26 @@
 module.exports = function(config) {
 
+  var browsers,
+    customLaunchers = []
+
+  if (process.env.BROWSERSTACK) {
+    customLaunchers = require('./browsers')
+    browsers = Object.keys(customLaunchers)
+    browsers.forEach(function(browser) { customLaunchers[browser].base = 'BrowserStack' })
+  }
+  else
+    browsers = ['PhantomJS']
+
   config.set({
     basePath: '',
     frameworks: ['mocha'],
     plugins: [
       'karma-mocha',
       'karma-coverage',
+      'karma-browserstack-launcher',
       'karma-phantomjs-launcher'
     ],
+
     files: [
       '../node_modules/expect.js/index.js',
       '../dist/riot.tmpl.js',
@@ -15,7 +28,9 @@ module.exports = function(config) {
       'specs/brackets.specs.js'
     ],
 
-    browsers: ['PhantomJS'],
+    browsers: browsers,
+
+    customLaunchers: customLaunchers,
 
     reporters: ['progress', 'coverage'],
     preprocessors: {
@@ -28,7 +43,6 @@ module.exports = function(config) {
         subdir: 'report-lcov'
       }]
     },
-
     singleRun: true
   })
 }

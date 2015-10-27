@@ -32,6 +32,9 @@ eslint:
 test-karma:
 	@ $(KARMA) start test/karma.conf.js
 
+test-browsers:
+	@ BROWSERSTACK=1 $(KARMA) start test/karma.conf.js
+
 test-mocha:
 	@ $(ISTANBUL) cover --dir ./coverage/ist $(MOCHA) -- test/runner.js
 

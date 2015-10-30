@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version 2.3.0-beta.8
+ * @version 2.3.0
  */
 
 /**

@@ -1,6 +1,6 @@
 {
   "name": "riot-tmpl",
-  "version": "2.3.0-beta.8",
+  "version": "2.3.0",
   "description": "The riot template engine",
   "main": "dist/tmpl.js",
   "directories": {
@@ -31,7 +31,7 @@
     "coveralls": "^2.11.4",
     "eslint": "^1.7.3",
     "expect.js": "^0.3.1",
-    "jspreproc": "^0.2.3",
+    "jspreproc": "^0.2.4",
     "karma": "^0.13.14",
     "karma-browserstack-launcher": "^0.1.6",
     "karma-coverage": "^0.5.3",

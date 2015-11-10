@@ -167,6 +167,7 @@ var brackets = (function (UNDEF) {
 
   _brackets.array = function array(pair) {
     if (pair != null) _reset(pair)
+    else _set(_brackets.settings.backets)
     return _pairs
   }
 

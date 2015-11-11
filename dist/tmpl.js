@@ -79,14 +79,8 @@
       _brackets.settings.brackets = cachedBrackets = pair
     }
 
-    function _set(pair) {
-      if (cachedBrackets !== pair) {
-        _reset(pair)
-      }
-    }
-
     function _brackets(reOrIdx) {
-      _set(_brackets.settings.brackets)
+      _reset(_brackets.settings.brackets)
       return reOrIdx instanceof RegExp ? _regex(reOrIdx) : _pairs[reOrIdx]
     }
 
@@ -164,14 +158,13 @@
     }
 
     _brackets.array = function array(pair) {
-      if (pair != null) _reset(pair)
-      else _set(_brackets.settings.backets)
+      _reset(pair || _brackets.settings.backets)
       return _pairs
     }
 
     /* istanbul ignore next: in the node version riot is not in the scope */
     _brackets.settings = typeof riot !== 'undefined' && riot.settings || {}
-    _brackets.set = _set
+    _brackets.set = _reset
 
     _brackets.R_STRINGS = STRINGS
     _brackets.R_MLCOMMS = MLCOMMS

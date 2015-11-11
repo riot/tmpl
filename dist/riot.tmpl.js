@@ -75,7 +75,7 @@ var brackets = (function (UNDEF) {
       _pairs[5] = _regex(/\\({|})/g)
       _pairs[6] = _regex(/(\\?)({)/g)
       _pairs[7] = _regExp('(\\\\?)(?:([[({])|(' + _pairs[3] + '))|' + S_QBSRC, REGLOB)
-      _pairs[9] = _regExp(/^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S+)\s*}/)
+      _pairs[9] = _regex(/^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S+)\s*}/)
       _pairs[8] = pair
     }
     _brackets.settings.brackets = cachedBrackets = pair
@@ -160,7 +160,7 @@ var brackets = (function (UNDEF) {
   }
 
   _brackets.array = function array(pair) {
-    _reset(pair || _brackets.settings.backets)
+    _reset(pair || _brackets.settings.brackets)
     return _pairs
   }
 

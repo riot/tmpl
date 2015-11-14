@@ -29,13 +29,13 @@ ASP takes the value of `x`, does the substitution, and stops here. The browser (
 
 Source &#x2013;>  | Browser &#x2013;>    | riot parser &#x2013;>
 ------------------|----------------------|----------------
-`<p><%= x %></p>` | Renders `<p><></p>`? | `<p><></p>` 
+`<p><%= x %></p>` | Renders `<p><></p>`? | `<p><></p>`
 
 Here the browser (some version of IE) receives invalid markup and try to render the best it can without break the page (i.e. "fix" the error). riot has no chance to get the expression and re-render the value. Other browser _can_ keep the markup as-is depending on its location in the elements. Anyway, the result is unpredictable.
 
 ## Escaped brackets, backslashes, and EOLs
 
-Escaped brackets _inside expressions_ are unescaped, except in JavaScript strings and regexes where are not touched. So far, I have not found a case where literal brackets needs to remain escaped.
+Escaped brackets _within expressions_ are left unescaped, except in JavaScript strings and regular expressions, where are not touched. So far, I have not found a case where the brackets must remain escaped.
 
 Other backslashes in the HTML parts, strings, and regexes, are preserved.
 
@@ -43,15 +43,15 @@ EOLs are normalized to `\n` in the HTML, converted to compact spaces in expressi
 
 ## Handling evaluation errors
 
-The new `tmpl.errorHandler` property allows to detect errors _in the evaluation_, by setting its value to a function that receives the generated Error object, augmented with a property of type object containing the `tagName` and `\_riot_id` in context.
+The new `tmpl.errorHandler` property allows to detect errors _in the evaluation_, by setting its value to a function that receives the generated Error object, augmented with an object `riotData` containing the properties `tagName` and `\_riot_id` of the context at error time.
 
-Other (usually fatal) errors, such as the "Parse Error" when creating the evaluation function, are not intercepted by riot.
+Other (usually fatal) errors, such as "Parse Error" generated for the Function constructor, are not intercepted.
 
-If this property is not set (or falsy), as in previous versions, the error is silently ignored.
+If this property is not set, or set to falsy, as in previous versions the error is silently ignored.
 
 ## Why to use tmpl.hasExpr and tmpl.loopKeys?
 
-Encapsulation. Changes to the internal `tmpl` or `brackets` function are easy if other code don't depends on the format of parsed expressions. `hasExpr` and `loopKeys` has optimized regexes to do the work and the riot code can stay a bit clearer. 
+Encapsulation. Changes to the internal `tmpl` or `brackets` function are easy if other code don't depends on the format of parsed expressions. `hasExpr` and `loopKeys` has optimized regexes to do the work and the riot code can stay a bit clearer.
 
 `tmpl.hasExpr` is intended for general use, while `loopKeys` is useful only for riot.
 
@@ -63,7 +63,7 @@ brackets 2.3 combines the behavior of brackets 2.2 with a new one, based on thes
 
 If riot is available when `brackets` is instantiated, `brackets` will use the configuration in `riot.settings`. If not, you can link a configuration later, through the new `brackets.settings` property, which accepts a reference to `riot.settings` or other object where read and write new brackets values.
 
-The other, recommended option, is call to the new `breackets.set` function with the value for the brackets. The only difference is `brackets.set` checks and make the changes immediately, while using the `settings` property the reconfiguration is delayed to first use. 
+The other, recommended option, is call to the new `breackets.set` function with the value for the brackets. The only difference is `brackets.set` checks and make the changes immediately, while using the `settings` property the reconfiguration is delayed to first use.
 
 There's more new functions and properties added to `brackets`, you can use the regexes, these will be maintained, but the additional functions are for internal use.
 

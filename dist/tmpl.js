@@ -1,20 +1,13 @@
-/* riot-tmpl 2.3.0, @license MIT, (c) 2015 Muut Inc. + contributors */
+/* riot-tmpl 2.3.1, @license MIT, (c) 2015 Muut Inc. + contributors */
 ;(function (window) {
   'use strict'              // eslint-disable-line
 
   /**
    * @module brackets
    *
-   * `brackets         `  Returns a string or regex based on its parameter:
-   *                      With a number returns the current left (0) or right (1) brackets.
-   *                      With a regex, returns the original regex if the current brackets
-   *                      are the default, or a new one with the default brackets replaced
-   *                      by the current custom brackets.
-   *                      WARNING: recreated regexes discards the `/i` and `/m` flags.
-   * `brackets.settings`  This object mirrors the `riot.settings` object, you can assign this
-   *                      if riot is not in context.
-   * `brackets.set     `  The recommended option to change the current tiot brackets, check
-   *                      its parameter and reconfigures the internal state immediately.
+   * `brackets         ` Returns a string or regex based on its parameter
+   * `brackets.settings` Mirrors the `riot.settings` object
+   * `brackets.set     ` The recommended option to change the current tiot brackets
    */
 
   var brackets = (function (UNDEF) {
@@ -217,7 +210,7 @@
     function _create(str) {
 
       var expr = _getTmpl(str)
-      if (expr.slice(0, 11) !== "try{return ") expr = 'return ' + expr
+      if (expr.slice(0, 11) !== 'try{return ') expr = 'return ' + expr
 
       return new Function('E', expr + ';')  // eslint-disable-line indent
     }
@@ -352,7 +345,7 @@
       })
 
       if (tb) {
-        expr = "try{return " + expr + '}catch(e){E(e,this)}'
+        expr = 'try{return ' + expr + '}catch(e){E(e,this)}'
       }
 
       if (key) {

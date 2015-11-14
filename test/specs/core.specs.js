@@ -441,6 +441,25 @@ describe('riot-tmpl', function() {
         }
       })
 
+      it('tmpl.loopKeys with custom brackets', function () {
+        brackets.set('{{ }}')
+        var i, s,
+          atest = [
+            '{{k,i in item}}', {key: 'k', pos: 'i', val: '{{item}}'},
+            '{{ k in i }}', {key: 'k', pos: undefined, val: '{{i}}'},
+            '{{^ item in i }}', {key: 'item', pos: undefined, val: '{{i}}'},
+            '{{^item,idx in items }} ', {key: 'item', pos: 'idx', val: '{{items}}'},
+            '{{ item}}  ', {val: '{{ item}}'},
+            '{{item', {val: '{{item'},    // val is expected
+            '{{}}', {val: '{{}}'},
+            '0', {val: '0'}
+          ]
+        for (i = 0; i < atest.length; i += 2) {
+          expect(tmpl.loopKeys(atest[i])).to.eql(atest[i + 1])
+        }
+        brackets.set(null)
+      })
+
       it('tmpl.hasExpr: test for expression existence', function () {
         expect(tmpl.hasExpr('{}')).to.be(true)
         expect(tmpl.hasExpr(' {} ')).to.be(true)

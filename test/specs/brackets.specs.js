@@ -235,6 +235,34 @@ describe('brackets', function () {
       expect(bp[1]).to.be(']')
     })
 
+    it('brackets.array in sync with riot.settings.brackets', function () {
+      var oldSettings = brackets.settings,
+        riot = { settings: {} },
+        str
+      brackets.settings = riot.settings
+
+      riot.settings.brackets = '{{ }}'
+      str = render('{{ x }} and { x }')
+      expect(str).to.be('2 and { x }')
+
+      // restore using riot.settings
+      riot.settings.brackets = '{ }'
+      str = render('\\{{ x }} and { x }')
+      expect(str).to.be('{2} and 2')
+
+      // change again, now with riot.settings
+      riot.settings.brackets = '{{ }}'
+      str = render('{{ x }} and { x }')
+      expect(str).to.be('2 and { x }')
+
+      riot.settings.brackets = undefined
+      str = render('\\{{ x }} and { x } ')
+      expect(str).to.be('{2} and 2 ')
+
+      brackets.settings = oldSettings
+      resetBrackets()
+    })
+
     describe('brackets.split', function () {
 
       it('the new kid in the town is a key function', function () {

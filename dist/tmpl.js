@@ -66,20 +66,14 @@
         _pairs[5] = _regex(/\\({|})/g)
         _pairs[6] = _regex(/(\\?)({)/g)
         _pairs[7] = _regExp('(\\\\?)(?:([[({])|(' + _pairs[3] + '))|' + S_QBSRC, REGLOB)
-        _pairs[9] = _regExp(/^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S+)\s*}/)
+        _pairs[9] = _regex(/^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S+)\s*}/)
         _pairs[8] = pair
       }
       _brackets.settings.brackets = cachedBrackets = pair
     }
 
-    function _set(pair) {
-      if (cachedBrackets !== pair) {
-        _reset(pair)
-      }
-    }
-
     function _brackets(reOrIdx) {
-      _set(_brackets.settings.brackets)
+      _reset(_brackets.settings.brackets)
       return reOrIdx instanceof RegExp ? _regex(reOrIdx) : _pairs[reOrIdx]
     }
 
@@ -157,13 +151,13 @@
     }
 
     _brackets.array = function array(pair) {
-      if (pair != null) _reset(pair)
+      _reset(pair || _brackets.settings.brackets)
       return _pairs
     }
 
     /* istanbul ignore next: in the node version riot is not in the scope */
     _brackets.settings = typeof riot !== 'undefined' && riot.settings || {}
-    _brackets.set = _set
+    _brackets.set = _reset
 
     _brackets.R_STRINGS = STRINGS
     _brackets.R_MLCOMMS = MLCOMMS

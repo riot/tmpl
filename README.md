@@ -66,14 +66,14 @@ tmpl('{ null }', {})       // null
 tmpl('{ 0 }', {})          // 0
 ```
 
-## Changes in 2.3
+## Changes in v2.3
 
 * Brackets can not contain characters in the set `[\x00-\x1F<>a-zA-Z0-9'",;\\]`
 * No comments in expressions, the compiler is the only that strip comments
 * Attributes with expressions containing `>` must be quoted
 * The new `brackets.set` function avoids direct assignment to `riot.settings.brackets`
 
-Please read the [CHANGES](doc/CHANGES.md) file in the doc folder.
+See [API](doc/API.md) and [CHANGES](doc/CHANGES.md) for details.
 
 
 [npm-version-image]: https://img.shields.io/npm/v/riot-tmpl.svg?style=flat-square

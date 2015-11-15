@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "test": "make test",
-    "prepublish": "make build"
+    "prepublish": "make build bump"
   },
   "repository": {
     "type": "git",

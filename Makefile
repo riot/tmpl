@@ -14,6 +14,12 @@ JSPP      = ./node_modules/jspreproc/bin/jspp.js
 
 TESTCOVER = $(TRAVIS_BRANCH) $(TRAVIS_NODE_VERSION)
 
+# if no "v" var given, default to package version
+v ?= $(shell node -pe "require('./package.json').version")
+
+# expand variable (so we can use it on branches w/o package.json)
+VERSION := $(v)
+
 # folders
 DIST = "./dist/"
 
@@ -24,6 +30,10 @@ build: eslint
 	@ mkdir -p $(DIST)
 	@ $(JSPP) $(JSPP_RIOT_FLAGS) lib/index.js > $(DIST)riot.tmpl.js
 	@ $(JSPP) $(JSPP_NODE_FLAGS) lib/index.js > $(DIST)tmpl.js
+
+bump:
+	# Bump the version
+	@ sed -i '' 's/WIP/v$(VERSION)/' $(DIST)*tmpl.js
 
 eslint:
 	# check code style

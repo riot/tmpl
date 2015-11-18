@@ -35,9 +35,9 @@ Here the browser (some version of IE) receives invalid markup and try to render 
 
 ## Escaped brackets, backslashes, and EOLs
 
-Escaped brackets _within expressions_ are left unescaped, except in JavaScript strings and regular expressions, where are not touched. So far, I have not found a case where the brackets must remain escaped.
+Escaped brackets _within expressions_ are left unescaped, except in JavaScript strings and regexes, where are preserved. So far, I have not found a case where the brackets must remain escaped.
 
-Other backslashes in the HTML parts, strings, and regexes, are preserved.
+Backslashes in the HTML parts are not touched.
 
 EOLs are normalized to `\n` in the HTML, converted to compact spaces in expressions, and preserved in JavaScript strings and regexes.
 
@@ -48,6 +48,8 @@ The new `tmpl.errorHandler` property allows to detect errors _in the evaluation_
 Other (usually fatal) errors, such as "Parse Error" generated for the Function constructor, are not intercepted.
 
 If this property is not set, or set to falsy, as in previous versions the error is silently ignored.
+
+Ref: [riot#1189](https://github.com/riot/riot/issues/1189)
 
 ## Why to use tmpl.hasExpr and tmpl.loopKeys?
 

@@ -30,7 +30,7 @@ Example:
   riot.mount('*')
 
   function myLogger(err) {
-    console.log(err.message + ' of ' + err.riotData.tagName)
+    console.log(err.message + ' in ' + err.riotData.tagName)
   }
 </script>
 ```

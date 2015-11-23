@@ -5,7 +5,7 @@ I'll try to explain the reason for the some changes in tmpl 2.3.x
 
 ## Escaped brackets, backslashes, and EOLs
 
-Escaped brackets _within expressions_ are left unescaped, except in JavaScript strings and regexes, where are preserved. So far, I have not found a case where the brackets must remain escaped.
+Escaped brackets _within expressions_ are left unescaped, except in JavaScript strings and regexes, where are preserved. So far, I have not found a case where brackets in expressions must remain escaped.
 
 Backslashes in the HTML parts are not touched.
 

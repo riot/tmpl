@@ -46,8 +46,6 @@ If riot is available when `brackets` is instantiated, `brackets` will use the co
 
 The other, recommended option, is call to the new `breackets.set` function with the value for the brackets. The only difference is `brackets.set` checks and make the changes immediately, while using the `settings` property the reconfiguration is delayed to first use.
 
-There's more new functions and properties added to `brackets`, you can use the regexes, these will be maintained, but the additional functions are for internal use.
-
 It is all, syntax and behavior are the same as older versions: `brackets(regex_or_number)`.
 
 ## Characters not allowed in brackets
@@ -85,5 +83,10 @@ Here the browser (some version of IE) receives invalid markup and try to render 
 Encapsulation. Changes to the internal `tmpl` or `brackets` function are easy if other code don't depends on the format of parsed expressions. `hasExpr` and `loopKeys` has optimized regexes to do the work and the riot code can stay a bit clearer.
 
 `brackets.hasExpr` is intended for general use, while `brackets.loopKeys` is useful only for riot.
+
+## Final Note
+
+There's more new functions and properties added to `brackets`, you can use [hasExpr](https://github.com/riot/tmpl/blob/dev/doc/API.md#hasexpr-function) and the [regexes](https://github.com/riot/tmpl/blob/dev/doc/API.md#r_mlcomms-property) which will be maintained, but the additional functions are for internal use.
+
 
 _@amarcruz_

@@ -19,6 +19,23 @@ Other (usually fatal) errors, such as "Parse Error" generated for the Function c
 
 If this property is not set, or set to falsy, as in previous versions the error is silently ignored.
 
+Example:
+```html
+<mytag></mytag>
+<script type="riot/tag">
+  <mytag><p>{ foo == 'bar' }</p></mytag>
+</script>
+<script>
+  riot.util.tmpl.errorHandler = myLogger
+  riot.mount('*')
+
+  function myLogger(err) {
+    console.log(err.message + ' of ' + err.riotData.tagName)
+  }
+</script>
+```
+outputs "Cannot read property 'bar' of undefined in MYTAG" in the console.
+
 Ref: [riot#871](https://github.com/riot/riot/issues/871), [riot#1189](https://github.com/riot/riot/issues/1189)
 
 ## The new brackets function

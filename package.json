@@ -29,7 +29,7 @@
   ],
   "devDependencies": {
     "coveralls": "^2.11.4",
-    "eslint": "^1.7.3",
+    "eslint": "^1.10.1",
     "expect.js": "^0.3.1",
     "jspreproc": "^0.2.4",
     "karma": "^0.13.14",
@@ -37,7 +37,7 @@
     "karma-coverage": "^0.5.3",
     "karma-mocha": "^0.2.0",
     "karma-phantomjs-launcher": "^0.2.1",
-    "mocha": "^2.3.3",
+    "mocha": "^2.3.4",
     "phantomjs": "^1.9.18"
   },
   "author": "Muut, Inc. and other contributors",

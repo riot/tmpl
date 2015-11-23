@@ -19,21 +19,13 @@ Other (usually fatal) errors, such as "Parse Error" generated for the Function c
 
 If this property is not set, or set to falsy, as in previous versions the error is silently ignored.
 
-Ref: [riot#1189](https://github.com/riot/riot/issues/1189)
-
-## Why to use tmpl.hasExpr and tmpl.loopKeys?
-
-Encapsulation. Changes to the internal `tmpl` or `brackets` function are easy if other code don't depends on the format of parsed expressions. `hasExpr` and `loopKeys` has optimized regexes to do the work and the riot code can stay a bit clearer.
-
-`tmpl.hasExpr` is intended for general use, while `loopKeys` is useful only for riot.
+Ref: [riot#871](https://github.com/riot/riot/issues/871), [riot#1189](https://github.com/riot/riot/issues/1189)
 
 ## The new brackets function
 
-In my personal opinion this function must have been designed as an array from the beginning, configured by riot at the instantiation time, and from the user via an explicit function call, without the possibility of further changes; plus an auxiliary function to convert custom regexes.
+brackets 2.3 combines the behavior of brackets 2.2 with a new one, based on a function to make immediate, more secure changes to custom brackets. There is a performance penalty in supporting both schemes, but compatibility is maintained.
 
-brackets 2.3 combines the behavior of brackets 2.2 with a new one, based on these idea. There is a performance penalty in supporting both, but compatibility is maintained.
-
-If riot is available when `brackets` is instantiated, `brackets` will use the configuration in `riot.settings`. If not, you can link a configuration later, through the new `brackets.settings` property, which accepts a reference to `riot.settings` or other object where read and write new brackets values.
+If riot is available when `brackets` is instantiated, `brackets` will use the configuration in `riot.settings`. If not, you can link a configuration later, through the new `brackets.settings` property, which accepts a reference to `riot.settings` or other object where read and write new brackets values. In this way, brackets works as in previous versions.
 
 The other, recommended option, is call to the new `breackets.set` function with the value for the brackets. The only difference is `brackets.set` checks and make the changes immediately, while using the `settings` property the reconfiguration is delayed to first use.
 
@@ -70,5 +62,11 @@ Source &#x2013;>  | Browser &#x2013;>    | riot parser &#x2013;>
 `<p><%= x %></p>` | Renders `<p><></p>`? | `<p><></p>`
 
 Here the browser (some version of IE) receives invalid markup and try to render the best it can without break the page (i.e. "fix" the error). riot has no chance to get the expression and re-render the value. Other browser _can_ keep the markup as-is depending on its location in the elements. Anyway, the result is unpredictable.
+
+## Why to use brackets.hasExpr and brackets.loopKeys?
+
+Encapsulation. Changes to the internal `tmpl` or `brackets` function are easy if other code don't depends on the format of parsed expressions. `hasExpr` and `loopKeys` has optimized regexes to do the work and the riot code can stay a bit clearer.
+
+`brackets.hasExpr` is intended for general use, while `brackets.loopKeys` is useful only for riot.
 
 _@amarcruz_

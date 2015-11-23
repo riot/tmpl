@@ -13,7 +13,7 @@ EOLs are normalized to `\n` in the HTML, converted to compact spaces in expressi
 
 ## Handling evaluation errors
 
-The new `tmpl.errorHandler` property allows to detect errors _in the evaluation_, by setting its value to a function that receives the generated Error object, augmented with an object `riotData` containing the properties `tagName` and `\_riot_id` of the context at error time.
+The new `tmpl.errorHandler` property allows to detect errors _in the evaluation_, by setting its value to a function that receives the generated Error object, augmented with an object `riotData` containing the properties `tagName` and `_riot_id` of the context at error time.
 
 Other (usually fatal) errors, such as "Parse Error" generated for the Function constructor, are not intercepted.
 

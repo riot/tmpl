@@ -18,12 +18,12 @@ _parameters_
 _returns:_ string - Raw value of the expression or template to render
 
 
-### `hasExpr` function
+### `hasExpr` function (alias)
 
 This is an alias to [`brackets.hasExpr`](#hasxpr-function)
 
 
-### `loopKeys` function (private)
+### `loopKeys` function (alias, private)
 
 This is an alias to [`brackets.loopKeys`](#loopkeys-function-private)
 

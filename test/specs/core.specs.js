@@ -1,5 +1,5 @@
 /* eslint-env node, mocha  */
-/* eslint camelcase: false */
+/* eslint camelcase: 0 */
 
 globalVar = 5
 
@@ -23,9 +23,9 @@ function render(str, dbg) {
   return tmpl(str, data)
 }
 
-describe('riot-tmpl', function() {
+describe('riot-tmpl', function () {
 
-  describe('compiles specs', function() {
+  describe('compiles specs', function () {
 
     //// return values
 
@@ -217,6 +217,8 @@ describe('riot-tmpl', function() {
 
     it('in quoted text, only openning riot brackets need to be escaped!', function () {
       expect(render('str = "/\\{}\\/\\n/"')).to.be('str = "/{}\\/\\n/"')
+      expect(render('<p str2="\\{foo}">\\{ message }</p>')).to.be('<p str2="{foo}">{ message }</p>')
+      expect(render('str="\\\\{foo}"')).to.be('str="\\{foo}"')
     })
 
     //// Better recognition of comments, including empty ones.
@@ -460,14 +462,14 @@ describe('riot-tmpl', function() {
         brackets.set(null)
       })
 
-      it('tmpl.hasExpr: test for expression existence', function () {
+      it('tmpl.hasExpr: test for expression (brackets) existence', function () {
         expect(tmpl.hasExpr('{}')).to.be(true)
         expect(tmpl.hasExpr(' {} ')).to.be(true)
         expect(tmpl.hasExpr('{ 123 } ')).to.be(true)
         expect(tmpl.hasExpr('"{ "#" }"')).to.be(true)
         expect(tmpl.hasExpr('"{ " }')).to.be(true)
-        expect(tmpl.hasExpr('\\{ 123 } ')).to.be(false)
-        expect(tmpl.hasExpr(' \\{}')).to.be(false)
+        expect(tmpl.hasExpr('\\{ 123 } ')).to.be(true)
+        expect(tmpl.hasExpr(' \\{}')).to.be(true)
         expect(tmpl.hasExpr(' }{ ')).to.be(false)
       })
 

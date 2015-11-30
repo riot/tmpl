@@ -1,4 +1,4 @@
-/* riot-tmpl v2.3.12, @license MIT, (c) 2015 Muut Inc. + contributors */
+/* riot-tmpl WIP, @license MIT, (c) 2015 Muut Inc. + contributors */
 ;(function (window) {
   'use strict'              // eslint-disable-line
 
@@ -7,7 +7,7 @@
    *
    * `brackets         ` Returns a string or regex based on its parameter
    * `brackets.settings` Mirrors the `riot.settings` object
-   * `brackets.set     ` The recommended option to change the current tiot brackets
+   * `brackets.set     ` The recommended form to change the current riot brackets
    */
 
   var brackets = (function (UNDEF) {
@@ -62,7 +62,8 @@
           _pairs = bp.concat(pair.replace(/(?=[[\]()*+?.^$|])/g, '\\').split(' '))
           _regex = _rewrite
         }
-        _pairs[4] = _regex(_pairs[1].length > 1 ? /(?:^|[^\\]){[\S\s]*?}/ : /(?:^|[^\\]){[^}]*}/)
+
+        _pairs[4] = _regex(_pairs[1].length > 1 ? /{[\S\s]*?}/ : /{[^}]*}/)
         _pairs[5] = _regex(/\\({|})/g)
         _pairs[6] = _regex(/(\\?)({)/g)
         _pairs[7] = _regExp('(\\\\?)(?:([[({])|(' + _pairs[3] + '))|' + S_QBSRC, REGLOB)

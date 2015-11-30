@@ -51,6 +51,7 @@ out/
 node_modules
 bower_components
 coverage
+cov-int
 
 # these files are generated anyway
 dist/

@@ -17,6 +17,8 @@ var data = {
   _debug_: 0
 }
 
+var RAW_FLAG = '='
+
 // send 1 or 2 in 'err' to enable internal information
 function render(str, dbg) {
   if (dbg) data._debug_ = 1
@@ -471,6 +473,18 @@ describe('riot-tmpl', function () {
         expect(tmpl.hasExpr('\\{ 123 } ')).to.be(true)
         expect(tmpl.hasExpr(' \\{}')).to.be(true)
         expect(tmpl.hasExpr(' }{ ')).to.be(false)
+      })
+
+      it('tmpl.isRaw: test for raw html flag in expression (v2.3.14)', function () {
+        expect(tmpl.isRaw('{' + RAW_FLAG + ' "<br>" }')).to.be(true)
+        expect(tmpl.isRaw('{ ' + RAW_FLAG + ' "<br>" }')).to.be(false)
+        expect(tmpl.isRaw('{ "<br>" } ')).to.be(false)
+      })
+
+      it('the raw html is removed before evaluation (v2.3.14)', function () {
+        expect(render('{' + RAW_FLAG + ' "<br>" }')).to.be('<br>')
+        expect(render(' {' + RAW_FLAG + ' "<br>" }')).to.be(' <br>')
+        expect(render('{' + RAW_FLAG + ' "<" + str + ">" }')).to.be('<x>')
       })
 
     })

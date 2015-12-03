@@ -7,7 +7,7 @@ JSPP_NODE_FLAGS = $(JSPP_FLAGS) -D NODE --indent 2
 # Command line paths
 COVERALLS = ./node_modules/coveralls/bin/coveralls.js
 ESLINT    = ./node_modules/eslint/bin/eslint.js
-ISTANBUL  = ./node_modules/karma-coverage/node_modules/.bin/istanbul
+ISTANBUL  = ./node_modules/istanbul/lib/cli.js
 KARMA     = ./node_modules/karma/bin/karma
 MOCHA     = ./node_modules/mocha/bin/_mocha
 JSPP      = ./node_modules/jspreproc/bin/jspp.js

@@ -69,6 +69,7 @@
         _pairs[7] = _regExp('(\\\\?)(?:([[({])|(' + _pairs[3] + '))|' + S_QBSRC, REGLOB)
         _pairs[9] = _regex(/^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S+)\s*}/)
         _pairs[8] = pair
+        _brackets._rawOffset = _pairs[0].length
       }
       _brackets.settings.brackets = cachedBrackets = pair
     }
@@ -190,6 +191,11 @@
       return (_cache[str] || (_cache[str] = _create(str))).call(data, _logErr)
     }
 
+    function _isRaw(expr) {
+      return expr[brackets._rawOffset] === "="
+    }
+    _tmpl.isRaw = _isRaw
+
     _tmpl.hasExpr = brackets.hasExpr
 
     _tmpl.loopKeys = brackets.loopKeys
@@ -270,6 +276,8 @@
       RE_BRACE = /,|([[{(])|$/g
 
     function _parseExpr(expr, asText, qstr) {
+
+      if (expr[0] === "=") expr = expr.slice(1)
 
       expr = expr
             .replace(RE_QBLOCK, function (s, div) {

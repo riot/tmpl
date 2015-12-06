@@ -3,6 +3,7 @@
   "version": "2.3.14",
   "description": "The riot template engine",
   "main": "dist/tmpl.js",
+  "jsnext:main": "dist/es6.tmpl.js",
   "directories": {
     "lib": "lib",
     "doc": "doc"

@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version WIP
+ * @version v2.3.14
  */
 
 /**

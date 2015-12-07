@@ -7,9 +7,10 @@ I'll try to explain the reason for the some changes in tmpl 2.3.x
 
 Escaped brackets _within expressions_ are left unescaped, except in JavaScript strings and regexes, where are preserved. So far, I have not found a case where brackets in expressions must remain escaped.
 
-Backslashes in the HTML parts are not touched.
+In the HTML part, escaped brackets are unescaped before the evaluation.
 
-EOLs are normalized to `\n` in the HTML, converted to compact spaces in expressions, and preserved in JavaScript strings and regexes.
+EOLs are normalized to `\n` in the HTML and converted to compact spaces in expressions.
+In JavaScript strings and regexes, escaped characters `\r` and `\n` are preserved.
 
 ## Handling evaluation errors
 
@@ -78,15 +79,6 @@ Source &#x2013;>  | Browser &#x2013;>    | riot parser &#x2013;>
 
 Here the browser (some version of IE) receives invalid markup and try to render the best it can without break the page (i.e. "fix" the error). riot has no chance to get the expression and re-render the value. Other browser _can_ keep the markup as-is depending on its location in the elements. Anyway, the result is unpredictable.
 
-## Why to use brackets.hasExpr and brackets.loopKeys?
-
-Encapsulation. Changes to the internal `tmpl` or `brackets` function are easy if other code don't depends on the format of parsed expressions. `hasExpr` and `loopKeys` has optimized regexes to do the work and the riot code can stay a bit clearer.
-
-`brackets.hasExpr` is intended for general use, while `brackets.loopKeys` is useful only for riot.
-
 ## Final Note
 
 There's more new functions and properties added to `brackets`, you can use [hasExpr](https://github.com/riot/tmpl/blob/dev/doc/API.md#hasexpr-function) and the [regexes](https://github.com/riot/tmpl/blob/dev/doc/API.md#r_mlcomms-property) which will be maintained, but the additional functions are for internal use.
-
-
-_@amarcruz_

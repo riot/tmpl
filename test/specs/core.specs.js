@@ -17,6 +17,8 @@ var data = {
   _debug_: 0
 }
 
+var RAW_FLAG = '='
+
 // send 1 or 2 in 'err' to enable internal information
 function render(str, dbg) {
   if (dbg) data._debug_ = 1
@@ -140,8 +142,9 @@ describe('riot-tmpl', function () {
         expect(render('{ a_b-c3: yes }')).to.equal('a_b-c3')
       })
 
-      it('even dashed names can be unquoted', function () {
-        expect(render('{ my-class: yes }')).to.equal('my-class')
+      it('set multiple cases, test trim', function () {
+        expect(render('{ c0: 0, c1: "x", "c2  c2b": str, c3: "", c4: obj }')).to.be('c1 c2 c2b  c4')
+        expect(render('{ c0: 0, c1: false, "c2  c2b": "", c3: null, c4: undefined }')).to.be('')
       })
 
       it('set two classes with one expression', function () {
@@ -262,6 +265,7 @@ describe('riot-tmpl', function () {
       })
 
       it('is compacted and trimmed in quoted shorthand names', function () {
+        debugger  //eslint-disable-line
         expect(render('{ " \ta\n \r \r\nb\n ": yes }')).to.be('a b')
       })
 
@@ -471,6 +475,18 @@ describe('riot-tmpl', function () {
         expect(tmpl.hasExpr('\\{ 123 } ')).to.be(true)
         expect(tmpl.hasExpr(' \\{}')).to.be(true)
         expect(tmpl.hasExpr(' }{ ')).to.be(false)
+      })
+
+      it('tmpl.isRaw: test for raw html flag in expression (v2.3.14)', function () {
+        expect(tmpl.isRaw('{' + RAW_FLAG + ' "<br>" }')).to.be(true)
+        expect(tmpl.isRaw('{ ' + RAW_FLAG + ' "<br>" }')).to.be(false)
+        expect(tmpl.isRaw('{ "<br>" } ')).to.be(false)
+      })
+
+      it('the raw html is removed before evaluation (v2.3.14)', function () {
+        expect(render('{' + RAW_FLAG + ' "<br>" }')).to.be('<br>')
+        expect(render(' {' + RAW_FLAG + ' "<br>" }')).to.be(' <br>')
+        expect(render('{' + RAW_FLAG + ' "<" + str + ">" }')).to.be('<x>')
       })
 
     })

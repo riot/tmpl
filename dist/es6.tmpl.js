@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version v2.3.13
+ * @version WIP
  */
 
 /**
@@ -377,4 +377,6 @@ var tmpl = (function () {
   return _tmpl
 
 })()
+
+export default {tmpl, brackets}
 

@@ -18,14 +18,20 @@ _parameters_
 _returns:_ string - Raw value of the expression or template to render
 
 
-### `hasExpr` function (alias)
+### `hasExpr` function
 
-This is an alias to [`brackets.hasExpr`](#hasxpr-function)
+_usage:_ `brackets.hasExpr( str )`
 
+Checks for an expression within a string, using the current brackets.
 
-### `loopKeys` function (alias, private)
+_parameters_
 
-This is an alias to [`brackets.loopKeys`](#loopkeys-function-private)
+* `str` : string - String where to search
+
+_returns:_ boolean - `true` if the string contains an expression
+
+NOTE: This function only checks for a pair of unescaped riot brackets, does not validate
+the expression nor excludes brackets within quotes.
 
 
 ### `errorHandler` property
@@ -96,51 +102,7 @@ _Type:_ object
 
 Mirror the `riot.settings` object or other user object where read or write the current brackets string. Unlike with `brackets.set`, reconfiguration for changes in `brackets.settings.brackets` or `riot.settings.brackets` will be applied in the next use of the `brackets` function.
 
-
-### `split` function (private)
-
-_Syntax:_ `brackets.split( template [, brackets_array] ) : Array`
-
-Used by tmpl and riot-compiler.
-
-
-### `array` function (private)
-
-_Syntax:_ `brackets.array( [brackets_string] ) : Array`
-
-Used by riot-compiler.
-
-
-### `hasExpr` function
-
-_usage:_ `brackets.hasExpr( str )`
-
-Checks for an expression within a string, using the current brackets.
-
-_parameters_
-
-* `str` : string - String where to search
-
-_returns:_ boolean - `true` if the string contains an expression
-
-NOTE: This function only checks for a pair of unescaped riot brackets, does not validate
-the expression nor excludes brackets within quotes.
-
-
-### `loopKeys` function (private)
-
-_usage:_ `brackets.loopKeys( expr )`
-
-Used by browser/tag/each.js
-
-Parses the `expr` string to detect how to map the collection data to the child tags.
-If the received string does not contains an expression, the behavior is undefined.
-
-_parameters_
-
-* `expr` : string - value of the `each` attribute
-
-_returns:_ object - object needed to check how the items in the collection should be mapped to the child tags
+**NOTE:** `riot.settings.brackets` and `brackets.settings` will be deprecated in future versions, please use brackets.set in new code.
 
 
 ### `R_MLCOMMS` property

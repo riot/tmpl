@@ -6,8 +6,8 @@
    * @module brackets
    *
    * `brackets         ` Returns a string or regex based on its parameter
-   * `brackets.settings` Mirrors the `riot.settings` object
-   * `brackets.set     ` The recommended form to change the current riot brackets
+   * `brackets.settings` Mirrors the `riot.settings` object (use brackets.set in new code)
+   * `brackets.set     ` Change the current riot brackets
    */
 
   var brackets = (function (UNDEF) {
@@ -16,7 +16,7 @@
       REGLOB  = 'g',
 
       MLCOMMS = /\/\*[^*]*\*+(?:[^*\/][^*]*\*+)*\//g,
-      STRINGS = /"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'/g,
+      STRINGS = /"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*'/g,
 
       S_QBSRC = STRINGS.source + '|' +
         /(?:\breturn\s+|(?:[$\w\)\]]|\+\+|--)\s*(\/)(?![*\/]))/.source + '|' +
@@ -25,17 +25,15 @@
       DEFAULT = '{ }',
 
       FINDBRACES = {
-        '(': _regExp('([()])|'   + S_QBSRC, REGLOB),
-        '[': _regExp('([[\\]])|' + S_QBSRC, REGLOB),
-        '{': _regExp('([{}])|'   + S_QBSRC, REGLOB)
+        '(': RegExp('([()])|'   + S_QBSRC, REGLOB),
+        '[': RegExp('([[\\]])|' + S_QBSRC, REGLOB),
+        '{': RegExp('([{}])|'   + S_QBSRC, REGLOB)
       }
 
     var
       cachedBrackets = UNDEF,
       _regex,
       _pairs = []
-
-    function _regExp(source, flags) { return new RegExp(source, flags) }
 
     function _loopback(re) { return re }
 
@@ -63,10 +61,10 @@
           _regex = _rewrite
         }
 
-        _pairs[4] = _regex(_pairs[1].length > 1 ? /{[\S\s]*?}/ : /{[^}]*}/)
+        _pairs[4] = _regex(_pairs[1].length > 1 ? /{[^]*?}/ : /{[^}]*}/)
         _pairs[5] = _regex(/\\({|})/g)
         _pairs[6] = _regex(/(\\?)({)/g)
-        _pairs[7] = _regExp('(\\\\?)(?:([[({])|(' + _pairs[3] + '))|' + S_QBSRC, REGLOB)
+        _pairs[7] = RegExp('(\\\\?)(?:([[({])|(' + _pairs[3] + '))|' + S_QBSRC, REGLOB)
         _pairs[9] = _regex(/^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S+)\s*}/)
         _pairs[8] = pair
         _brackets._rawOffset = _pairs[0].length
@@ -181,9 +179,7 @@
 
   var tmpl = (function () {
 
-    var
-      FALSE  = !1,
-      _cache = {}
+    var _cache = {}
 
     function _tmpl(str, data) {
       if (!str) return str
@@ -200,7 +196,7 @@
 
     _tmpl.loopKeys = brackets.loopKeys
 
-    _tmpl.errorHandler = FALSE
+    _tmpl.errorHandler = null
 
     function _logErr(err, ctx) {
 
@@ -223,7 +219,7 @@
     }
 
     var
-      RE_QBLOCK = new RegExp(brackets.S_QBLOCKS, 'g'),
+      RE_QBLOCK = RegExp(brackets.S_QBLOCKS, 'g'),
       RE_QBMARK = /\x01(\d+)~/g
 
     function _getTmpl(str) {
@@ -337,7 +333,7 @@
     var JS_VARNAME = /[,{][$\w]+:|(^ *|[^$\w\.])(?!(?:typeof|true|false|null|undefined|in|instanceof|is(?:Finite|NaN)|void|NaN|new|Date|RegExp|Math)(?![$\w]))([$_A-Za-z][$\w]*)/g
 
     function _wrapExpr(expr, asText, key) {
-      var tb = FALSE
+      var tb
 
       expr = expr.replace(JS_VARNAME, function (match, p, mvar, pos, s) {
         if (mvar) {

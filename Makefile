@@ -2,7 +2,7 @@
 #JSPP_DEBUG = -D DEBUG -D SHOW_PARSE_ERRORS
 JSPP_FLAGS = -F istanbul -F eslint --custom-filter "\s@(module|version)\b" --headers ""
 JSPP_RIOT_FLAGS = $(JSPP_FLAGS) -D RIOT
-JSPP_ES6_FLAGS = $(JSPP_FLAGS) -D ES6
+JSPP_ES6_FLAGS  = $(JSPP_FLAGS) -D ES6
 JSPP_NODE_FLAGS = $(JSPP_FLAGS) -D NODE --indent 2
 
 # Command line paths
@@ -30,7 +30,7 @@ build: eslint
 	# rebuild all
 	@ mkdir -p $(DIST)
 	@ $(JSPP) $(JSPP_RIOT_FLAGS) lib/index.js > $(DIST)riot.tmpl.js
-	@ $(JSPP) $(JSPP_ES6_FLAGS) lib/index.js > $(DIST)es6.tmpl.js
+	@ $(JSPP) $(JSPP_ES6_FLAGS)  lib/index.js > $(DIST)es6.tmpl.js
 	@ $(JSPP) $(JSPP_NODE_FLAGS) lib/index.js > $(DIST)tmpl.js
 
 bump:
@@ -60,7 +60,7 @@ else
 endif
 
 debug: build
-	@ node-debug $(MOCHA) test/runner.js
+	@ node-debug --debug-port 5859 $(MOCHA) test/runner.js
 
 perf: build
 	@ node --expose-gc test/perf.js

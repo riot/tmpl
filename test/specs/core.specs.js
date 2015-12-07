@@ -142,8 +142,9 @@ describe('riot-tmpl', function () {
         expect(render('{ a_b-c3: yes }')).to.equal('a_b-c3')
       })
 
-      it('even dashed names can be unquoted', function () {
-        expect(render('{ my-class: yes }')).to.equal('my-class')
+      it('set multiple cases, test trim', function () {
+        expect(render('{ c0: 0, c1: "x", "c2  c2b": str, c3: "", c4: obj }')).to.be('c1 c2 c2b  c4')
+        expect(render('{ c0: 0, c1: false, "c2  c2b": "", c3: null, c4: undefined }')).to.be('')
       })
 
       it('set two classes with one expression', function () {
@@ -264,6 +265,7 @@ describe('riot-tmpl', function () {
       })
 
       it('is compacted and trimmed in quoted shorthand names', function () {
+        debugger  //eslint-disable-line
         expect(render('{ " \ta\n \r \r\nb\n ": yes }')).to.be('a b')
       })
 

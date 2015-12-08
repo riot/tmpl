@@ -265,7 +265,6 @@ describe('riot-tmpl', function () {
       })
 
       it('is compacted and trimmed in quoted shorthand names', function () {
-        debugger  //eslint-disable-line
         expect(render('{ " \ta\n \r \r\nb\n ": yes }')).to.be('a b')
       })
 
@@ -433,6 +432,7 @@ describe('riot-tmpl', function () {
       it('tmpl.loopKeys: extract keys from the value (for `each`)', function () {
         var i, s,
           atest = [
+            '{ studio in studios["Nearby Locations"] }', {key: 'studio', pos: undefined, val: '{studios["Nearby Locations"]}'},
             '{k,i in item}', {key: 'k', pos: 'i', val: '{item}'},
             '{ k in i }', {key: 'k', pos: undefined, val: '{i}'},
             '{^ item in i }', {key: 'item', pos: undefined, val: '{i}'},

@@ -67,7 +67,7 @@ var brackets = (function (UNDEF) {
       _pairs[5] = _regex(/\\({|})/g)
       _pairs[6] = _regex(/(\\?)({)/g)
       _pairs[7] = RegExp('(\\\\?)(?:([[({])|(' + _pairs[3] + '))|' + S_QBSRC, REGLOB)
-      _pairs[9] = _regex(/^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S+)\s*}/)
+      _pairs[9] = _regex(/^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S.*)\s*}/)
       _pairs[8] = pair
       _brackets._rawOffset = _pairs[0].length
     }
@@ -149,7 +149,7 @@ var brackets = (function (UNDEF) {
   _brackets.loopKeys = function loopKeys(expr) {
     var m = expr.match(_brackets(9))
     return m ?
-      { key: m[1], pos: m[2], val: _pairs[0] + m[3] + _pairs[1] } : { val: expr.trim() }
+      { key: m[1], pos: m[2], val: _pairs[0] + m[3].trim() + _pairs[1] } : { val: expr.trim() }
   }
 
   _brackets.array = function array(pair) {

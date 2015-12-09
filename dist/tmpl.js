@@ -37,36 +37,45 @@
 
     function _loopback(re) { return re }
 
-    function _rewrite(re) {
+    function _rewrite(re, bp) {
+      if (!bp) bp = _pairs
       return new RegExp(
-        re.source.replace(/{/g, _pairs[2]).replace(/}/g, _pairs[3]), re.global ? REGLOB : ''
+        re.source.replace(/{/g, bp[2]).replace(/}/g, bp[3]), re.global ? REGLOB : ''
       )
     }
 
+    function _create(pair) {
+      var
+        cvt,
+        arr = pair.split(' ')
+
+      if (pair === DEFAULT) {
+        arr[2] = arr[0]
+        arr[3] = arr[1]
+        cvt = _loopback
+      }
+      else {
+        if (arr.length !== 2 || /[\x00-\x1F<>a-zA-Z0-9'",;\\]/.test(pair)) {
+          throw new Error('Unsupported brackets "' + pair + '"')
+        }
+        arr = arr.concat(pair.replace(/(?=[[\]()*+?.^$|])/g, '\\').split(' '))
+        cvt = _rewrite
+      }
+      arr[4] = cvt(arr[1].length > 1 ? /{[^]*?}/ : /{[^}]*}/, arr)
+      arr[5] = cvt(/\\({|})/g, arr)
+      arr[6] = cvt(/(\\?)({)/g, arr)
+      arr[7] = RegExp('(\\\\?)(?:([[({])|(' + arr[3] + '))|' + S_QBSRC, REGLOB)
+      arr[8] = pair
+      return arr
+    }
+
     function _reset(pair) {
-      pair = pair || DEFAULT
+      if (!pair) pair = DEFAULT
 
       if (pair !== _pairs[8]) {
-        var bp = pair.split(' ')
-
-        if (pair === DEFAULT) {
-          _pairs = bp.concat(bp)
-          _regex = _loopback
-        }
-        else {
-          if (bp.length !== 2 || /[\x00-\x1F<>a-zA-Z0-9'",;\\]/.test(pair)) {
-            throw new Error('Unsupported brackets "' + pair + '"')
-          }
-          _pairs = bp.concat(pair.replace(/(?=[[\]()*+?.^$|])/g, '\\').split(' '))
-          _regex = _rewrite
-        }
-
-        _pairs[4] = _regex(_pairs[1].length > 1 ? /{[^]*?}/ : /{[^}]*}/)
-        _pairs[5] = _regex(/\\({|})/g)
-        _pairs[6] = _regex(/(\\?)({)/g)
-        _pairs[7] = RegExp('(\\\\?)(?:([[({])|(' + _pairs[3] + '))|' + S_QBSRC, REGLOB)
+        _pairs = _create(pair)
+        _regex = pair === DEFAULT ? _loopback : _rewrite
         _pairs[9] = _regex(/^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S.*)\s*}/)
-        _pairs[8] = pair
         _brackets._rawOffset = _pairs[0].length
       }
       _brackets.settings.brackets = cachedBrackets = pair
@@ -77,7 +86,12 @@
       return reOrIdx instanceof RegExp ? _regex(reOrIdx) : _pairs[reOrIdx]
     }
 
-    _brackets.split = function split(str, tmpl) {
+    _brackets.split = function split(str, tmpl, _bp) {
+      // istanbul ignore next: _bp is for the compiler
+      if (!_bp) {
+        _reset(_brackets.settings.brackets)
+        _bp = _pairs
+      }
 
       var
         parts = [],
@@ -85,7 +99,7 @@
         isexpr,
         start,
         pos,
-        re = _brackets(6)
+        re = _bp[6]
 
       isexpr = start = re.lastIndex = 0
 
@@ -107,7 +121,7 @@
         if (!match[1]) {
           unescapeStr(str.slice(start, pos))
           start = re.lastIndex
-          re = _pairs[6 + (isexpr ^= 1)]
+          re = _bp[6 + (isexpr ^= 1)]
           re.lastIndex = start
         }
       }
@@ -120,7 +134,7 @@
 
       function unescapeStr(str) {
         if (tmpl || isexpr)
-          parts.push(str && str.replace(_pairs[5], '$1'))
+          parts.push(str && str.replace(_bp[5], '$1'))
         else
           parts.push(str)
       }
@@ -151,8 +165,8 @@
     }
 
     _brackets.array = function array(pair) {
-      _reset(pair || _brackets.settings.brackets)
-      return _pairs
+      if (!pair) pair = _brackets.settings.brackets
+      return _create(pair)
     }
 
     /* istanbul ignore next: in the node version riot is not in the scope */

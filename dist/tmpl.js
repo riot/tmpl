@@ -201,10 +201,13 @@
       return (_cache[str] || (_cache[str] = _create(str))).call(data, _logErr)
     }
 
-    function _isRaw(expr) {
+    _tmpl.isRaw = function (expr) {
       return expr[brackets._rawOffset] === "="
     }
-    _tmpl.isRaw = _isRaw
+
+    _tmpl.haveRaw = function (src) {
+      return brackets(/{=[^]*?}/).test(src)
+    }
 
     _tmpl.hasExpr = brackets.hasExpr
 

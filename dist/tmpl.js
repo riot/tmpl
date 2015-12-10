@@ -16,7 +16,7 @@
       REGLOB  = 'g',
 
       MLCOMMS = /\/\*[^*]*\*+(?:[^*\/][^*]*\*+)*\//g,
-      STRINGS = /"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*'/g,
+      STRINGS = /"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'/g,
 
       S_QBSRC = STRINGS.source + '|' +
         /(?:\breturn\s+|(?:[$\w\)\]]|\+\+|--)\s*(\/)(?![*\/]))/.source + '|' +
@@ -61,7 +61,7 @@
         arr = arr.concat(pair.replace(/(?=[[\]()*+?.^$|])/g, '\\').split(' '))
         cvt = _rewrite
       }
-      arr[4] = cvt(arr[1].length > 1 ? /{[^]*?}/ : /{[^}]*}/, arr)
+      arr[4] = cvt(arr[1].length > 1 ? /{[\S\s]*?}/ : /{[^}]*}/, arr)
       arr[5] = cvt(/\\({|})/g, arr)
       arr[6] = cvt(/(\\?)({)/g, arr)
       arr[7] = RegExp('(\\\\?)(?:([[({])|(' + arr[3] + '))|' + S_QBSRC, REGLOB)
@@ -206,7 +206,7 @@
     }
 
     _tmpl.haveRaw = function (src) {
-      return brackets(/{=[^]*?}/).test(src)
+      return brackets(/(^|[^\\]){=[\S\s]*?}/).test(src)
     }
 
     _tmpl.hasExpr = brackets.hasExpr

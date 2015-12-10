@@ -66,6 +66,7 @@ describe('brackets', function () {
       expect(render('\\{ 1 }')).to.equal('{ 1 }')
       expect(render('{ "\\}" }')).to.equal('}')
       expect(render('{ "\\{" }')).to.equal('{')
+      expect(render('{ \\{\\} }')).to.eql({})
     })
 
     it('though escaping is optional', function () {
@@ -78,9 +79,11 @@ describe('brackets', function () {
 
       setBrackets('{{ }}')
       expect(render('a{{ "b{{c}}d" }}e {{ "{f{{f}}}" }} g')).to.equal('ab{{c}}de {f{{f}}} g')
+      expect(render('{{{}}}')).to.eql({})
 
-      //setBrackets('<% %>')
-      //expect(render('a<% "b<%c%>d" %>e <% "<%f<%f%>%>" %> g')).to.equal('ab<%c%>de <%f<%f%>%> g')
+      setBrackets('{^ ^}')
+      expect(render('{^ "x" ^}')).to.equal('x')
+      expect(render('{^ /{^}/ ^}').source).to.equal(/{^}/.source)
 
       setBrackets('[[ ]]')
       expect(render('a[[ "b[[c]]d" ]]e [["[[f[f]]]"]]g[[]]')).to.equal('ab[[c]]de [[f[f]]]g')

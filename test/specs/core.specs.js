@@ -484,9 +484,12 @@ describe('riot-tmpl', function () {
       })
 
       it('tmpl.haveRaw: test for raw html flag in a template (v2.3.14)', function () {
+        expect(tmpl.haveRaw('{' + RAW_FLAG + ' "<br>" }')).to.be(true)
+        expect(tmpl.haveRaw('{ ' + RAW_FLAG + ' "<br>" }')).to.be(false)
+        expect(tmpl.haveRaw('\\{= "<br>" } ')).to.be(false)
         expect(tmpl.haveRaw(' {' + RAW_FLAG + ' "<br>" }')).to.be(true)
         expect(tmpl.haveRaw(' { ' + RAW_FLAG + ' "<br>" }')).to.be(false)
-        expect(tmpl.haveRaw(' { "<br>" } ')).to.be(false)
+        expect(tmpl.haveRaw(' \\{= "<br>" } ')).to.be(false)
       })
 
       it('the raw html is removed before evaluation (v2.3.14)', function () {

@@ -41,13 +41,13 @@ Ref: [riot#871](https://github.com/riot/riot/issues/871), [riot#1189](https://gi
 
 ## The new brackets function
 
-brackets 2.3 combines the behavior of brackets 2.2 with a new one, based on a function to make immediate, more secure changes to custom brackets. There is a performance penalty in supporting both schemes, but compatibility is maintained.
+brackets 2.3 combines the behavior of brackets 2.2 with a new one, based on a function to make immediate, more secure changes to custom brackets. ~~There is a performance penalty in supporting both schemes, but compatibility is maintained.~~
 
 If riot is available when `brackets` is instantiated, `brackets` uses the configuration in `riot.settings`. In this way, `brackets` works as in previous versions and the reconfiguration is delayed to the first use.
 If riot is not available, you can change the brackets through the new `brackets.set` function, which accepts the same parameter as `riot.settings.brackets` and makes the reconfiguration immediately.
 
 **NOTE:**
-`breackets.set` is the recommended and long term option to change the brackets, it is likely that `riot.settings` is deprecated in future versions.
+From v2.3.15, brackets changes in browsers via `riot.settings.brackets` has immediate effect and always reflect the brackets in use, the `brackets.settings` property is not neccesary and will be removed in v2.4.0
 
 It is all, syntax and behavior are the same as older versions: `brackets(regex_or_number)`.
 

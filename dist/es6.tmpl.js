@@ -78,22 +78,19 @@ var brackets = (function (UNDEF) {
       _pairs = _create(pair)
       _regex = pair === DEFAULT ? _loopback : _rewrite
       _pairs[9] = _regex(/^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S.*)\s*}/)
+      _pairs[10] = _regex(/(^|[^\\]){=[\S\s]*?}/)
       _brackets._rawOffset = _pairs[0].length
     }
-    _brackets.settings.brackets = cachedBrackets = pair
+    cachedBrackets = pair
   }
 
   function _brackets(reOrIdx) {
-    _reset(_brackets.settings.brackets)
     return reOrIdx instanceof RegExp ? _regex(reOrIdx) : _pairs[reOrIdx]
   }
 
   _brackets.split = function split(str, tmpl, _bp) {
     // istanbul ignore next: _bp is for the compiler
-    if (!_bp) {
-      _reset(_brackets.settings.brackets)
-      _bp = _pairs
-    }
+    if (!_bp) _bp = _pairs
 
     var
       parts = [],
@@ -167,9 +164,26 @@ var brackets = (function (UNDEF) {
   }
 
   _brackets.array = function array(pair) {
-    if (!pair) pair = _brackets.settings.brackets
-    return _create(pair)
+    return _create(pair || cachedBrackets)
   }
+
+  var _settings
+  function _setSettings(o) {
+    var b
+    o = o || {}
+    b = o.brackets
+    Object.defineProperty(o, 'brackets', {
+      set: _reset,
+      get: function () { return cachedBrackets },
+      enumerable: true
+    })
+    _settings = o
+    _reset(b)
+  }
+  Object.defineProperty(_brackets, 'settings', {
+    set: _setSettings,
+    get: function () { return _settings }
+  })
 
   /* istanbul ignore next: in the node version riot is not in the scope */
   _brackets.settings = typeof riot !== 'undefined' && riot.settings || {}
@@ -178,8 +192,6 @@ var brackets = (function (UNDEF) {
   _brackets.R_STRINGS = STRINGS
   _brackets.R_MLCOMMS = MLCOMMS
   _brackets.S_QBLOCKS = S_QBSRC
-
-  _reset(_brackets.settings.brackets)
 
   return _brackets
 
@@ -208,7 +220,7 @@ var tmpl = (function () {
   }
 
   _tmpl.haveRaw = function (src) {
-    return brackets(/(^|[^\\]){=[\S\s]*?}/).test(src)
+    return brackets(10).test(src)
   }
 
   _tmpl.hasExpr = brackets.hasExpr
@@ -394,6 +406,8 @@ var tmpl = (function () {
   return _tmpl
 
 })()
+
+  tmpl.version = brackets.version = 'WIP'
 
 export default {tmpl, brackets}
 

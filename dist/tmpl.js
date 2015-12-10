@@ -1,4 +1,4 @@
-/* riot-tmpl v2.3.14, @license MIT, (c) 2015 Muut Inc. + contributors */
+/* riot-tmpl v2.3.15, @license MIT, (c) 2015 Muut Inc. + contributors */
 ;(function (window) {
   'use strict'              // eslint-disable-line
 
@@ -16,7 +16,7 @@
       REGLOB  = 'g',
 
       MLCOMMS = /\/\*[^*]*\*+(?:[^*\/][^*]*\*+)*\//g,
-      STRINGS = /"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*'/g,
+      STRINGS = /"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'/g,
 
       S_QBSRC = STRINGS.source + '|' +
         /(?:\breturn\s+|(?:[$\w\)\]]|\+\+|--)\s*(\/)(?![*\/]))/.source + '|' +
@@ -61,7 +61,7 @@
           _regex = _rewrite
         }
 
-        _pairs[4] = _regex(_pairs[1].length > 1 ? /{[^]*?}/ : /{[^}]*}/)
+        _pairs[4] = _regex(_pairs[1].length > 1 ? /{[\S\s]*?}/ : /{[^}]*}/)
         _pairs[5] = _regex(/\\({|})/g)
         _pairs[6] = _regex(/(\\?)({)/g)
         _pairs[7] = RegExp('(\\\\?)(?:([[({])|(' + _pairs[3] + '))|' + S_QBSRC, REGLOB)

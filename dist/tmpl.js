@@ -1,4 +1,4 @@
-/* riot-tmpl v2.3.15, @license MIT, (c) 2015 Muut Inc. + contributors */
+/* riot-tmpl v2.3.16, @license MIT, (c) 2015 Muut Inc. + contributors */
 ;(function (window) {
   'use strict'              // eslint-disable-line
 

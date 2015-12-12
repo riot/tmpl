@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version WIP
+ * @version v2.3.17
  */
 
 /**
@@ -407,7 +407,7 @@ var tmpl = (function () {
 
 })()
 
-  tmpl.version = brackets.version = 'WIP'
+  tmpl.version = brackets.version = 'v2.3.17'
 
 export default {tmpl, brackets}
 

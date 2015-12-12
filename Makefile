@@ -35,7 +35,7 @@ build: eslint
 
 bump:
 	# Bump the version
-	@ sed -i 's/WIP/v$(VERSION)/' $(DIST)*tmpl.js
+	@ sed -i '' 's/WIP/v$(VERSION)/' $(DIST)*tmpl.js
 
 eslint:
 	# check code style

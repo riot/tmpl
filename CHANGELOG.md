@@ -1,6 +1,6 @@
 # riot-tmpl Changes
 
-### v2.3.16
+### v2.3.17
 - Regression of optimized regexes not working in IE9/10.
 - Fix [riot#1416](https://github.com/riot/riot/issues/1416) : Issue with space in expression of `each`.
 - Fix: when calling the compiler with different brackets, `brackets.array` changes the global configuration (`riot.settings.brackets`).

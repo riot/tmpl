@@ -41,11 +41,13 @@ Ref: [riot#871](https://github.com/riot/riot/issues/871), [riot#1189](https://gi
 
 ## The new brackets function
 
-brackets 2.3 combines the behavior of brackets 2.2 with a new one, based on a function to make immediate, more secure changes to custom brackets. There is a performance penalty in supporting both schemes, but compatibility is maintained.
+brackets 2.3 combines the behavior of brackets 2.2 with a new one, based on a function to make immediate, more secure changes to custom brackets. ~~There is a performance penalty in supporting both schemes, but compatibility is maintained.~~
 
-If riot is available when `brackets` is instantiated, `brackets` will use the configuration in `riot.settings`. If not, you can link a configuration later, through the new `brackets.settings` property, which accepts a reference to `riot.settings` or other object where read and write new brackets values. In this way, brackets works as in previous versions.
+If riot is available when `brackets` is instantiated, `brackets` uses the configuration in `riot.settings`. In this way, `brackets` works as in previous versions and the reconfiguration is delayed to the first use.
+If riot is not available, you can change the brackets through the new `brackets.set` function, which accepts the same parameter as `riot.settings.brackets` and makes the reconfiguration immediately.
 
-The other, recommended option, is call to the new `breackets.set` function with the value for the brackets. The only difference is `brackets.set` checks and make the changes immediately, while using the `settings` property the reconfiguration is delayed to first use.
+**NOTE:**
+From v2.3.15, brackets changes in browsers via `riot.settings.brackets` has immediate effect and always reflect the brackets in use, the `brackets.settings` property is not neccesary and will be removed in v2.4.0
 
 It is all, syntax and behavior are the same as older versions: `brackets(regex_or_number)`.
 
@@ -60,14 +62,13 @@ This is the list of invalid characters:
 - Single and double quotes, comma, semicolon and backslash `'`, `"`, `,`, `;`, `\`, for obvious reasons
 - The dangerous `<` and `>` characters, reserved for use in markup and strictly prohibited in unquoted text for any other purpose -- out of CDATA sections.
 
-Typically, by using '<>' the browser will send to riot something different to what the user wants. With preprocessors such as ASP, no problems. But riot is not one of them, even with precompiled tags, it's a postprocessor. See the difference:
+Typically, by using `<>` the browser will send to riot something different to what the user wants. With preprocessors such as ASP, no problems. But riot is not one of them, even with precompiled tags, it's a postprocessor. See the difference:
 
 #### ASP
 
 Source &#x2013;>   | ASP parser &#x2013;> | Browser
 -------------------|----------------|-----------
 `<p><%= x %></p>`  |    `<p>X</p>`  |  (Renders "X")  
-
 
 ASP takes the value of `x`, does the substitution, and stops here. The browser (HTML parser) receives valid HTML.
 

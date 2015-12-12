@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version v2.3.16
+ * @version WIP
  */
 
 /**
@@ -39,47 +39,58 @@ var brackets = (function (UNDEF) {
 
   function _loopback(re) { return re }
 
-  function _rewrite(re) {
+  function _rewrite(re, bp) {
+    if (!bp) bp = _pairs
     return new RegExp(
-      re.source.replace(/{/g, _pairs[2]).replace(/}/g, _pairs[3]), re.global ? REGLOB : ''
+      re.source.replace(/{/g, bp[2]).replace(/}/g, bp[3]), re.global ? REGLOB : ''
     )
   }
 
+  function _create(pair) {
+    var
+      cvt,
+      arr = pair.split(' ')
+
+    if (pair === DEFAULT) {
+      arr[2] = arr[0]
+      arr[3] = arr[1]
+      cvt = _loopback
+    }
+    else {
+      if (arr.length !== 2 || /[\x00-\x1F<>a-zA-Z0-9'",;\\]/.test(pair)) {
+        throw new Error('Unsupported brackets "' + pair + '"')
+      }
+      arr = arr.concat(pair.replace(/(?=[[\]()*+?.^$|])/g, '\\').split(' '))
+      cvt = _rewrite
+    }
+    arr[4] = cvt(arr[1].length > 1 ? /{[\S\s]*?}/ : /{[^}]*}/, arr)
+    arr[5] = cvt(/\\({|})/g, arr)
+    arr[6] = cvt(/(\\?)({)/g, arr)
+    arr[7] = RegExp('(\\\\?)(?:([[({])|(' + arr[3] + '))|' + S_QBSRC, REGLOB)
+    arr[8] = pair
+    return arr
+  }
+
   function _reset(pair) {
-    pair = pair || DEFAULT
+    if (!pair) pair = DEFAULT
 
     if (pair !== _pairs[8]) {
-      var bp = pair.split(' ')
-
-      if (pair === DEFAULT) {
-        _pairs = bp.concat(bp)
-        _regex = _loopback
-      }
-      else {
-        if (bp.length !== 2 || /[\x00-\x1F<>a-zA-Z0-9'",;\\]/.test(pair)) {
-          throw new Error('Unsupported brackets "' + pair + '"')
-        }
-        _pairs = bp.concat(pair.replace(/(?=[[\]()*+?.^$|])/g, '\\').split(' '))
-        _regex = _rewrite
-      }
-
-      _pairs[4] = _regex(_pairs[1].length > 1 ? /{[\S\s]*?}/ : /{[^}]*}/)
-      _pairs[5] = _regex(/\\({|})/g)
-      _pairs[6] = _regex(/(\\?)({)/g)
-      _pairs[7] = RegExp('(\\\\?)(?:([[({])|(' + _pairs[3] + '))|' + S_QBSRC, REGLOB)
-      _pairs[9] = _regex(/^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S+)\s*}/)
-      _pairs[8] = pair
+      _pairs = _create(pair)
+      _regex = pair === DEFAULT ? _loopback : _rewrite
+      _pairs[9] = _regex(/^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S.*)\s*}/)
+      _pairs[10] = _regex(/(^|[^\\]){=[\S\s]*?}/)
       _brackets._rawOffset = _pairs[0].length
     }
-    _brackets.settings.brackets = cachedBrackets = pair
+    cachedBrackets = pair
   }
 
   function _brackets(reOrIdx) {
-    _reset(_brackets.settings.brackets)
     return reOrIdx instanceof RegExp ? _regex(reOrIdx) : _pairs[reOrIdx]
   }
 
-  _brackets.split = function split(str, tmpl) {
+  _brackets.split = function split(str, tmpl, _bp) {
+    // istanbul ignore next: _bp is for the compiler
+    if (!_bp) _bp = _pairs
 
     var
       parts = [],
@@ -87,7 +98,7 @@ var brackets = (function (UNDEF) {
       isexpr,
       start,
       pos,
-      re = _brackets(6)
+      re = _bp[6]
 
     isexpr = start = re.lastIndex = 0
 
@@ -109,7 +120,7 @@ var brackets = (function (UNDEF) {
       if (!match[1]) {
         unescapeStr(str.slice(start, pos))
         start = re.lastIndex
-        re = _pairs[6 + (isexpr ^= 1)]
+        re = _bp[6 + (isexpr ^= 1)]
         re.lastIndex = start
       }
     }
@@ -122,7 +133,7 @@ var brackets = (function (UNDEF) {
 
     function unescapeStr(str) {
       if (tmpl || isexpr)
-        parts.push(str && str.replace(_pairs[5], '$1'))
+        parts.push(str && str.replace(_bp[5], '$1'))
       else
         parts.push(str)
     }
@@ -149,13 +160,30 @@ var brackets = (function (UNDEF) {
   _brackets.loopKeys = function loopKeys(expr) {
     var m = expr.match(_brackets(9))
     return m ?
-      { key: m[1], pos: m[2], val: _pairs[0] + m[3] + _pairs[1] } : { val: expr.trim() }
+      { key: m[1], pos: m[2], val: _pairs[0] + m[3].trim() + _pairs[1] } : { val: expr.trim() }
   }
 
   _brackets.array = function array(pair) {
-    _reset(pair || _brackets.settings.brackets)
-    return _pairs
+    return _create(pair || cachedBrackets)
   }
+
+  var _settings
+  function _setSettings(o) {
+    var b
+    o = o || {}
+    b = o.brackets
+    Object.defineProperty(o, 'brackets', {
+      set: _reset,
+      get: function () { return cachedBrackets },
+      enumerable: true
+    })
+    _settings = o
+    _reset(b)
+  }
+  Object.defineProperty(_brackets, 'settings', {
+    set: _setSettings,
+    get: function () { return _settings }
+  })
 
   /* istanbul ignore next: in the node version riot is not in the scope */
   _brackets.settings = typeof riot !== 'undefined' && riot.settings || {}
@@ -164,8 +192,6 @@ var brackets = (function (UNDEF) {
   _brackets.R_STRINGS = STRINGS
   _brackets.R_MLCOMMS = MLCOMMS
   _brackets.S_QBLOCKS = S_QBSRC
-
-  _reset(_brackets.settings.brackets)
 
   return _brackets
 
@@ -189,10 +215,13 @@ var tmpl = (function () {
     return (_cache[str] || (_cache[str] = _create(str))).call(data, _logErr)
   }
 
-  function _isRaw(expr) {
+  _tmpl.isRaw = function (expr) {
     return expr[brackets._rawOffset] === "="
   }
-  _tmpl.isRaw = _isRaw
+
+  _tmpl.haveRaw = function (src) {
+    return brackets(10).test(src)
+  }
 
   _tmpl.hasExpr = brackets.hasExpr
 
@@ -377,6 +406,8 @@ var tmpl = (function () {
   return _tmpl
 
 })()
+
+  tmpl.version = brackets.version = 'WIP'
 
 export default {tmpl, brackets}
 

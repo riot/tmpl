@@ -77,7 +77,7 @@ With a numeric parameter, returns a value based on current brackets according to
 * 1: right bracket (`}`)
 * 2: left escaped bracket (`{`)*
 * 3: right escaped bracket (`}`)*
-* 4: RegExp which matches an unescaped barckets pair (`/(?:^\|[^\\]){[^}]*}/`)\*\*
+* 4: RegExp which matches a brackets pair (`/{[^}]*}/`)\*\*
 
 \* only characters `[]()*+?.^$|` are escaped.
 
@@ -93,16 +93,10 @@ This function checks their parameter and reconfigures the internal state immedia
 
 _parameters_
 
-* `brackets_pair` : string - new custom brackets pair. The start and end is separated with a space character.
+* `brackets_pair` : string - (optional) new custom brackets pair. The start and end is separated with a space character.
 
-
-### `settings` property
-
-_Type:_ object
-
-Mirror the `riot.settings` object or other user object where read or write the current brackets string. Unlike with `brackets.set`, reconfiguration for changes in `brackets.settings.brackets` or `riot.settings.brackets` will be applied in the next use of the `brackets` function.
-
-**NOTE:** `riot.settings.brackets` and `brackets.settings` will be deprecated in future versions, please use brackets.set in new code.
+**NOTE:**
+From v2.3.15, changes in `riot.settings.brackets` are detected resulting in a call to `brackets.set` and the reconfiguration is immediate.
 
 
 ### `R_MLCOMMS` property

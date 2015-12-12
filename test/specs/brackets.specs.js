@@ -66,6 +66,7 @@ describe('brackets', function () {
       expect(render('\\{ 1 }')).to.equal('{ 1 }')
       expect(render('{ "\\}" }')).to.equal('}')
       expect(render('{ "\\{" }')).to.equal('{')
+      expect(render('{ \\{\\} }')).to.eql({})
     })
 
     it('though escaping is optional', function () {
@@ -78,9 +79,11 @@ describe('brackets', function () {
 
       setBrackets('{{ }}')
       expect(render('a{{ "b{{c}}d" }}e {{ "{f{{f}}}" }} g')).to.equal('ab{{c}}de {f{{f}}} g')
+      expect(render('{{{}}}')).to.eql({})
 
-      //setBrackets('<% %>')
-      //expect(render('a<% "b<%c%>d" %>e <% "<%f<%f%>%>" %> g')).to.equal('ab<%c%>de <%f<%f%>%> g')
+      setBrackets('{^ ^}')
+      expect(render('{^ "x" ^}')).to.equal('x')
+      expect(render('{^ /{^}/ ^}').source).to.equal(/{^}/.source)
 
       setBrackets('[[ ]]')
       expect(render('a[[ "b[[c]]d" ]]e [["[[f[f]]]"]]g[[]]')).to.equal('ab[[c]]de [[f[f]]]g')
@@ -89,6 +92,40 @@ describe('brackets', function () {
   })
 
   describe('2.2.3', function () {
+
+    it('escaped brackets, some 8 bit, iso-8859-1 characters', function () {
+      var vals = [
+      // source    brackets(2) + brackets(3)
+      //['<% %>',  '<% %>'    ],      // angle brackets unsupported from 2.4
+        ['{# #}',  '{# #}'    ],
+        ['[! !]',  '\\[! !\\]'],
+        ['·ʃ ʃ',   '·ʃ ʃ'     ],
+        ['{$ $}',  '{\\$ \\$}'],
+        ['_( )_',  '_\\( \\)_']
+      ]
+      var rs, bb, i
+
+      rs = new RegExp('{x}')
+      setBrackets('{ }')              // same as defaults
+      expect(brackets(rs)).to.be(rs)      // must returns the same object (to.be)
+      expect(brackets(0)).to.equal('{')
+      expect(brackets(1)).to.equal('}')
+      expect(brackets(2)).to.equal('{')
+      expect(brackets(3)).to.equal('}')
+
+      for (i = 0; i < vals.length; i++) {
+        // set the new brackets pair
+        rs = vals[i]
+        setBrackets(rs[0])
+        bb = rs[0].split(' ')
+        rs = rs[1]
+        expect(brackets(/{ }/g).source).to.equal(rs)
+        expect(brackets(0)).to.equal(bb[0])
+        expect(brackets(1)).to.equal(bb[1]); bb = rs.split(' ')
+        expect(brackets(2)).to.equal(bb[0])
+        expect(brackets(3)).to.equal(bb[1])
+      }
+    })
 
     //// Better recognition of nested brackets, escaping is almost unnecessary.
     //// (include escaped version for compatibility)
@@ -175,47 +212,12 @@ describe('brackets', function () {
       })
 
     })
-    // end of 2.3 scaping is almost...
-
-    it('escaped brackets, some 8 bit, iso-8859-1 characters', function () {
-      var vals = [
-      // source    brackets(2) + brackets(3)
-      //['<% %>',  '<% %>'    ],      // angle brackets unsupported from 2.4
-        ['{# #}',  '{# #}'    ],
-        ['[! !]',  '\\[! !\\]'],
-        ['·ʃ ʃ',   '·ʃ ʃ'     ],
-        ['{$ $}',  '{\\$ \\$}'],
-        ['_( )_',  '_\\( \\)_']
-      ]
-      var rs, bb, i
-
-      rs = new RegExp('{x}')
-      setBrackets('{ }')              // same as defaults
-      expect(brackets(rs)).to.be(rs)      // must returns the same object (to.be)
-      expect(brackets(0)).to.equal('{')
-      expect(brackets(1)).to.equal('}')
-      expect(brackets(2)).to.equal('{')
-      expect(brackets(3)).to.equal('}')
-
-      for (i = 0; i < vals.length; i++) {
-        // set the new brackets pair
-        rs = vals[i]
-        setBrackets(rs[0])
-        bb = rs[0].split(' ')
-        rs = rs[1]
-        expect(brackets(/{ }/g).source).to.equal(rs)
-        expect(brackets(0)).to.equal(bb[0])
-        expect(brackets(1)).to.equal(bb[1]); bb = rs.split(' ')
-        expect(brackets(2)).to.equal(bb[0])
-        expect(brackets(3)).to.equal(bb[1])
-      }
-    })
 
   })
   // end of brackets 2.2.3
 
 
-  describe('2.3.0', function () {
+  describe('2.3.x', function () {
 
     it('don\'t use characters in the set [\\x00-\\x1F<>a-zA-Z0-9\'",;\\]',
       function () {
@@ -229,38 +231,84 @@ describe('brackets', function () {
       expect(setBrackets).withArgs('<% %>').to.throwError()
     })
 
-    it('new function brackets.array() -- for internal use', function () {
-      var bp = brackets.array('[ ]')
-      expect(bp[0]).to.be('[')
-      expect(bp[1]).to.be(']')
-    })
-
     it('brackets.array in sync with riot.settings.brackets', function () {
-      var oldSettings = brackets.settings,
-        riot = { settings: {} },
+      var
+        settings = typeof riot === 'undefined' ? {} : riot.settings,
         str
-      brackets.settings = riot.settings
+      brackets.settings = settings
 
-      riot.settings.brackets = '{{ }}'
+      settings.brackets = '{{ }}'
       str = render('{{ x }} and { x }')
       expect(str).to.be('2 and { x }')
 
       // restore using riot.settings
-      riot.settings.brackets = '{ }'
+      settings.brackets = '{ }'
       str = render('\\{{ x }} and { x }')
       expect(str).to.be('{2} and 2')
 
       // change again, now with riot.settings
-      riot.settings.brackets = '{{ }}'
+      settings.brackets = '{{ }}'
       str = render('{{ x }} and { x }')
       expect(str).to.be('2 and { x }')
 
-      riot.settings.brackets = undefined
+      settings.brackets = undefined
       str = render('\\{{ x }} and { x } ')
       expect(str).to.be('{2} and 2 ')
 
-      brackets.settings = oldSettings
       resetBrackets()
+    })
+
+    it('riot.settings.brackets has immediate effect', function () {
+      var
+        settings,
+        haveRiot
+      resetBrackets()
+
+      brackets.settings.brackets = '$ $'
+      expect(bracketsPair()).to.be('$ $')
+
+      if (typeof riot !== 'undefined' && riot.settings) {
+        expect(riot.settings.brackets).to.be('^ ^')
+        riot.settings.brackets = '^ ^'
+        expect(brackets.settings.brackets).to.be('^ ^')
+        expect(bracketsPair()).to.be('^ ^')
+        haveRiot = true
+      }
+
+      // reasign brackets.settings
+
+      resetBrackets()
+      brackets.settings = settings = {}
+
+      settings.brackets = '^ ^'
+      expect(brackets.settings.brackets).to.be('^ ^')
+      expect(bracketsPair()).to.be('^ ^')
+
+      brackets.settings.brackets = '$ $'
+      expect(settings.brackets).to.be('$ $')
+      expect(bracketsPair()).to.be('$ $')
+
+      brackets.settings = null  // reset to {brackets: DEFAULT}
+
+      expect(brackets.settings.brackets).to.be('{ }')
+      expect(bracketsPair()).to.be('{ }')
+
+      if (haveRiot)
+        brackets.settings = riot.settings
+      resetBrackets()
+    })
+
+    it('don\'t use internal functions', function () {
+      var bp
+      setBrackets(null)   //to default
+
+      bp = brackets.array(null)
+      expect(bp[0] + bp[1]).to.be('{}')
+      expect(bracketsPair()).to.be('{ }')
+
+      bp = brackets.array('~ ~')
+      expect(bp[0] + bp[1]).to.be('~~')
+      expect(bracketsPair()).to.be('{ }')   // must no change
     })
 
     describe('brackets.split', function () {
@@ -386,16 +434,6 @@ describe('regexes', function () {
     expect(match[2]).to.be('/*""*/')
     expect(match[3]).to.be('"/*\\"*/"')
     expect(match[4]).to.be("'/*2*/\\\''")   // yes, the match is correct :)
-  })
-
-  it('don\'t use internal functions', function () {
-    var bp
-
-    bp = brackets.array(null)
-    expect(bp[0] + bp[1]).to.be('{}')
-    bp = brackets.array('~ ~')
-    expect(bp[0] + bp[1]).to.be('~~')
-    bp = brackets.array(null)
   })
 
 })

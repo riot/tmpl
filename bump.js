@@ -17,7 +17,7 @@ var
   re = RegExp('\\b' + repStr.replace(/(?=[[\]()*+?.^$|])/g, '\\') + '\\b', 'g')
 
 version = 'v' + version
-console.log('bump v%s for %s', version, path.join(fpath, '*.js'))
+console.log('bump %s for %s', version, path.join(fpath, '*.js'))
 
 fs.readdirSync(fpath).forEach(function (name) {
   if (path.extname(name) === '.js') {
@@ -38,7 +38,6 @@ fs.readdirSync(fpath).forEach(function (name) {
 process.on('exit', function (code) {
   if (!count) {
     console.log('Error: There\'s no .js files in %s', fpath)
-    code = 1
   }
   if (code) process.exit(code)
 })

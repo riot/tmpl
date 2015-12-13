@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version v2.3.17
+ * @version v2.3.18
  */
 
 /**
@@ -407,5 +407,5 @@ var tmpl = (function () {
 
 })()
 
-  tmpl.version = brackets.version = 'v2.3.17'
+  tmpl.version = brackets.version = 'v2.3.18'
 

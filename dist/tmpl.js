@@ -1,4 +1,4 @@
-/* riot-tmpl WIP, @license MIT, (c) 2015 Muut Inc. + contributors */
+/* riot-tmpl v2.3.19, @license MIT, (c) 2015 Muut Inc. + contributors */
 ;(function (window) {
   'use strict'              // eslint-disable-line
 
@@ -255,7 +255,7 @@
       var
         qstr = [],
         expr,
-        parts = brackets.split(str, 1)
+        parts = brackets.split(str.replace(/\u2057/g, '"'), 1)
 
       if (parts.length > 2 || parts[0]) {
         var i, j, list = []
@@ -305,7 +305,6 @@
       if (expr[0] === "=") expr = expr.slice(1)
 
       expr = expr
-            .replace(/\u2057/g, '"')
             .replace(RE_QBLOCK, function (s, div) {
               return s.length > 2 && !div ? '\x01' + (qstr.push(s) - 1) + '~' : s
             })
@@ -406,7 +405,7 @@
 
   })()
 
-  tmpl.version = brackets.version = 'WIP'
+  tmpl.version = brackets.version = 'v2.3.19'
 
   /* istanbul ignore else */
   if (typeof module === 'object' && module.exports) {

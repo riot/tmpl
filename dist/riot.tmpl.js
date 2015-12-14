@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version WIP
+ * @version v2.3.19
  */
 
 /**
@@ -257,7 +257,7 @@ var tmpl = (function () {
     var
       qstr = [],
       expr,
-      parts = brackets.split(str, 1)
+      parts = brackets.split(str.replace(/\u2057/g, '"'), 1)
 
     if (parts.length > 2 || parts[0]) {
       var i, j, list = []
@@ -307,7 +307,6 @@ var tmpl = (function () {
     if (expr[0] === "=") expr = expr.slice(1)
 
     expr = expr
-          .replace(/\u2057/g, '"')
           .replace(RE_QBLOCK, function (s, div) {
             return s.length > 2 && !div ? '\x01' + (qstr.push(s) - 1) + '~' : s
           })
@@ -408,5 +407,5 @@ var tmpl = (function () {
 
 })()
 
-  tmpl.version = brackets.version = 'WIP'
+  tmpl.version = brackets.version = 'v2.3.19'
 

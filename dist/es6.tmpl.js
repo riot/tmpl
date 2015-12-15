@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version v2.3.18
+ * @version v2.3.19
  */
 
 /**
@@ -246,7 +246,7 @@ var tmpl = (function () {
     var expr = _getTmpl(str)
     if (expr.slice(0, 11) !== 'try{return ') expr = 'return ' + expr
 
-    return new Function('E', expr + ';')  // eslint-disable-line indent
+    return new Function('E', expr + ';')
   }
 
   var
@@ -257,7 +257,7 @@ var tmpl = (function () {
     var
       qstr = [],
       expr,
-      parts = brackets.split(str, 1)
+      parts = brackets.split(str.replace(/\u2057/g, '"'), 1)
 
     if (parts.length > 2 || parts[0]) {
       var i, j, list = []
@@ -407,7 +407,7 @@ var tmpl = (function () {
 
 })()
 
-  tmpl.version = brackets.version = 'v2.3.18'
+  tmpl.version = brackets.version = 'v2.3.19'
 
 export default {tmpl, brackets}
 

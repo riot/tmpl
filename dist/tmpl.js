@@ -1,4 +1,4 @@
-/* riot-tmpl v2.3.18, @license MIT, (c) 2015 Muut Inc. + contributors */
+/* riot-tmpl v2.3.19, @license MIT, (c) 2015 Muut Inc. + contributors */
 ;(function (window) {
   'use strict'              // eslint-disable-line
 
@@ -244,7 +244,7 @@
       var expr = _getTmpl(str)
       if (expr.slice(0, 11) !== 'try{return ') expr = 'return ' + expr
 
-      return new Function('E', expr + ';')  // eslint-disable-line indent
+      return new Function('E', expr + ';')
     }
 
     var
@@ -255,7 +255,7 @@
       var
         qstr = [],
         expr,
-        parts = brackets.split(str, 1)
+        parts = brackets.split(str.replace(/\u2057/g, '"'), 1)
 
       if (parts.length > 2 || parts[0]) {
         var i, j, list = []
@@ -405,7 +405,7 @@
 
   })()
 
-  tmpl.version = brackets.version = 'v2.3.18'
+  tmpl.version = brackets.version = 'v2.3.19'
 
   /* istanbul ignore else */
   if (typeof module === 'object' && module.exports) {
@@ -413,7 +413,7 @@
       'tmpl': tmpl, 'brackets': brackets
     }
   }
-  else if (typeof define === 'function' && define.amd) {
+  else if (typeof define === 'function' && typeof define.amd !== 'undefined') {
     define(function () {
       return {
         'tmpl': tmpl, 'brackets': breackets

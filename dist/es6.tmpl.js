@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version v2.3.19
+ * @version WIP
  */
 
 /**
@@ -12,6 +12,7 @@
  * `brackets.set     ` Change the current riot brackets
  */
 
+export
 var brackets = (function (UNDEF) {
 
   var
@@ -205,6 +206,7 @@ var brackets = (function (UNDEF) {
  * tmpl.loopKeys - Get the keys for an 'each' loop (used by `_each`)
  */
 
+export
 var tmpl = (function () {
 
   var _cache = {}
@@ -407,7 +409,5 @@ var tmpl = (function () {
 
 })()
 
-  tmpl.version = brackets.version = 'v2.3.19'
-
-export default {tmpl, brackets}
+  tmpl.version = brackets.version = 'WIP'
 

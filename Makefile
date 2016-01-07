@@ -1,5 +1,4 @@
 # jspreproc flags
-#JSPP_DEBUG = -D DEBUG -D SHOW_PARSE_ERRORS
 JSPP_FLAGS = -F istanbul -F eslint --custom-filter "\s@(module|version)\b" --headers ""
 JSPP_RIOT_FLAGS = $(JSPP_FLAGS) -D RIOT
 JSPP_ES6_FLAGS  = $(JSPP_FLAGS) -D ES6
@@ -29,7 +28,7 @@ build: eslint
 
 eslint:
 	# check code style
-	@ $(ESLINT) -c ./.eslintrc lib
+	@ $(ESLINT) -c ./.eslintrc.yml lib
 
 test-karma:
 	@ $(KARMA) start test/karma.conf.js

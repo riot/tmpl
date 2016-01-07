@@ -6,7 +6,7 @@ module.exports = function (config) {
   if (process.env.BROWSERSTACK) {
     customLaunchers = require('./browsers')
     browsers = Object.keys(customLaunchers)
-    browsers.forEach(function(browser) { customLaunchers[browser].base = 'BrowserStack' })
+    browsers.forEach(function (browser) { customLaunchers[browser].base = 'BrowserStack' })
   }
   else
     browsers = ['PhantomJS']

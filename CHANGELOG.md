@@ -1,7 +1,10 @@
 # riot-tmpl Changes
 
+### v2.3.20
+- Fixed lint issues with new .eslint.yml, almost compatible with [JavaScript Standard Style](http://standardjs.com/)
+
 ### v2.3.19
-- Fixing issues with double quotes.
+- Fixed issues with double quotes.
 
 ### v2.3.18
 - Regression of optimized regexes not working in IE9/10.

@@ -1,5 +1,6 @@
-/* eslint-env node, mocha  */
-/* eslint camelcase: 0 */
+/*eslint-env mocha */
+/*eslint camelcase: 0 */
+/*global tmpl, brackets, expect, globalVar:true */
 
 globalVar = 5
 
@@ -13,14 +14,14 @@ var data = {
   $a: 0,
   $b: 1,
   esc: '\'\n\\',
-  fn: function(s) { return ['hi', s].join(' ') },
+  fn: function (s) { return ['hi', s].join(' ') },
   _debug_: 0
 }
 
 var RAW_FLAG = '='
 
 // send 1 or 2 in 'err' to enable internal information
-function render(str, dbg) {
+function render (str, dbg) {
   if (dbg) data._debug_ = 1
   return tmpl(str, data)
 }
@@ -191,7 +192,7 @@ describe('riot-tmpl', function () {
 
     it('unwrapped keywords void, window and global, in addition to `this`', function () {
       data.$a = 5
-      expect(render('{' + (typeof window === 'object' ? 'window' : 'global') +'.globalVar }')).to.be(5)
+      expect(render('{' + (typeof window === 'object' ? 'window' : 'global') + '.globalVar }')).to.be(5)
       expect(render('{ this.$a }')).to.be(5)
       expect(render('{ void 0 }')).to.be(undefined)
       // without unprefixed global/window, default convertion to `new (D).Date()` throws here
@@ -288,7 +289,7 @@ describe('riot-tmpl', function () {
 
   //// new in tmpl 2.3.0
 
-  describe('2.3.0', function() {
+  describe('2.3.0', function () {
 
     it('support for 8 bit, ISO-8859-1 charset in shorthand names', function () {
       expect(render('{ neón: 1 }')).to.be('neón')
@@ -364,7 +365,7 @@ describe('riot-tmpl', function () {
       after(clearHandler)
 
       it('using a custom function', function () {
-        var result, err
+        var err
         tmpl.errorHandler = function (e) { err = e }
         // je, tmpl({x}, NaN) does not generate error... bug or danling var?
         //console.error('========== >>>> x: ' + x)        // error here
@@ -381,7 +382,7 @@ describe('riot-tmpl', function () {
       })
 
       it('GOTCHA: null as param for call([this]) defaults to global too', function () {
-        var result, err
+        var err
         tmpl.errorHandler = function (e) { err = e }
         err = 0
         expect(tmpl('{x[0]}', null)).to.be(undefined)
@@ -430,7 +431,7 @@ describe('riot-tmpl', function () {
     describe('new helper functions', function () {
 
       it('tmpl.loopKeys: extract keys from the value (for `each`)', function () {
-        var i, s,
+        var i,
           atest = [
             '{ studio in studios["Nearby Locations"] }', {key: 'studio', pos: undefined, val: '{studios["Nearby Locations"]}'},
             '{k,i in item}', {key: 'k', pos: 'i', val: '{item}'},
@@ -449,7 +450,7 @@ describe('riot-tmpl', function () {
 
       it('tmpl.loopKeys with custom brackets', function () {
         brackets.set('{{ }}')
-        var i, s,
+        var i,
           atest = [
             '{{k,i in item}}', {key: 'k', pos: 'i', val: '{{item}}'},
             '{{ k in i }}', {key: 'k', pos: undefined, val: '{{i}}'},

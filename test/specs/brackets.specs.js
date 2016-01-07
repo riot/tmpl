@@ -1,27 +1,22 @@
-/*
-if (typeof tmpl === 'undefined') {
-  var
-    expect = require('expect.js'),
-    tmpl = require('tmpl').tmpl,
-    brackets = require('tmpl').brackets
-}*/
+/*eslint-env mocha */
+/*global riot, tmpl, brackets, expect */
 
 describe('brackets', function () {
 
   var data = { x: 2, str: 'x' }
 
   // send 1 or 2 in 'err' to enable internal information
-  function render(str, dbg) {
+  function render (str, dbg) {
     if (dbg) data._debug_ = 1
     return tmpl(str, data)
   }
-  function setBrackets(s) {
+  function setBrackets (s) {
     brackets.set(s)
   }
-  function resetBrackets() {
+  function resetBrackets () {
     brackets.set('{ }')
   }
-  function bracketsPair() {
+  function bracketsPair () {
     return brackets(0) + ' ' + brackets(1)
   }
 
@@ -97,9 +92,9 @@ describe('brackets', function () {
       var vals = [
       // source    brackets(2) + brackets(3)
       //['<% %>',  '<% %>'    ],      // angle brackets unsupported from 2.4
-        ['{# #}',  '{# #}'    ],
+        ['{# #}',  '{# #}'],
         ['[! !]',  '\\[! !\\]'],
-        ['·ʃ ʃ',   '·ʃ ʃ'     ],
+        ['·ʃ ʃ',   '·ʃ ʃ'],
         ['{$ $}',  '{\\$ \\$}'],
         ['_( )_',  '_\\( \\)_']
       ]
@@ -318,7 +313,7 @@ describe('brackets', function () {
           str = '<tag att="{ a }" expr1={a<1} expr2={a>2}>\n\\{{body}}\r\n</tag>\n'
 
         resetBrackets()             // set brackets to default
-        a = brackets.split(str)
+        var a = brackets.split(str)
 
         expect(a).to.have.length(9)
         expect(a[1]).to.be(' a ')
@@ -334,7 +329,7 @@ describe('brackets', function () {
           str = '<tag att="{ a }" expr1={a<1} expr2={a>2}>\n\\{{body}}\r\n</tag>\n'
 
         resetBrackets()
-        a = brackets.split(str, true)
+        var a = brackets.split(str, true)
 
         expect(a).to.have.length(9)
         expect(a[6]).to.be('>\n{')
@@ -356,7 +351,7 @@ describe('brackets', function () {
       })
 
       it('recognizes difficult literal regexes', function () {
-        var n, i, str, p1 = '<p a="', p2 = '">'
+        var n, i, p1 = '<p a="', p2 = '">'
         var atest = [
           [p1, '{5+3/ /}/}',          p2],  // <p a="{a+5/ /}/}">  : regex: /}/  (ok, `5+3/ re` == NaN)
           [p1, '{/[///[]}/}',         p2],  // <p a="{/[///[]}/}"> : regex: /[///[]}/
@@ -379,7 +374,7 @@ describe('brackets', function () {
           }
         }
 
-        function unq(s) { return /^{.*}$/.test(s) ? s.slice(1, -1) : s }
+        function unq (s) { return /^{.*}$/.test(s) ? s.slice(1, -1) : s }
       })
 
     })

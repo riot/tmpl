@@ -1,6 +1,7 @@
 /* riot-tmpl WIP, @license MIT, (c) 2015 Muut Inc. + contributors */
-;(function (window) {
-  'use strict'              // eslint-disable-line
+;(function (window) {     // eslint-disable-line no-extra-semi
+  'use strict'
+  /*eslint-env amd */
 
   /**
    * @module brackets
@@ -35,16 +36,16 @@
       _regex,
       _pairs = []
 
-    function _loopback(re) { return re }
+    function _loopback (re) { return re }
 
-    function _rewrite(re, bp) {
+    function _rewrite (re, bp) {
       if (!bp) bp = _pairs
       return new RegExp(
         re.source.replace(/{/g, bp[2]).replace(/}/g, bp[3]), re.global ? REGLOB : ''
       )
     }
 
-    function _create(pair) {
+    function _create (pair) {
       var
         cvt,
         arr = pair.split(' ')
@@ -69,7 +70,7 @@
       return arr
     }
 
-    function _reset(pair) {
+    function _reset (pair) {
       if (!pair) pair = DEFAULT
 
       if (pair !== _pairs[8]) {
@@ -82,11 +83,11 @@
       cachedBrackets = pair
     }
 
-    function _brackets(reOrIdx) {
+    function _brackets (reOrIdx) {
       return reOrIdx instanceof RegExp ? _regex(reOrIdx) : _pairs[reOrIdx]
     }
 
-    _brackets.split = function split(str, tmpl, _bp) {
+    _brackets.split = function split (str, tmpl, _bp) {
       // istanbul ignore next: _bp is for the compiler
       if (!_bp) _bp = _pairs
 
@@ -129,14 +130,14 @@
 
       return parts
 
-      function unescapeStr(str) {
+      function unescapeStr (str) {
         if (tmpl || isexpr)
           parts.push(str && str.replace(_bp[5], '$1'))
         else
           parts.push(str)
       }
 
-      function skipBraces(ch, pos) {
+      function skipBraces (ch, pos) {
         var
           match,
           recch = FINDBRACES[ch],
@@ -151,22 +152,22 @@
       }
     }
 
-    _brackets.hasExpr = function hasExpr(str) {
+    _brackets.hasExpr = function hasExpr (str) {
       return _brackets(4).test(str)
     }
 
-    _brackets.loopKeys = function loopKeys(expr) {
+    _brackets.loopKeys = function loopKeys (expr) {
       var m = expr.match(_brackets(9))
       return m ?
         { key: m[1], pos: m[2], val: _pairs[0] + m[3].trim() + _pairs[1] } : { val: expr.trim() }
     }
 
-    _brackets.array = function array(pair) {
+    _brackets.array = function array (pair) {
       return _create(pair || cachedBrackets)
     }
 
     var _settings
-    function _setSettings(o) {
+    function _setSettings (o) {
       var b
       o = o || {}
       b = o.brackets
@@ -202,19 +203,20 @@
    * tmpl.hasExpr  - Test the existence of a expression inside a string
    * tmpl.loopKeys - Get the keys for an 'each' loop (used by `_each`)
    */
+  /*global riot */
 
   var tmpl = (function () {
 
     var _cache = {}
 
-    function _tmpl(str, data) {
+    function _tmpl (str, data) {
       if (!str) return str
 
       return (_cache[str] || (_cache[str] = _create(str))).call(data, _logErr)
     }
 
     _tmpl.isRaw = function (expr) {
-      return expr[brackets._rawOffset] === "="
+      return expr[brackets._rawOffset] === '='
     }
 
     _tmpl.haveRaw = function (src) {
@@ -227,7 +229,7 @@
 
     _tmpl.errorHandler = null
 
-    function _logErr(err, ctx) {
+    function _logErr (err, ctx) {
 
       if (_tmpl.errorHandler) {
 
@@ -239,7 +241,7 @@
       }
     }
 
-    function _create(str) {
+    function _create (str) {
 
       var expr = _getTmpl(str)
       if (expr.slice(0, 11) !== 'try{return ') expr = 'return ' + expr
@@ -251,7 +253,7 @@
       RE_QBLOCK = RegExp(brackets.S_QBLOCKS, 'g'),
       RE_QBMARK = /\x01(\d+)~/g
 
-    function _getTmpl(str) {
+    function _getTmpl (str) {
       var
         qstr = [],
         expr,
@@ -297,12 +299,11 @@
     }
 
     var
-      CS_IDENT = /^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\x01(\d+)~):/,
-      RE_BRACE = /,|([[{(])|$/g
+      CS_IDENT = /^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\x01(\d+)~):/
 
-    function _parseExpr(expr, asText, qstr) {
+    function _parseExpr (expr, asText, qstr) {
 
-      if (expr[0] === "=") expr = expr.slice(1)
+      if (expr[0] === '=') expr = expr.slice(1)
 
       expr = expr
             .replace(RE_QBLOCK, function (s, div) {
@@ -342,7 +343,7 @@
       }
       return expr
 
-      function skipBraces(jsb, re) {
+      function skipBraces (jsb, re) {
         var
           match,
           lv = 1,
@@ -358,10 +359,12 @@
     }
 
     // istanbul ignore next: not both
-    var JS_CONTEXT = '"in this?this:' + (typeof window !== 'object' ? 'global' : 'window') + ').'
-    var JS_VARNAME = /[,{][$\w]+:|(^ *|[^$\w\.])(?!(?:typeof|true|false|null|undefined|in|instanceof|is(?:Finite|NaN)|void|NaN|new|Date|RegExp|Math)(?![$\w]))([$_A-Za-z][$\w]*)/g
+    var
+      JS_CONTEXT = '"in this?this:' + (typeof window !== 'object' ? 'global' : 'window') + ').',
+      JS_VARNAME = /[,{][$\w]+:|(^ *|[^$\w\.])(?!(?:typeof|true|false|null|undefined|in|instanceof|is(?:Finite|NaN)|void|NaN|new|Date|RegExp|Math)(?![$\w]))([$_A-Za-z][$\w]*)/g,
+      JS_NOPROPS = /^(?=(\.[$\w]+))\1(?:[^.[(]|$)/
 
-    function _wrapExpr(expr, asText, key) {
+    function _wrapExpr (expr, asText, key) {
       var tb
 
       expr = expr.replace(JS_VARNAME, function (match, p, mvar, pos, s) {
@@ -372,8 +375,9 @@
             match = p + '("' + mvar + JS_CONTEXT + mvar
             if (pos) tb = (s = s[pos]) === '.' || s === '(' || s === '['
           }
-          else if (pos)
-            tb = !/^(?=(\.[$\w]+))\1(?:[^.[(]|$)/.test(s.slice(pos))
+          else if (pos) {
+            tb = !JS_NOPROPS.test(s.slice(pos))
+          }
         }
         return match
       })
@@ -416,7 +420,7 @@
   else if (typeof define === 'function' && typeof define.amd !== 'undefined') {
     define(function () {
       return {
-        'tmpl': tmpl, 'brackets': breackets
+        'tmpl': tmpl, 'brackets': brackets
       }
     })
   }
@@ -425,4 +429,4 @@
     window.brackets = brackets
   }
 
-})(typeof window === 'object' ? /* istanbul ignore next */ window : void 0) // eslint-disable-line no-void
+})(typeof window === 'object' ? /* istanbul ignore next */ window : void 0) // eslint-disable-line

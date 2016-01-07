@@ -1,11 +1,9 @@
-'use strict'    // eslint-disable-line strict, global-strict
+/*eslint no-console: 0 */
+'use strict'    // eslint-disable-line
 
 var
   tmpl23 = require('../dist/tmpl').tmpl,
-  tmpl22 = require('./v223/tmpl223.js').tmpl,
-//assert = require('assert'),
-  path = require('path'),
-  fs = require('fs')
+  tmpl22 = require('./v223/tmpl223.js').tmpl
 
 var
   data = { num: 1, str: 'string', date: new Date(), bool: true, item: null },
@@ -64,7 +62,7 @@ console.log('  provided by the node process.memoryUsage() function.')
 console.log('- Execution time in both versions excludes expression compilation.')
 console.log('- Minimum & maximum times are removed.')
 
-function testExpr(tmpl, data, times, list, agc) {
+function testExpr (tmpl, data, times, list, agc) {
   var ogc, gc1, gc2, gc3
   times.length = 0
   global.gc()
@@ -105,20 +103,20 @@ function testExpr(tmpl, data, times, list, agc) {
   agc[2] += ogc.heapUsed - gc3
 }
 
-function numsort(a, b) {
+function numsort (a, b) {
   return a - b
 }
-function numsum(a, b) {
+function numsum (a, b) {
   return a + b
 }
-function replicate(s, n) {
+function replicate (s, n) {
   return n < 1 ? '' : (new Array(n + 1)).join(s)
 }
-function padr(s, n) {
+function padr (s, n) {
   s = '' + s
   return s + replicate(' ', n - s.length)
 }
-function padl(s, n) {
+function padl (s, n) {
   s = '' + s
   return replicate(' ', n - s.length) + s
 }

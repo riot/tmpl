@@ -1,6 +1,6 @@
 var isNode = typeof window === 'undefined'
 
-describe('Observable Tests', function() {
+describe('Observable Tests', function () {
   if (isNode) {
     expect = require('expect.js')
     tmpl = require('../dist/tmpl').tmpl

@@ -1,4 +1,4 @@
-/* riot-tmpl WIP, @license MIT, (c) 2015 Muut Inc. + contributors */
+/* riot-tmpl v2.3.20, @license MIT, (c) 2015 Muut Inc. + contributors */
 ;(function (window) {     // eslint-disable-line no-extra-semi
   'use strict'
   /*eslint-env amd */
@@ -409,7 +409,7 @@
 
   })()
 
-  tmpl.version = brackets.version = 'WIP'
+  tmpl.version = brackets.version = 'v2.3.20'
 
   /* istanbul ignore else */
   if (typeof module === 'object' && module.exports) {

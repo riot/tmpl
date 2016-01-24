@@ -171,7 +171,6 @@
         _regex = pair === DEFAULT ? _loopback : _rewrite
         _cache[9] = _regex(_pairs[9])
         _cache[10] = _regex(_pairs[10])
-        _brackets._rawOffset = _cache[0].length
       }
       cachedBrackets = pair
     }
@@ -213,7 +212,6 @@
    * tmpl.hasExpr  - Test the existence of a expression inside a string
    * tmpl.loopKeys - Get the keys for an 'each' loop (used by `_each`)
    */
-  /*global riot */
 
   var tmpl = (function () {
 

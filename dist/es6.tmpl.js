@@ -13,6 +13,8 @@
  * @module
  */
 
+/* global riot */
+
 export
 var brackets = (function (UNDEF) {
 
@@ -173,7 +175,6 @@ var brackets = (function (UNDEF) {
       _regex = pair === DEFAULT ? _loopback : _rewrite
       _cache[9] = _regex(_pairs[9])
       _cache[10] = _regex(_pairs[10])
-      _brackets._rawOffset = _cache[0].length
     }
     cachedBrackets = pair
   }
@@ -215,7 +216,6 @@ var brackets = (function (UNDEF) {
  * tmpl.hasExpr  - Test the existence of a expression inside a string
  * tmpl.loopKeys - Get the keys for an 'each' loop (used by `_each`)
  */
-/*global riot */
 
 export
 var tmpl = (function () {
@@ -416,9 +416,9 @@ var tmpl = (function () {
   // istanbul ignore next: compatibility fix for beta versions
   _tmpl.parse = function (s) { return s }
 
+  _tmpl.version = brackets.version = 'WIP'
+
   return _tmpl
 
 })()
-
-  tmpl.version = brackets.version = 'WIP'
 

@@ -4,92 +4,87 @@
   /*eslint-env amd */
 
   /**
-   * @module brackets
+   * riot.util.brackets
    *
-   * `brackets         ` Returns a string or regex based on its parameter
-   * `brackets.settings` Mirrors the `riot.settings` object (use brackets.set in new code)
-   * `brackets.set     ` Change the current riot brackets
+   * - `brackets    ` - Returns a string or regex based on its parameter
+   * - `brackets.set` - Change the current riot brackets
+   *
+   * @module
    */
 
   var brackets = (function (UNDEF) {
 
     var
-      REGLOB  = 'g',
+      REGLOB = 'g',
 
-      MLCOMMS = /\/\*[^*]*\*+(?:[^*\/][^*]*\*+)*\//g,
-      STRINGS = /"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'/g,
+      R_MLCOMMS = /\/\*[^*]*\*+(?:[^*\/][^*]*\*+)*\//g,
 
-      S_QBSRC = STRINGS.source + '|' +
+      R_STRINGS = /"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'/g,
+
+      S_QBLOCKS = R_STRINGS.source + '|' +
         /(?:\breturn\s+|(?:[$\w\)\]]|\+\+|--)\s*(\/)(?![*\/]))/.source + '|' +
         /\/(?=[^*\/])[^[\/\\]*(?:(?:\[(?:\\.|[^\]\\]*)*\]|\\.)[^[\/\\]*)*?(\/)[gim]*/.source,
 
-      DEFAULT = '{ }',
-
       FINDBRACES = {
-        '(': RegExp('([()])|'   + S_QBSRC, REGLOB),
-        '[': RegExp('([[\\]])|' + S_QBSRC, REGLOB),
-        '{': RegExp('([{}])|'   + S_QBSRC, REGLOB)
-      }
+        '(': RegExp('([()])|'   + S_QBLOCKS, REGLOB),
+        '[': RegExp('([[\\]])|' + S_QBLOCKS, REGLOB),
+        '{': RegExp('([{}])|'   + S_QBLOCKS, REGLOB)
+      },
+
+      DEFAULT = '{ }'
+
+    var _pairs = [
+      '{', '}',
+      '{', '}',
+      /{[^}]*}/,
+      /\\([{}])/g,
+      /\\({)|{/g,
+      RegExp('\\\\(})|([[({])|(})|' + S_QBLOCKS, REGLOB),
+      DEFAULT,
+      /^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S.*)\s*}/,
+      /(^|[^\\]){=[\S\s]*?}/
+    ]
 
     var
       cachedBrackets = UNDEF,
       _regex,
-      _pairs = []
+      _cache = [],
+      _settings
 
     function _loopback (re) { return re }
 
     function _rewrite (re, bp) {
-      if (!bp) bp = _pairs
+      if (!bp) bp = _cache
       return new RegExp(
         re.source.replace(/{/g, bp[2]).replace(/}/g, bp[3]), re.global ? REGLOB : ''
       )
     }
 
     function _create (pair) {
-      var
-        cvt,
-        arr = pair.split(' ')
+      if (pair === DEFAULT) return _pairs
 
-      if (pair === DEFAULT) {
-        arr[2] = arr[0]
-        arr[3] = arr[1]
-        cvt = _loopback
+      var arr = pair.split(' ')
+
+      if (arr.length !== 2 || /[\x00-\x1F<>a-zA-Z0-9'",;\\]/.test(pair)) {
+        throw new Error('Unsupported brackets "' + pair + '"')
       }
-      else {
-        if (arr.length !== 2 || /[\x00-\x1F<>a-zA-Z0-9'",;\\]/.test(pair)) {
-          throw new Error('Unsupported brackets "' + pair + '"')
-        }
-        arr = arr.concat(pair.replace(/(?=[[\]()*+?.^$|])/g, '\\').split(' '))
-        cvt = _rewrite
-      }
-      arr[4] = cvt(arr[1].length > 1 ? /{[\S\s]*?}/ : /{[^}]*}/, arr)
-      arr[5] = cvt(/\\({|})/g, arr)
-      arr[6] = cvt(/(\\?)({)/g, arr)
-      arr[7] = RegExp('(\\\\?)(?:([[({])|(' + arr[3] + '))|' + S_QBSRC, REGLOB)
+      arr = arr.concat(pair.replace(/(?=[[\]()*+?.^$|])/g, '\\').split(' '))
+
+      arr[4] = _rewrite(arr[1].length > 1 ? /{[\S\s]*?}/ : _pairs[4], arr)
+      arr[5] = _rewrite(/\\({|})/g, arr)
+      arr[6] = _rewrite(_pairs[6], arr)
+      arr[7] = RegExp('\\\\(' + arr[3] + ')|([[({])|(' + arr[3] + ')|' + S_QBLOCKS, REGLOB)
       arr[8] = pair
       return arr
     }
 
-    function _reset (pair) {
-      if (!pair) pair = DEFAULT
-
-      if (pair !== _pairs[8]) {
-        _pairs = _create(pair)
-        _regex = pair === DEFAULT ? _loopback : _rewrite
-        _pairs[9] = _regex(/^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S.*)\s*}/)
-        _pairs[10] = _regex(/(^|[^\\]){=[\S\s]*?}/)
-        _brackets._rawOffset = _pairs[0].length
-      }
-      cachedBrackets = pair
-    }
-
     function _brackets (reOrIdx) {
-      return reOrIdx instanceof RegExp ? _regex(reOrIdx) : _pairs[reOrIdx]
+      return reOrIdx instanceof RegExp ? _regex(reOrIdx) : _cache[reOrIdx]
     }
 
     _brackets.split = function split (str, tmpl, _bp) {
       // istanbul ignore next: _bp is for the compiler
-      if (!_bp) _bp = _pairs
+      if (!_bp) _bp = _cache
 
       var
         parts = [],
@@ -111,7 +106,6 @@
             re.lastIndex = skipBraces(match[2], re.lastIndex)
             continue
           }
-
           if (!match[3])
             continue
         }
@@ -140,33 +134,48 @@
       function skipBraces (ch, pos) {
         var
           match,
-          recch = FINDBRACES[ch],
-          level = 1
-        recch.lastIndex = pos
+          recch = FINDBRACES[ch]
 
+        recch.lastIndex = pos
+        pos = 1
         while (match = recch.exec(str)) {
           if (match[1] &&
-            !(match[1] === ch ? ++level : --level)) break
+            !(match[1] === ch ? ++pos : --pos)) break
         }
-        return match ? recch.lastIndex : str.length
+        return pos ? str.length : recch.lastIndex
       }
     }
 
     _brackets.hasExpr = function hasExpr (str) {
-      return _brackets(4).test(str)
+      return _cache[4].test(str)
     }
 
     _brackets.loopKeys = function loopKeys (expr) {
-      var m = expr.match(_brackets(9))
-      return m ?
-        { key: m[1], pos: m[2], val: _pairs[0] + m[3].trim() + _pairs[1] } : { val: expr.trim() }
+      var m = expr.match(_cache[9])
+      return m
+        ? { key: m[1], pos: m[2], val: _cache[0] + m[3].trim() + _cache[1] }
+        : { val: expr.trim() }
+    }
+
+    _brackets.hasRaw = function (src) {
+      return _cache[10].test(src)
     }
 
     _brackets.array = function array (pair) {
-      return _create(pair || cachedBrackets)
+      return pair ? _create(pair) : _pairs
     }
 
-    var _settings
+    function _reset (pair) {
+      if ((pair || (pair = DEFAULT)) !== _cache[8]) {
+        _cache = _create(pair)
+        _regex = pair === DEFAULT ? _loopback : _rewrite
+        _cache[9] = _regex(_pairs[9])
+        _cache[10] = _regex(_pairs[10])
+        _brackets._rawOffset = _cache[0].length
+      }
+      cachedBrackets = pair
+    }
+
     function _setSettings (o) {
       var b
       o = o || {}
@@ -179,6 +188,7 @@
       _settings = o
       _reset(b)
     }
+
     Object.defineProperty(_brackets, 'settings', {
       set: _setSettings,
       get: function () { return _settings }
@@ -188,9 +198,9 @@
     _brackets.settings = typeof riot !== 'undefined' && riot.settings || {}
     _brackets.set = _reset
 
-    _brackets.R_STRINGS = STRINGS
-    _brackets.R_MLCOMMS = MLCOMMS
-    _brackets.S_QBLOCKS = S_QBSRC
+    _brackets.R_STRINGS = R_STRINGS
+    _brackets.R_MLCOMMS = R_MLCOMMS
+    _brackets.S_QBLOCKS = S_QBLOCKS
 
     return _brackets
 
@@ -215,13 +225,7 @@
       return (_cache[str] || (_cache[str] = _create(str))).call(data, _logErr)
     }
 
-    _tmpl.isRaw = function (expr) {
-      return expr[brackets._rawOffset] === '='
-    }
-
-    _tmpl.haveRaw = function (src) {
-      return brackets(10).test(src)
-    }
+    _tmpl.haveRaw = brackets.hasRaw
 
     _tmpl.hasExpr = brackets.hasExpr
 
@@ -282,8 +286,8 @@
 
         expr = j < 2 ? list[0] :
                '[' + list.join(',') + '].join("")'
-      }
-      else {
+
+      } else {
 
         expr = _parseExpr(parts[1], 0, qstr)
       }
@@ -299,6 +303,11 @@
     }
 
     var
+      RE_BREND = {
+        '(': /[()]/g,
+        '[': /[[\]]/g,
+        '{': /[{}]/g
+      },
       CS_IDENT = /^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\x01(\d+)~):/
 
     function _parseExpr (expr, asText, qstr) {
@@ -343,15 +352,15 @@
       }
       return expr
 
-      function skipBraces (jsb, re) {
+      function skipBraces (ch, re) {
         var
-          match,
+          mm,
           lv = 1,
-          ir = jsb === '(' ? /[()]/g : jsb === '[' ? /[[\]]/g : /[{}]/g
+          ir = RE_BREND[ch]
 
         ir.lastIndex = re.lastIndex
-        while (match = ir.exec(expr)) {
-          if (match[0] === jsb) ++lv
+        while (mm = ir.exec(expr)) {
+          if (mm[0] === ch) ++lv
           else if (!--lv) break
         }
         re.lastIndex = lv ? expr.length : ir.lastIndex
@@ -374,8 +383,7 @@
           if (mvar !== 'this' && mvar !== 'global' && mvar !== 'window') {
             match = p + '("' + mvar + JS_CONTEXT + mvar
             if (pos) tb = (s = s[pos]) === '.' || s === '(' || s === '['
-          }
-          else if (pos) {
+          } else if (pos) {
             tb = !JS_NOPROPS.test(s.slice(pos))
           }
         }
@@ -391,8 +399,8 @@
         expr = (tb ?
             'function(){' + expr + '}.call(this)' : '(' + expr + ')'
           ) + '?"' + key + '":""'
-      }
-      else if (asText) {
+
+      } else if (asText) {
 
         expr = 'function(v){' + (tb ?
             expr.replace('return ', 'v=') : 'v=(' + expr + ')'
@@ -416,15 +424,13 @@
     module.exports = {
       'tmpl': tmpl, 'brackets': brackets
     }
-  }
-  else if (typeof define === 'function' && typeof define.amd !== 'undefined') {
+  } else if (typeof define === 'function' && typeof define.amd !== 'undefined') {
     define(function () {
       return {
         'tmpl': tmpl, 'brackets': brackets
       }
     })
-  }
-  else if (window) {
+  } else if (window) {
     window.tmpl = tmpl
     window.brackets = brackets
   }

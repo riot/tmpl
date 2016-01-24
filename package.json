@@ -1,6 +1,6 @@
 {
   "name": "riot-tmpl",
-  "version": "2.3.20",
+  "version": "2.3.21",
   "description": "The riot template engine",
   "main": "dist/tmpl.js",
   "jsnext:main": "dist/es6.tmpl.js",

@@ -22,13 +22,13 @@ test: build test-mocha test-karma
 build: eslint
 	# rebuild all
 	@ mkdir -p $(DIST)
-	@ $(JSPP) $(JSPP_RIOT_FLAGS) lib/index.js > $(DIST)riot.tmpl.js
-	@ $(JSPP) $(JSPP_ES6_FLAGS)  lib/index.js > $(DIST)es6.tmpl.js
-	@ $(JSPP) $(JSPP_NODE_FLAGS) lib/index.js > $(DIST)tmpl.js
+	@ $(JSPP) $(JSPP_RIOT_FLAGS) src/index.js > $(DIST)riot.tmpl.js
+	@ $(JSPP) $(JSPP_ES6_FLAGS)  src/index.js > $(DIST)es6.tmpl.js
+	@ $(JSPP) $(JSPP_NODE_FLAGS) src/index.js > $(DIST)tmpl.js
 
 eslint:
 	# check code style
-	@ $(ESLINT) -c ./.eslintrc.yml lib
+	@ $(ESLINT) -c ./.eslintrc.yml src
 
 test-karma:
 	@ $(KARMA) start test/karma.conf.js

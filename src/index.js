@@ -18,9 +18,9 @@
 
   //#include tmpl
 
-  tmpl.version = brackets.version = 'WIP'
 
 //#if NODE
+  tmpl.version = brackets.version = 'WIP'
 
   // support CommonJS, AMD & browser
   /* istanbul ignore else */
@@ -28,15 +28,13 @@
     module.exports = {
       'tmpl': tmpl, 'brackets': brackets
     }
-  }
-  else if (typeof define === 'function' && typeof define.amd !== 'undefined') {
+  } else if (typeof define === 'function' && typeof define.amd !== 'undefined') {
     define(function () {
       return {
         'tmpl': tmpl, 'brackets': brackets
       }
     })
-  }
-  else if (window) {
+  } else if (window) {
     window.tmpl = tmpl
     window.brackets = brackets
   }

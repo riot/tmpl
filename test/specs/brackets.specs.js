@@ -1,5 +1,6 @@
-/*eslint-env mocha */
-/*global riot, tmpl, brackets, expect */
+/* eslint-env mocha */
+/* eslint max-len: 0 */
+/* global riot, tmpl, brackets, expect */
 
 describe('brackets', function () {
 

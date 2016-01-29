@@ -2,6 +2,7 @@
     #                                                                         #
     #   Revised by aMarCruz - 2016-01-06                                      #
     #   Follow most of rules from http://standardjs.com/                      #
+    #   2016-01-19: use 1tbs style for blocks, like in the riot core          #
     #                                                                         #
     ###########################################################################
 
@@ -35,26 +36,15 @@ ecmaFeatures:
     modules: true
 
 rules:
-
-    ###########################################################################
-    #                                                                         #
-    #   POSSIBLE ERRORS: these rules point out areas where you might have     #
-    #   made mistakes.                                                        #
-    #                                                                         #
-    ###########################################################################
-
+    #
+    #   POSSIBLE ERRORS
+    #
     no-cond-assign: 0          # disallow assignment in conditional expressions (Default: 2)
     no-unexpected-multiline: 2 # avoid code that looks like two expressions but is actually one (Default: 0)
     valid-jsdoc: [1, { "requireReturn": false }]
-
-    ###########################################################################
-    #                                                                         #
-    #   BEST PRACTICES: these rules are designed to prevent you from making   #
-    #   mistakes. They either prescribe a better way of doing something or    #
-    #   help you avoid pitfalls.                                              #
-    #                                                                         #
-    ###########################################################################
-
+    #
+    #   BEST PRACTICES
+    #
     complexity: [1, 16]       # specify the maximum cyclomatic complexity allowed in a program (Default [0, 11])
   # curly: 0                  # specify curly brace conventions for all control statements
     default-case: 2           # require default case in switch statements (Default: 0)
@@ -91,21 +81,13 @@ rules:
     radix: 2                  # require use of the second argument for parseInt() (Default: 0)
     wrap-iife: [2, "inside"]  # require immediate function invocation to be wrapped in parentheses (Default: 0)
     yoda: [2, "never"]        # require or disallow Yoda conditions (Default: 0)
-
-    ###########################################################################
-    #                                                                         #
-    #   STRICT MODE: these rules relate to using strict mode.                 #
-    #                                                                         #
-    ###########################################################################
-
+    #
+    #   STRICT MODE
+    #
   # strict: [1, "never"]          # require that all functions are run in strict mode (Default: 0)
-
-    ###########################################################################
-    #                                                                         #
-    #   VARIABLES: These rules have to do with variable declarations.         #
-    #                                                                         #
-    ###########################################################################
-
+    #
+    #   VARIABLES
+    #
     no-label-var: 2               # disallow labels that share a name with a variable (Default: 0)
   # no-shadow: 1                  # disallow declaration of variables already declared in the outer scope (Default: 0)
     no-shadow-restricted-names: 2 # disallow shadowing of names such as arguments (Default: 0)
@@ -113,26 +95,16 @@ rules:
     no-undef-init: 2              # disallow use of undefined when initializing variables (Default: 0)
   # no-unused-vars: 0             # disallow declaration of variables that are not used in the code (Default: [2, {"vars": "all", "args": "after-used"}])
     no-use-before-define: [2, "nofunc"] # disallow use of variables before they are defined (Default: 0)
-
-    ###########################################################################
-    #                                                                         #
-    #   NODE.JS AND COMMONJS: These rules are specific to JavaScript          #
-    #   running on Node.js or using CommonJS in the browser.                  #
-    #                                                                         #
-    ###########################################################################
-
+    #
+    #   NODE.JS AND COMMONJS
+    #
     no-new-require: 2             # disallow use of new operator with the require function (Default: 0)
     no-path-concat: 2             # disallow string concatenation with __dirname and __filename (Default: 0)
-
-    ###########################################################################
-    #                                                                         #
-    #   STYLISTIC ISSUES: These rules are purely matters of style and are     #
-    #   quite subjective.                                                     #
-    #                                                                         #
-    ###########################################################################
-
+    #
+    #   STYLISTIC ISSUES
+    #
     array-bracket-spacing: 2        # disallow spaces inside of brackets (Default: [0, "never"])
-    brace-style: [1, "stroustrup", { "allowSingleLine": true }]
+    brace-style: [1, "1tbs", { "allowSingleLine": true }]
                                     # require Stroustrup style: `else` must be on its own line (Default: [0, '1tbs'])
     camelcase: [2, { "properties": "always" }]
                                     # require camel case names (Default: 0)
@@ -141,6 +113,7 @@ rules:
     indent: [2, 2, { "SwitchCase": 1 }] # set a specific tab width (Default: 0)
     key-spacing: 2                  # enforces spacing between keys and values in object literal properties
                                     # (Default: [0, { "beforeColon": false, "afterColon": true }])
+    max-len: [1, 96, 4, { "ignoreUrls": true, "ignorePattern": "=\\s+/.+/|_regEx\\(|RegExp\\(" }]
     max-nested-callbacks: [2, 4]    # specify the maximum depth callbacks can be nested (Default: [0, 2])
     new-cap: 1                      # require a capital letter for constructors (Default: 0)
     new-parens: 2                   # disallow the omission of parentheses when invoking a constructor with no arguments (Default: 0)

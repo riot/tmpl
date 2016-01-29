@@ -71,7 +71,7 @@
       arr = arr.concat(pair.replace(/(?=[[\]()*+?.^$|])/g, '\\').split(' '))
 
       arr[4] = _rewrite(arr[1].length > 1 ? /{[\S\s]*?}/ : _pairs[4], arr)
-      arr[5] = _rewrite(/\\({|})/g, arr)
+      arr[5] = _rewrite(pair.length > 3 ? /\\({|})/g : _pairs[5], arr)
       arr[6] = _rewrite(_pairs[6], arr)
       arr[7] = RegExp('\\\\(' + arr[3] + ')|([[({])|(' + arr[3] + ')|' + S_QBLOCKS, REGLOB)
       arr[8] = pair
@@ -103,7 +103,7 @@
         if (isexpr) {
 
           if (match[2]) {
-            re.lastIndex = skipBraces(match[2], re.lastIndex)
+            re.lastIndex = skipBraces(str, match[2], re.lastIndex)
             continue
           }
           if (!match[3])
@@ -124,25 +124,25 @@
 
       return parts
 
-      function unescapeStr (str) {
+      function unescapeStr (s) {
         if (tmpl || isexpr)
-          parts.push(str && str.replace(_bp[5], '$1'))
+          parts.push(s && s.replace(_bp[5], '$1'))
         else
-          parts.push(str)
+          parts.push(s)
       }
 
-      function skipBraces (ch, pos) {
+      function skipBraces (s, ch, ix) {
         var
           match,
           recch = FINDBRACES[ch]
 
-        recch.lastIndex = pos
-        pos = 1
-        while (match = recch.exec(str)) {
+        recch.lastIndex = ix
+        ix = 1
+        while (match = recch.exec(s)) {
           if (match[1] &&
-            !(match[1] === ch ? ++pos : --pos)) break
+            !(match[1] === ch ? ++ix : --ix)) break
         }
-        return pos ? str.length : recch.lastIndex
+        return ix ? s.length : recch.lastIndex
       }
     }
 
@@ -162,7 +162,7 @@
     }
 
     _brackets.array = function array (pair) {
-      return pair ? _create(pair) : _pairs
+      return pair ? _create(pair) : _cache
     }
 
     function _reset (pair) {
@@ -193,7 +193,7 @@
       get: function () { return _settings }
     })
 
-    /* istanbul ignore next: in the node version riot is not in the scope */
+    /* istanbul ignore next: in the browser riot is always in the scope */
     _brackets.settings = typeof riot !== 'undefined' && riot.settings || {}
     _brackets.set = _reset
 

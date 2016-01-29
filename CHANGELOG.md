@@ -1,9 +1,10 @@
 # riot-tmpl Changes
 
 ### v2.3.21
-- Refactorization of `brackets`, now is ~8% faster.
+- Refactorization, now `tmpl` and `brackets` are ~5% faster.
 - Removed unused `tmpl.isRaw` function (internal).
 - Changes to comments.
+- Files to preprocess are moved from the "lib" to the "src" directory, "lib" was removed.
 
 ### v2.3.20
 - Fixed lint issues with new .eslintrc.yml, almost compatible with [JavaScript Standard Style](http://standardjs.com/)

@@ -167,7 +167,7 @@ var brackets = (function (UNDEF) {
     arr = arr.concat(pair.replace(/(?=[[\]()*+?.^$|])/g, '\\').split(' '))
 
     arr[$_RIX_TEST] = _rewrite(arr[1].length > 1 ? /{[\S\s]*?}/ : _pairs[$_RIX_TEST], arr)
-    arr[$_RIX_ESC] = _rewrite(/\\({|})/g, arr)
+    arr[$_RIX_ESC] = _rewrite(pair.length > 3 ? /\\({|})/g : _pairs[$_RIX_ESC], arr)
     arr[$_RIX_OPEN] = _rewrite(_pairs[$_RIX_OPEN], arr) // for _split()
     arr[$_RIX_CLOSE] = RegExp('\\\\(' + arr[3] + ')|([[({])|(' + arr[3] + ')|' + S_QBLOCKS, REGLOB)
     arr[$_RIX_PAIR] = pair
@@ -314,6 +314,8 @@ var brackets = (function (UNDEF) {
 
   /**
    * Returns an array with brackets information, defaults to the current brackets.
+   * (the `brackets` module in the node version of the compiler allways defaults
+   * to the predefined riot brackets `{ }`).
    *
    * _This function is for internal use._
    * @param   {string} [pair] - If used, returns info for this brackets
@@ -321,7 +323,7 @@ var brackets = (function (UNDEF) {
    * @private
    */
   _brackets.array = function array (pair) {
-    return pair ? _create(pair) : _pairs
+    return pair ? _create(pair) : _cache
   }
 
   /**
@@ -366,7 +368,7 @@ var brackets = (function (UNDEF) {
     get: function () { return _settings }
   })
 
-  /* istanbul ignore next: in the node version riot is not in the scope */
+  /* istanbul ignore next: in the browser riot is always in the scope */
   _brackets.settings = typeof riot !== 'undefined' && riot.settings || {}
   _brackets.set = _reset
 

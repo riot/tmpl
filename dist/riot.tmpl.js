@@ -253,14 +253,17 @@ var tmpl = (function () {
   }
 
   var
+    CH_IDEXPR = '\u2057',
+    RE_CSNAME = /^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\u2057(\d+)~):/,
     RE_QBLOCK = RegExp(brackets.S_QBLOCKS, 'g'),
-    RE_QBMARK = /\x01(\d+)~/g
+    RE_DQUOTE = /\u2057/g,
+    RE_QBMARK = /\u2057(\d+)~/g
 
   function _getTmpl (str) {
     var
       qstr = [],
       expr,
-      parts = brackets.split(str.replace(/\u2057/g, '"'), 1)
+      parts = brackets.split(str.replace(RE_DQUOTE, '"'), 1)
 
     if (parts.length > 2 || parts[0]) {
       var i, j, list = []
@@ -306,8 +309,7 @@ var tmpl = (function () {
       '(': /[()]/g,
       '[': /[[\]]/g,
       '{': /[{}]/g
-    },
-    CS_IDENT = /^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\x01(\d+)~):/
+    }
 
   function _parseExpr (expr, asText, qstr) {
 
@@ -315,7 +317,7 @@ var tmpl = (function () {
 
     expr = expr
           .replace(RE_QBLOCK, function (s, div) {
-            return s.length > 2 && !div ? '\x01' + (qstr.push(s) - 1) + '~' : s
+            return s.length > 2 && !div ? CH_IDEXPR + (qstr.push(s) - 1) + '~' : s
           })
           .replace(/\s+/g, ' ').trim()
           .replace(/\ ?([[\({},?\.:])\ ?/g, '$1')
@@ -327,7 +329,7 @@ var tmpl = (function () {
         match
 
       while (expr &&
-            (match = expr.match(CS_IDENT)) &&
+            (match = expr.match(RE_CSNAME)) &&
             !match.index
         ) {
         var

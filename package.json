@@ -37,9 +37,9 @@
     "karma-browserstack-launcher": "^0.1.6",
     "karma-coverage": "^0.5.3",
     "karma-mocha": "^0.2.1",
-    "karma-phantomjs-launcher": "^0.2.3",
-    "mocha": "^2.4.4",
-    "phantomjs": "^2.1.2",
+    "karma-phantomjs-launcher": "^1.0.0",
+    "mocha": "^2.4.5",
+    "phantomjs": "^2.1.3",
     "riot-bump": "^1.0.0"
   },
   "author": "Muut, Inc. and other contributors",

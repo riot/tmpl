@@ -100,7 +100,7 @@ var brackets = (function (UNDEF) {
 
     isexpr = start = re.lastIndex = 0
 
-    while (match = re.exec(str)) {
+    while ((match = re.exec(str))) {
 
       pos = match.index
 
@@ -110,8 +110,9 @@ var brackets = (function (UNDEF) {
           re.lastIndex = skipBraces(str, match[2], re.lastIndex)
           continue
         }
-        if (!match[3])
+        if (!match[3]) {
           continue
+        }
       }
 
       if (!match[1]) {
@@ -129,10 +130,11 @@ var brackets = (function (UNDEF) {
     return parts
 
     function unescapeStr (s) {
-      if (tmpl || isexpr)
+      if (tmpl || isexpr) {
         parts.push(s && s.replace(_bp[5], '$1'))
-      else
+      } else {
         parts.push(s)
+      }
     }
 
     function skipBraces (s, ch, ix) {
@@ -142,7 +144,7 @@ var brackets = (function (UNDEF) {
 
       recch.lastIndex = ix
       ix = 1
-      while (match = recch.exec(s)) {
+      while ((match = recch.exec(s))) {
         if (match[1] &&
           !(match[1] === ch ? ++ix : --ix)) break
       }
@@ -156,13 +158,10 @@ var brackets = (function (UNDEF) {
 
   _brackets.loopKeys = function loopKeys (expr) {
     var m = expr.match(_cache[9])
+
     return m
       ? { key: m[1], pos: m[2], val: _cache[0] + m[3].trim() + _cache[1] }
       : { val: expr.trim() }
-  }
-
-  _brackets.hasRaw = function (src) {
-    return _cache[10].test(src)
   }
 
   _brackets.array = function array (pair) {
@@ -174,13 +173,13 @@ var brackets = (function (UNDEF) {
       _cache = _create(pair)
       _regex = pair === DEFAULT ? _loopback : _rewrite
       _cache[9] = _regex(_pairs[9])
-      _cache[10] = _regex(_pairs[10])
     }
     cachedBrackets = pair
   }
 
   function _setSettings (o) {
     var b
+
     o = o || {}
     b = o.brackets
     Object.defineProperty(o, 'brackets', {
@@ -249,11 +248,11 @@ var tmpl = (function () {
   }
 
   function _create (str) {
-
     var expr = _getTmpl(str)
+
     if (expr.slice(0, 11) !== 'try{return ') expr = 'return ' + expr
 
-    return new Function('E', expr + ';')
+    return new Function('E', expr + ';')    //eslint-disable-line no-new-func
   }
 
   var
@@ -276,11 +275,11 @@ var tmpl = (function () {
 
         expr = parts[i]
 
-        if (expr && (expr = i & 1 ?
+        if (expr && (expr = i & 1
 
-              _parseExpr(expr, 1, qstr) :
+            ? _parseExpr(expr, 1, qstr)
 
-              '"' + expr
+            : '"' + expr
                 .replace(/\\/g, '\\\\')
                 .replace(/\r\n?|\n/g, '\\n')
                 .replace(/"/g, '\\"') +
@@ -290,21 +289,21 @@ var tmpl = (function () {
 
       }
 
-      expr = j < 2 ? list[0] :
-             '[' + list.join(',') + '].join("")'
+      expr = j < 2 ? list[0]
+           : '[' + list.join(',') + '].join("")'
 
     } else {
 
       expr = _parseExpr(parts[1], 0, qstr)
     }
 
-    if (qstr[0])
+    if (qstr[0]) {
       expr = expr.replace(RE_QBMARK, function (_, pos) {
         return qstr[pos]
           .replace(/\r/g, '\\r')
           .replace(/\n/g, '\\n')
       })
-
+    }
     return expr
   }
 
@@ -316,8 +315,6 @@ var tmpl = (function () {
     }
 
   function _parseExpr (expr, asText, qstr) {
-
-    if (expr[0] === '=') expr = expr.slice(1)
 
     expr = expr
           .replace(RE_QBLOCK, function (s, div) {
@@ -352,8 +349,8 @@ var tmpl = (function () {
         list[cnt++] = _wrapExpr(jsb, 1, key)
       }
 
-      expr = !cnt ? _wrapExpr(expr, asText) :
-          cnt > 1 ? '[' + list.join(',') + '].join(" ").trim()' : list[0]
+      expr = !cnt ? _wrapExpr(expr, asText)
+           : cnt > 1 ? '[' + list.join(',') + '].join(" ").trim()' : list[0]
     }
     return expr
 
@@ -373,7 +370,7 @@ var tmpl = (function () {
   }
 
   // istanbul ignore next: not both
-  var
+  var // eslint-disable-next-line max-len
     JS_CONTEXT = '"in this?this:' + (typeof window !== 'object' ? 'global' : 'window') + ').',
     JS_VARNAME = /[,{][$\w]+:|(^ *|[^$\w\.])(?!(?:typeof|true|false|null|undefined|in|instanceof|is(?:Finite|NaN)|void|NaN|new|Date|RegExp|Math)(?![$\w]))([$_A-Za-z][$\w]*)/g,
     JS_NOPROPS = /^(?=(\.[$\w]+))\1(?:[^.[(]|$)/
@@ -401,14 +398,14 @@ var tmpl = (function () {
 
     if (key) {
 
-      expr = (tb ?
-          'function(){' + expr + '}.call(this)' : '(' + expr + ')'
+      expr = (tb
+          ? 'function(){' + expr + '}.call(this)' : '(' + expr + ')'
         ) + '?"' + key + '":""'
 
     } else if (asText) {
 
-      expr = 'function(v){' + (tb ?
-          expr.replace('return ', 'v=') : 'v=(' + expr + ')'
+      expr = 'function(v){' + (tb
+          ? expr.replace('return ', 'v=') : 'v=(' + expr + ')'
         ) + ';return v||v===0?v:""}.call(this)'
     }
 

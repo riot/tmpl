@@ -42,8 +42,9 @@ var tmpl = (function () {
       data._debug_ = 0
       if (!_cache[str]) {
         _cache[str] = _create(str, 1)  // request debug output
-        var rs = typeof riot === 'undefined' ?
-          '(riot undefined)' : JSON.stringify(riot.settings)
+        var rs = typeof riot === 'undefined'
+          ? '(riot undefined)' : JSON.stringify(riot.settings)
+
         console.log('--- DEBUG' +
           '\n riot.settings: ' + rs + '\n data: ' + JSON.stringify(data))
       }
@@ -135,20 +136,19 @@ var tmpl = (function () {
    * @private
    */
   function _create (str) {
-
     var expr = _getTmpl(str)
+
     if (expr.slice(0, 11) !== 'try{return ') expr = 'return ' + expr
 
 //#if DEBUG
-    if (arguments.length > 1)
-      console.log('--- getter:\n    `' + expr + '`\n---')
+    if (arguments.length > 1) console.log('--- getter:\n    `' + expr + '`\n---')
 //#elif LIST_GETTERS
     //console.log(' In: `%s`\nOUT: `%s`', str, expr)
 //#endif
 
     // Now, we can create the function to return by calling the Function constructor.
     // The parameter `E` is the error handler for runtime only.
-    return new Function('E', expr + ';')
+    return new Function('E', expr + ';')    //eslint-disable-line no-new-func
   }
 
   //
@@ -157,8 +157,11 @@ var tmpl = (function () {
 
   // Regexes for `_getTmpl` and `_parseExpr`
   var
+    CH_IDEXPR = '\u2057',
+    RE_CSNAME = /^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\u2057(\d+)~):/,
     RE_QBLOCK = RegExp(brackets.S_QBLOCKS, 'g'),
-    RE_QBMARK = /\x01(\d+)~/g     // string or regex marker, $1: array index
+    RE_DQUOTE = /\u2057/g,
+    RE_QBMARK = /\u2057(\d+)~/g     // string or regex marker, $1: array index
 
   /**
    * Parses an expression or template with zero or more expressions enclosed with
@@ -172,7 +175,7 @@ var tmpl = (function () {
     var
       qstr = [],                      // hidden qblocks
       expr,
-      parts = brackets.split(str.replace(/\u2057/g, '"'), 1)  // get text/expr parts
+      parts = brackets.split(str.replace(RE_DQUOTE, '"'), 1)  // get text/expr parts
 
     // We can have almost anything as expressions, except comments... hope
     if (parts.length > 2 || parts[0]) {
@@ -182,11 +185,11 @@ var tmpl = (function () {
 
         expr = parts[i]
 
-        if (expr && (expr = i & 1 ?             // every odd element is an expression
+        if (expr && (expr = i & 1               // every odd element is an expression
 
-              _parseExpr(expr, 1, qstr) :       // mode 1 convert falsy values to "",
+            ? _parseExpr(expr, 1, qstr)         // mode 1 convert falsy values to "",
                                                 // except zero
-              '"' + expr                        // ttext: convert to js literal string
+            : '"' + expr                        // ttext: convert to js literal string
                 .replace(/\\/g, '\\\\')         // this is html, preserve backslashes
                 .replace(/\r\n?|\n/g, '\\n')    // normalize eols
                 .replace(/"/g, '\\"') +         // escape inner double quotes
@@ -196,8 +199,8 @@ var tmpl = (function () {
 
       }
 
-      expr = j < 2 ? list[0] :                  // optimize code for 0-1 parts
-             '[' + list.join(',') + '].join("")'
+      expr = j < 2 ? list[0]                    // optimize code for 0-1 parts
+           : '[' + list.join(',') + '].join("")'
 
     } else {
 
@@ -205,13 +208,13 @@ var tmpl = (function () {
     }
 
     // Restore quoted strings and regexes
-    if (qstr[0])
+    if (qstr[0]) {
       expr = expr.replace(RE_QBMARK, function (_, pos) {
         return qstr[pos]
           .replace(/\r/g, '\\r')
           .replace(/\n/g, '\\n')
       })
-
+    }
     return expr
   }
 
@@ -220,8 +223,7 @@ var tmpl = (function () {
       '(': /[()]/g,
       '[': /[[\]]/g,
       '{': /[{}]/g
-    },
-    CS_IDENT = /^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\x01(\d+)~):/
+    }
 
   /**
    * Parses an individual expression `{expression}` or shorthand `{name: expression, ...}`
@@ -257,11 +259,9 @@ var tmpl = (function () {
     //   Trim and compact is not strictly necessary, but it allows optimized regexes.
     //   Do not touch the next block until you know how/which regexes are affected.
 
-    if (expr[0] === '=') expr = expr.slice(1)
-
     expr = expr
           .replace(RE_QBLOCK, function (s, div) {   // hide strings & regexes
-            return s.length > 2 && !div ? '\x01' + (qstr.push(s) - 1) + '~' : s
+            return s.length > 2 && !div ? CH_IDEXPR + (qstr.push(s) - 1) + '~' : s
           })
           .replace(/\s+/g, ' ').trim()
           .replace(/\ ?([[\({},?\.:])\ ?/g, '$1')
@@ -274,7 +274,7 @@ var tmpl = (function () {
 
       // Try to match the first name in the possible shorthand list
       while (expr &&
-            (match = expr.match(CS_IDENT)) &&
+            (match = expr.match(RE_CSNAME)) &&
             !match.index                          // index > 0 means error
         ) {
         var
@@ -298,8 +298,8 @@ var tmpl = (function () {
       }
 
       // For shorthands, the generated code returns an array with expression-name pairs
-      expr = !cnt ? _wrapExpr(expr, asText) :
-          cnt > 1 ? '[' + list.join(',') + '].join(" ").trim()' : list[0]
+      expr = !cnt ? _wrapExpr(expr, asText)
+           : cnt > 1 ? '[' + list.join(',') + '].join(" ").trim()' : list[0]
     }
     return expr
 
@@ -321,7 +321,7 @@ var tmpl = (function () {
 
   // Matches a varname, excludes object keys. $1: lookahead, $2: variable name
   // istanbul ignore next: not both
-  var
+  var // eslint-disable-next-line max-len
     JS_CONTEXT = '"in this?this:' + (typeof window !== 'object' ? 'global' : 'window') + ').',
     JS_VARNAME = /[,{][$\w]+:|(^ *|[^$\w\.])(?!(?:typeof|true|false|null|undefined|in|instanceof|is(?:Finite|NaN)|void|NaN|new|Date|RegExp|Math)(?![$\w]))([$_A-Za-z][$\w]*)/g,
     JS_NOPROPS = /^(?=(\.[$\w]+))\1(?:[^.[(]|$)/
@@ -367,16 +367,16 @@ var tmpl = (function () {
       // w/try : function(){try{return expr}catch(e){E(e,this)}}.call(this)?"name":""
       // no try: (expr)?"name":""
       // ==> 'return [' + expr_list.join(',') + '].join(" ").trim()'
-      expr = (tb ?
-          'function(){' + expr + '}.call(this)' : '(' + expr + ')'
+      expr = (tb
+          ? 'function(){' + expr + '}.call(this)' : '(' + expr + ')'
         ) + '?"' + key + '":""'
 
     } else if (asText) {
       // w/try : function(v){try{v=expr}catch(e){E(e,this)};return v||v===0?v:""}.call(this)
       // no try: function(v){return (v=(expr))||v===0?v:""}.call(this)
       // ==> 'return [' + text_and_expr_list.join(',') + '].join("")'
-      expr = 'function(v){' + (tb ?
-          expr.replace('return ', 'v=') : 'v=(' + expr + ')'
+      expr = 'function(v){' + (tb
+          ? expr.replace('return ', 'v=') : 'v=(' + expr + ')'
         ) + ';return v||v===0?v:""}.call(this)'
     }
     // else if (!asText)

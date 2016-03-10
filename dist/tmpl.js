@@ -1,7 +1,6 @@
 /* riot-tmpl v2.3.21, @license MIT, (c) 2015 Muut Inc. + contributors */
 ;(function (window) {     // eslint-disable-line no-extra-semi
   'use strict'
-  /*eslint-env amd */
 
   /**
    * riot.util.brackets
@@ -96,7 +95,7 @@
 
       isexpr = start = re.lastIndex = 0
 
-      while (match = re.exec(str)) {
+      while ((match = re.exec(str))) {
 
         pos = match.index
 
@@ -106,8 +105,9 @@
             re.lastIndex = skipBraces(str, match[2], re.lastIndex)
             continue
           }
-          if (!match[3])
+          if (!match[3]) {
             continue
+          }
         }
 
         if (!match[1]) {
@@ -125,10 +125,11 @@
       return parts
 
       function unescapeStr (s) {
-        if (tmpl || isexpr)
+        if (tmpl || isexpr) {
           parts.push(s && s.replace(_bp[5], '$1'))
-        else
+        } else {
           parts.push(s)
+        }
       }
 
       function skipBraces (s, ch, ix) {
@@ -138,7 +139,7 @@
 
         recch.lastIndex = ix
         ix = 1
-        while (match = recch.exec(s)) {
+        while ((match = recch.exec(s))) {
           if (match[1] &&
             !(match[1] === ch ? ++ix : --ix)) break
         }
@@ -152,13 +153,10 @@
 
     _brackets.loopKeys = function loopKeys (expr) {
       var m = expr.match(_cache[9])
+
       return m
         ? { key: m[1], pos: m[2], val: _cache[0] + m[3].trim() + _cache[1] }
         : { val: expr.trim() }
-    }
-
-    _brackets.hasRaw = function (src) {
-      return _cache[10].test(src)
     }
 
     _brackets.array = function array (pair) {
@@ -170,13 +168,13 @@
         _cache = _create(pair)
         _regex = pair === DEFAULT ? _loopback : _rewrite
         _cache[9] = _regex(_pairs[9])
-        _cache[10] = _regex(_pairs[10])
       }
       cachedBrackets = pair
     }
 
     function _setSettings (o) {
       var b
+
       o = o || {}
       b = o.brackets
       Object.defineProperty(o, 'brackets', {
@@ -244,22 +242,25 @@
     }
 
     function _create (str) {
-
       var expr = _getTmpl(str)
+
       if (expr.slice(0, 11) !== 'try{return ') expr = 'return ' + expr
 
-      return new Function('E', expr + ';')
+      return new Function('E', expr + ';')    //eslint-disable-line no-new-func
     }
 
     var
+      CH_IDEXPR = '\u2057',
+      RE_CSNAME = /^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\u2057(\d+)~):/,
       RE_QBLOCK = RegExp(brackets.S_QBLOCKS, 'g'),
-      RE_QBMARK = /\x01(\d+)~/g
+      RE_DQUOTE = /\u2057/g,
+      RE_QBMARK = /\u2057(\d+)~/g
 
     function _getTmpl (str) {
       var
         qstr = [],
         expr,
-        parts = brackets.split(str.replace(/\u2057/g, '"'), 1)
+        parts = brackets.split(str.replace(RE_DQUOTE, '"'), 1)
 
       if (parts.length > 2 || parts[0]) {
         var i, j, list = []
@@ -268,11 +269,11 @@
 
           expr = parts[i]
 
-          if (expr && (expr = i & 1 ?
+          if (expr && (expr = i & 1
 
-                _parseExpr(expr, 1, qstr) :
+              ? _parseExpr(expr, 1, qstr)
 
-                '"' + expr
+              : '"' + expr
                   .replace(/\\/g, '\\\\')
                   .replace(/\r\n?|\n/g, '\\n')
                   .replace(/"/g, '\\"') +
@@ -282,21 +283,21 @@
 
         }
 
-        expr = j < 2 ? list[0] :
-               '[' + list.join(',') + '].join("")'
+        expr = j < 2 ? list[0]
+             : '[' + list.join(',') + '].join("")'
 
       } else {
 
         expr = _parseExpr(parts[1], 0, qstr)
       }
 
-      if (qstr[0])
+      if (qstr[0]) {
         expr = expr.replace(RE_QBMARK, function (_, pos) {
           return qstr[pos]
             .replace(/\r/g, '\\r')
             .replace(/\n/g, '\\n')
         })
-
+      }
       return expr
     }
 
@@ -305,16 +306,13 @@
         '(': /[()]/g,
         '[': /[[\]]/g,
         '{': /[{}]/g
-      },
-      CS_IDENT = /^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\x01(\d+)~):/
+      }
 
     function _parseExpr (expr, asText, qstr) {
 
-      if (expr[0] === '=') expr = expr.slice(1)
-
       expr = expr
             .replace(RE_QBLOCK, function (s, div) {
-              return s.length > 2 && !div ? '\x01' + (qstr.push(s) - 1) + '~' : s
+              return s.length > 2 && !div ? CH_IDEXPR + (qstr.push(s) - 1) + '~' : s
             })
             .replace(/\s+/g, ' ').trim()
             .replace(/\ ?([[\({},?\.:])\ ?/g, '$1')
@@ -326,7 +324,7 @@
           match
 
         while (expr &&
-              (match = expr.match(CS_IDENT)) &&
+              (match = expr.match(RE_CSNAME)) &&
               !match.index
           ) {
           var
@@ -345,8 +343,8 @@
           list[cnt++] = _wrapExpr(jsb, 1, key)
         }
 
-        expr = !cnt ? _wrapExpr(expr, asText) :
-            cnt > 1 ? '[' + list.join(',') + '].join(" ").trim()' : list[0]
+        expr = !cnt ? _wrapExpr(expr, asText)
+             : cnt > 1 ? '[' + list.join(',') + '].join(" ").trim()' : list[0]
       }
       return expr
 
@@ -366,7 +364,7 @@
     }
 
     // istanbul ignore next: not both
-    var
+    var // eslint-disable-next-line max-len
       JS_CONTEXT = '"in this?this:' + (typeof window !== 'object' ? 'global' : 'window') + ').',
       JS_VARNAME = /[,{][$\w]+:|(^ *|[^$\w\.])(?!(?:typeof|true|false|null|undefined|in|instanceof|is(?:Finite|NaN)|void|NaN|new|Date|RegExp|Math)(?![$\w]))([$_A-Za-z][$\w]*)/g,
       JS_NOPROPS = /^(?=(\.[$\w]+))\1(?:[^.[(]|$)/
@@ -394,14 +392,14 @@
 
       if (key) {
 
-        expr = (tb ?
-            'function(){' + expr + '}.call(this)' : '(' + expr + ')'
+        expr = (tb
+            ? 'function(){' + expr + '}.call(this)' : '(' + expr + ')'
           ) + '?"' + key + '":""'
 
       } else if (asText) {
 
-        expr = 'function(v){' + (tb ?
-            expr.replace('return ', 'v=') : 'v=(' + expr + ')'
+        expr = 'function(v){' + (tb
+            ? expr.replace('return ', 'v=') : 'v=(' + expr + ')'
           ) + ';return v||v===0?v:""}.call(this)'
       }
 
@@ -420,12 +418,12 @@
   /* istanbul ignore else */
   if (typeof module === 'object' && module.exports) {
     module.exports = {
-      'tmpl': tmpl, 'brackets': brackets
+      tmpl: tmpl, brackets: brackets
     }
   } else if (typeof define === 'function' && typeof define.amd !== 'undefined') {
     define(function () {
       return {
-        'tmpl': tmpl, 'brackets': brackets
+        tmpl: tmpl, brackets: brackets
       }
     })
   } else if (window) {
@@ -433,4 +431,4 @@
     window.brackets = brackets
   }
 
-})(typeof window === 'object' ? /* istanbul ignore next */ window : void 0) // eslint-disable-line
+})(typeof window === 'object' ? /* istanbul ignore next */ window : void 0)

@@ -1,11 +1,12 @@
 //#if 0
-/*global tmpl, brackets */
+/* global tmpl, brackets, window */
+/* eslint-disable no-void */
+/* eslint-env amd */
 //#endif
 //#if NODE
 /* riot-tmpl WIP, @license MIT, (c) 2015 Muut Inc. + contributors */
 ;(function (window) {     // eslint-disable-line no-extra-semi
   'use strict'
-  /*eslint-env amd */
 //#else
 
 /**
@@ -18,7 +19,6 @@
 
   //#include tmpl
 
-
 //#if NODE
   tmpl.version = brackets.version = 'WIP'
 
@@ -26,12 +26,12 @@
   /* istanbul ignore else */
   if (typeof module === 'object' && module.exports) {
     module.exports = {
-      'tmpl': tmpl, 'brackets': brackets
+      tmpl: tmpl, brackets: brackets
     }
   } else if (typeof define === 'function' && typeof define.amd !== 'undefined') {
     define(function () {
       return {
-        'tmpl': tmpl, 'brackets': brackets
+        tmpl: tmpl, brackets: brackets
       }
     })
   } else if (window) {
@@ -39,5 +39,5 @@
     window.brackets = brackets
   }
 
-})(typeof window === 'object' ? /* istanbul ignore next */ window : void 0) // eslint-disable-line
+})(typeof window === 'object' ? /* istanbul ignore next */ window : void 0)
 //#endif

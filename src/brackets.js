@@ -19,6 +19,23 @@ var brackets = (function (UNDEF) {
   //
   // Closure data
   // --------------------------------------------------------------------------
+  //
+  //#set $_RIX_TEST  = 4
+  //#set $_RIX_ESC   = 5
+  //#set $_RIX_OPEN  = 6
+  //#set $_RIX_CLOSE = 7
+  //#set $_RIX_PAIR  = 8
+  //#set $_RIX_LOOP  = 9
+  //#ifndef $_RIX_TEST
+  var
+    $_RIX_TEST  = 4,  // DONT'T FORGET SYNC THE #set BLOCK!!!
+    $_RIX_ESC   = 5,
+    $_RIX_OPEN  = 6,
+    $_RIX_CLOSE = 7,
+    $_RIX_PAIR  = 8,
+    $_RIX_LOOP  = 9
+  //#endif
+
   var
     REGLOB = 'g',
 
@@ -77,24 +94,6 @@ var brackets = (function (UNDEF) {
      * @default
      */
     DEFAULT = '{ }'
-
-  //#set $_RIX_TEST  = 4
-  //#set $_RIX_ESC   = 5
-  //#set $_RIX_OPEN  = 6
-  //#set $_RIX_CLOSE = 7
-  //#set $_RIX_PAIR  = 8
-  //#set $_RIX_LOOP  = 9
-  //#set $_RIX_RAW   = 10
-  //#ifndef $_RIX_TEST
-  var
-    $_RIX_TEST  = 4,  // DONT'T FORGET SYNC THE #set BLOCK!!!
-    $_RIX_ESC   = 5,
-    $_RIX_OPEN  = 6,
-    $_RIX_CLOSE = 7,
-    $_RIX_PAIR  = 8,
-    $_RIX_LOOP  = 9,
-    $_RIX_RAW   = 10
-  //#endif
 
   // pre-made string and regexes for the default brackets
   var _pairs = [
@@ -230,7 +229,7 @@ var brackets = (function (UNDEF) {
 
     isexpr = start = re.lastIndex = 0       // re is reused, we must reset lastIndex
 
-    while (match = re.exec(str)) {
+    while ((match = re.exec(str))) {
 
       pos = match.index
 
@@ -244,8 +243,9 @@ var brackets = (function (UNDEF) {
           re.lastIndex = skipBraces(str, match[2], re.lastIndex)
           continue                          // skip the bracketed block and loop
         }
-        if (!match[3])                      // if don't have a closing bracket
+        if (!match[3]) {                    // if don't have a closing bracket
           continue                          // search again
+        }
       }
 
       // At this point, we expect an _unescaped_ openning bracket in $2 for text,
@@ -271,10 +271,11 @@ var brackets = (function (UNDEF) {
     // Unescape escaped brackets from expressions and, if we are called from
     // tmpl, from the HTML part too.
     function unescapeStr (s) {
-      if (tmpl || isexpr)
+      if (tmpl || isexpr) {
         parts.push(s && s.replace(_bp[$_RIX_ESC], '$1'))
-      else
+      } else {
         parts.push(s)
+      }
     }
 
     // Find the js closing bracket for the current block.
@@ -286,7 +287,7 @@ var brackets = (function (UNDEF) {
 
       recch.lastIndex = ix
       ix = 1
-      while (match = recch.exec(s)) {
+      while ((match = recch.exec(s))) {
         if (match[1] &&
           !(match[1] === ch ? ++ix : --ix)) break
       }
@@ -302,14 +303,10 @@ var brackets = (function (UNDEF) {
   // exposed by riot.util.tmpl.loopKeys
   _brackets.loopKeys = function loopKeys (expr) {
     var m = expr.match(_cache[$_RIX_LOOP])
+
     return m
       ? { key: m[1], pos: m[2], val: _cache[0] + m[3].trim() + _cache[1] }
       : { val: expr.trim() }
-  }
-
-  // exposed by riot.util.tmpl.haveRaw
-  _brackets.hasRaw = function (src) {
-    return _cache[$_RIX_RAW].test(src)
   }
 
   /**
@@ -336,7 +333,6 @@ var brackets = (function (UNDEF) {
       _cache = _create(pair)
       _regex = pair === DEFAULT ? _loopback : _rewrite
       _cache[$_RIX_LOOP] = _regex(_pairs[$_RIX_LOOP])
-      _cache[$_RIX_RAW] = _regex(_pairs[$_RIX_RAW])
     }
     cachedBrackets = pair  // always set these
   }
@@ -348,6 +344,7 @@ var brackets = (function (UNDEF) {
    */
   function _setSettings (o) {
     var b
+
     o = o || {}
     b = o.brackets
     Object.defineProperty(o, 'brackets', {

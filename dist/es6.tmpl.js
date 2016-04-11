@@ -3,7 +3,6 @@
  * The riot template engine
  * @version v2.3.21
  */
-
 /**
  * riot.util.brackets
  *

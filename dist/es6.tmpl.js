@@ -252,7 +252,10 @@ var tmpl = (function () {
 
     if (expr.slice(0, 11) !== 'try{return ') expr = 'return ' + expr
 
-    return new Function('E', expr + ';')    //eslint-disable-line no-new-func
+/* eslint-disable */
+
+    return new Function('E', expr + ';')
+/* eslint-enable */
   }
 
   var

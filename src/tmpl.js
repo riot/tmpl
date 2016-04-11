@@ -145,10 +145,15 @@ var tmpl = (function () {
 //#elif LIST_GETTERS
     //console.log(' In: `%s`\nOUT: `%s`', str, expr)
 //#endif
-
+/* eslint-disable */
+//#if CSP
+    return safeEval.Function('E', expr + ';')
+//#else
     // Now, we can create the function to return by calling the Function constructor.
     // The parameter `E` is the error handler for runtime only.
-    return new Function('E', expr + ';')    //eslint-disable-line no-new-func
+    return new Function('E', expr + ';')
+//#endif
+/* eslint-enable */
   }
 
   //

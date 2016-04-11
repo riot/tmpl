@@ -1,10 +1,11 @@
 var isNode = typeof window === 'undefined'
 
-describe('Observable Tests', function () {
+describe('Tmpl Tests', function () {
   if (isNode) {
+    var _ = require('../dist/tmpl') // require('../dist/csp.tmpl')
     expect = require('expect.js')
-    tmpl = require('../dist/tmpl').tmpl
-    brackets = require('../dist/tmpl').brackets
+    tmpl = _.tmpl
+    brackets = _.brackets
     require('./specs/core.specs.js')
     require('./specs/brackets.specs.js')
   }

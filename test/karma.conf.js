@@ -23,7 +23,7 @@ module.exports = function (config) {
 
     files: [
       '../node_modules/expect.js/index.js',
-      '../dist/csp.tmpl.js',
+      '../dist/riot.tmpl.js',
       'specs/core.specs.js',
       'specs/brackets.specs.js'
     ],

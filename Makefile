@@ -2,7 +2,7 @@
 JSPP_FLAGS = -F istanbul -F eslint --custom-filter "\s@(module|version)\b" --headers ""
 JSPP_RIOT_FLAGS = $(JSPP_FLAGS) -D RIOT
 JSPP_ES6_FLAGS  = $(JSPP_FLAGS) -D ES6
-JSPP_CSP_FLAGS  = $(JSPP_FLAGS) -D CSP
+JSPP_CSP_FLAGS  = $(JSPP_FLAGS) -D CSP -D ES6
 JSPP_NODE_FLAGS = $(JSPP_FLAGS) -D NODE --indent 2
 
 # Command line paths
@@ -11,7 +11,7 @@ ESLINT    	= ./node_modules/eslint/bin/eslint.js
 ISTANBUL 		= ./node_modules/istanbul/lib/cli.js
 KARMA     	= ./node_modules/karma/bin/karma
 MOCHA     	= ./node_modules/mocha/bin/_mocha
-BROWSERIFY  = ./node_modules/browserify/bin/cmd.js
+ROLLUP      = ./node_modules/rollup/bin/rollup
 
 JSPP      = ./node_modules/jspreproc/bin/jspp.js
 
@@ -30,7 +30,7 @@ build: eslint
 	@ $(JSPP) $(JSPP_NODE_FLAGS) src/index.js > $(DIST)tmpl.js
 	# build the csp version
 	@ $(JSPP) $(JSPP_CSP_FLAGS)  src/index.js > $(DIST)csp.tmpl_tmp.js
-	@ $(BROWSERIFY) $(DIST)csp.tmpl_tmp.js -o $(DIST)csp.tmpl.js
+	@ $(ROLLUP) -c rollup.config.js --name cspTmpl -- $(DIST)csp.tmpl_tmp.js > $(DIST)csp.tmpl.js
 	@ rm $(DIST)csp.tmpl_tmp.js
 
 

@@ -1,10 +1,12 @@
+//#if CSP
+  //eslint-disable-next-line no-unused-vars
+  import safeEval from 'notevil'
+//#endif
+
 //#if 0
 /* global tmpl, brackets, window */
 /* eslint-disable no-void */
 /* eslint-env amd */
-//#endif
-//#if CSP
-//#set RIOT = 1
 //#endif
 //#if NODE
 /* riot-tmpl WIP, @license MIT, (c) 2015 Muut Inc. + contributors */
@@ -17,11 +19,6 @@
  * @version WIP
  */
 //#endif
-//#if CSP
-  //eslint-disable-next-line no-unused-vars
-  var safeEval = require('notevil')
-//#endif
-
   //#include brackets
 
   //#include tmpl

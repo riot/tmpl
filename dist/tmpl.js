@@ -1,7 +1,7 @@
+
 /* riot-tmpl WIP, @license MIT, (c) 2015 Muut Inc. + contributors */
 ;(function (window) {     // eslint-disable-line no-extra-semi
   'use strict'
-
   /**
    * riot.util.brackets
    *

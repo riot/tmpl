@@ -28,7 +28,6 @@
     "engine"
   ],
   "devDependencies": {
-    "browserify": "^13.0.0",
     "coveralls": "^2.11.9",
     "eslint": "^2.7.0",
     "expect.js": "^0.3.1",
@@ -42,7 +41,10 @@
     "mocha": "^2.4.5",
     "notevil": "^1.0.0",
     "phantomjs-prebuilt": "^2.1.7",
-    "riot-bump": "^1.0.0"
+    "riot-bump": "^1.0.0",
+    "rollup": "^0.25.8",
+    "rollup-plugin-commonjs": "^2.2.1",
+    "rollup-plugin-npm": "^1.4.0"
   },
   "author": "Muut, Inc. and other contributors",
   "license": "MIT",

@@ -79,7 +79,7 @@ With a numeric parameter, returns a value based on current brackets according to
 * 3: right escaped bracket (`}`)*
 * 4: RegExp which matches a brackets pair (`/{[^}]*}/`)\*\*
 
-\* only characters `[]()*+?.^$|` are escaped.
+\* only the characters in `[]()*+?.^$|` are escaped.
 
 \*\* not 100% accurate, because it does not recognize brackets within strings.
 
@@ -96,7 +96,7 @@ _parameters_
 * `brackets_pair` : string - (optional) new custom brackets pair. The start and end is separated with a space character.
 
 **NOTE:**
-From v2.3.15, changes in `riot.settings.brackets` are detected resulting in a call to `brackets.set` and the reconfiguration is immediate.
+From v2.3.15, any change in `riot.settings.brackets` is detected, resulting in a call to `brackets.set` and the reconfiguration is immediate.
 
 
 ### `R_MLCOMMS` property

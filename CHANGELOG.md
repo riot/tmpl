@@ -1,7 +1,21 @@
 # riot-tmpl Changes
 
+### v2.3.22
+- It has changed the character used to hide quoted strings and regexes, maybe this fix [riot#1588](https://github.com/riot/riot/issues/1588) : Syntax Error: Invalid character `\0129` (riot+compiler.min).
+- Removed support for raw expressions. It is unlikely this feature will be implemented in v2.3.x
+- Update devDependencies
+
+### v2.3.21
+- Refactorization, now `tmpl` and `brackets` are ~5% faster.
+- Removed unused `tmpl.isRaw` function (internal).
+- Changes to comments.
+- Files to preprocess are moved from the "lib" to the "src" directory, "lib" was removed.
+
+### v2.3.20
+- Fixed lint issues with new .eslintrc.yml, almost compatible with [JavaScript Standard Style](http://standardjs.com/)
+
 ### v2.3.19
-- Fixing issues with double quotes.
+- Fixed issues with double quotes.
 
 ### v2.3.18
 - Regression of optimized regexes not working in IE9/10.

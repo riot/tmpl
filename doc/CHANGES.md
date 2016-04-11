@@ -5,7 +5,7 @@ I'll try to explain the reason for the some changes in tmpl 2.3.x
 
 ## Escaped brackets, backslashes, and EOLs
 
-Escaped brackets _within expressions_ are left unescaped, except in JavaScript strings and regexes, where are preserved. So far, I have not found a case where brackets in expressions must remain escaped.
+Escaped brackets _within expressions_ are left unescaped, except in JavaScript strings and regexes, where are preserved. So far, I have not found a case where brackets within expressions must remain escaped.
 
 In the HTML part, escaped brackets are unescaped before the evaluation.
 
@@ -24,15 +24,13 @@ Example:
 ```html
 <mytag></mytag>
 <script type="riot/tag">
-  <mytag><p>{ foo == 'bar' }</p></mytag>
+  <mytag><p>{ foo.bar }</p></mytag>
 </script>
 <script>
-  riot.util.tmpl.errorHandler = myLogger
-  riot.mount('*')
-
-  function myLogger(err) {
-    console.log(err.message + ' in ' + err.riotData.tagName)
+  riot.util.tmpl.errorHandler = function (err) {
+    console.error(err.message + ' in ' + err.riotData.tagName)
   }
+  riot.mount('*')
 </script>
 ```
 outputs "Cannot read property 'bar' of undefined in MYTAG" in the console.

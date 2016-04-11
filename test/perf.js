@@ -1,19 +1,26 @@
-'use strict'    // eslint-disable-line strict, global-strict
+/* eslint no-console: 0, max-len: 0 */
+'use strict'    // eslint-disable-line
 
 var
   tmpl23 = require('../dist/tmpl').tmpl,
-  tmpl22 = require('./v223/tmpl223.js').tmpl,
-//assert = require('assert'),
-  path = require('path'),
-  fs = require('fs')
+  tmpl22 = require('./v223/tmpl223.js').tmpl
 
 var
   data = { num: 1, str: 'string', date: new Date(), bool: true, item: null },
+  tmplList = [
+    [' { date }', ' ' + data.date],
+    [' { num === 0 ? 0 : num } ', ' ' + data.num + ' '],
+    ['<p>\n{str + num}\n</p>', '<p>\nstring1\n</p>'],
+    [' "{ str.slice(0, 3).replace(/t/, \'T\') }" ', ' "sTr" '],
+    [' "{this.num}" ', ' "1" '],
+    ['{ !bool } ', ' '],
+    ['{} ', ' ']
+  ],
   exprList = [
     ['{ date }', data.date],
     ['{ num === 0 ? 0 : num }', data.num],
-    ['<p>{str}</p>', '<p>string</p>'],
-    [' "{ str.slice(0, 3).replace(/t/, \'T\') }" ', ' "sTr" '],
+    ['<p>{str + num}</p>', '<p>string1</p>'],
+    ['{ "-" + str.slice(0, 3).replace(/t/, \'T\') + "-" }', '-sTr-'],
     ['{this.num}', 1],
     ['{ !bool }', false],
     ['{}', undefined]
@@ -21,12 +28,13 @@ var
   csList = [
     ['{ foo: num }', 'foo'],
     ['{ foo: num, bar: item }', 'foo'],
-    ['{ foo: date.getFullYear() > 2000, bar: str==this.str }', 'foo bar']
+    ['{ foo: date.getFullYear() > 2000, bar: str==this.str }', 'foo bar'],
+    ['{ foo: str + num }', 'foo']
   ],
-  ex22a, ex22b, mem22, tt22 = [],
-  ex23a, ex23b, mem23, tt23 = []
+  ex22a, ex22b, ex22c, mem22, tt22 = [],
+  ex23a, ex23b, ex23c, mem23, tt23 = []
 
-var LOOP = 25000, TMAX = 12, CPAD = 12, NPAD = 11
+var LOOP = 50000, TMAX = 12, CPAD = 12, NPAD = 11
 
 console.log()
 console.log('Testing %d expressions %d times each.', exprList.length + csList.length, LOOP)
@@ -37,6 +45,8 @@ testExpr(tmpl22, data, tt22, exprList, mem22)
 ex22a = tt22.reduce(numsum)
 testExpr(tmpl22, data, tt22, csList, mem22)
 ex22b = tt22.reduce(numsum)
+testExpr(tmpl22, data, tt22, tmplList, mem22)
+ex22c = tt22.reduce(numsum)
 
 console.log('tmpl v2.3.0 ...')
 mem23 = [0, 0, 0]
@@ -44,13 +54,16 @@ testExpr(tmpl23, data, tt23, exprList, mem23, 1)
 ex23a = tt23.reduce(numsum)
 testExpr(tmpl23, data, tt23, csList, mem23, 1)
 ex23b = tt23.reduce(numsum)
+testExpr(tmpl23, data, tt23, tmplList, mem23, 1)
+ex23c = tt23.reduce(numsum)
 
 console.log()
 console.log('%s    tmpl 2.2.4   new v2.3.0', padr('Results', CPAD))
 console.log('%s    ----------   ----------', replicate('-', CPAD))
 console.log('%s:  %s %s', padr('Expressions', CPAD), padl(ex22a, NPAD), padl(ex23a, NPAD))
 console.log('%s:  %s %s', padr('Shorthands',  CPAD), padl(ex22b, NPAD), padl(ex23b, NPAD))
-console.log('%s:  %s %s', padr('TOTAL',       CPAD), padl(ex22a + ex22b, NPAD), padl(ex23a + ex23b, NPAD))
+console.log('%s:  %s %s', padr('Templates',   CPAD), padl(ex22c, NPAD), padl(ex23c, NPAD))
+console.log('%s:  %s %s', padr('TOTAL',       CPAD), padl(ex22a + ex22b + ex22c, NPAD), padl(ex23a + ex23b + ex23c, NPAD))
 console.log()
 console.log('Memory')
 //console.log('%s:  %s %s', padr('Res set size', CPAD), padl(mem22[0], NPAD), padl(mem23[0], NPAD))
@@ -64,7 +77,7 @@ console.log('  provided by the node process.memoryUsage() function.')
 console.log('- Execution time in both versions excludes expression compilation.')
 console.log('- Minimum & maximum times are removed.')
 
-function testExpr(tmpl, data, times, list, agc) {
+function testExpr (tmpl, data, times, list, agc) {
   var ogc, gc1, gc2, gc3
   times.length = 0
   global.gc()
@@ -105,20 +118,20 @@ function testExpr(tmpl, data, times, list, agc) {
   agc[2] += ogc.heapUsed - gc3
 }
 
-function numsort(a, b) {
+function numsort (a, b) {
   return a - b
 }
-function numsum(a, b) {
+function numsum (a, b) {
   return a + b
 }
-function replicate(s, n) {
+function replicate (s, n) {
   return n < 1 ? '' : (new Array(n + 1)).join(s)
 }
-function padr(s, n) {
+function padr (s, n) {
   s = '' + s
   return s + replicate(' ', n - s.length)
 }
-function padl(s, n) {
+function padl (s, n) {
   s = '' + s
   return replicate(' ', n - s.length) + s
 }

@@ -1,5 +1,6 @@
-/* eslint-env node, mocha  */
-/* eslint camelcase: 0 */
+/*eslint-env mocha */
+/*eslint camelcase: 0, max-len: 0 */
+/*global tmpl, brackets, expect, globalVar:true */
 
 globalVar = 5
 
@@ -7,20 +8,20 @@ var data = {
   yes: true,
   no: false,
   str: 'x',
-  obj: {val: 2},
+  obj: { val: 2 },
   arr: [2],
   x: 2,
   $a: 0,
   $b: 1,
   esc: '\'\n\\',
-  fn: function(s) { return ['hi', s].join(' ') },
+  fn: function (s) { return ['hi', s].join(' ') },
   _debug_: 0
 }
 
 var RAW_FLAG = '='
 
 // send 1 or 2 in 'err' to enable internal information
-function render(str, dbg) {
+function render (str, dbg) {
   if (dbg) data._debug_ = 1
   return tmpl(str, data)
 }
@@ -191,7 +192,7 @@ describe('riot-tmpl', function () {
 
     it('unwrapped keywords void, window and global, in addition to `this`', function () {
       data.$a = 5
-      expect(render('{' + (typeof window === 'object' ? 'window' : 'global') +'.globalVar }')).to.be(5)
+      expect(render('{' + (typeof window === 'object' ? 'window' : 'global') + '.globalVar }')).to.be(5)
       expect(render('{ this.$a }')).to.be(5)
       expect(render('{ void 0 }')).to.be(undefined)
       // without unprefixed global/window, default convertion to `new (D).Date()` throws here
@@ -255,7 +256,6 @@ describe('riot-tmpl', function () {
     //// Mac/Win EOL's normalization avoids unexpected results with some editors.
     //// (moved to 2.4, now tmpl don't touch non-expression parts)
 
-
     describe('whitespace', function () {
 
       it('is compacted to a space in expressions', function () {
@@ -288,7 +288,7 @@ describe('riot-tmpl', function () {
 
   //// new in tmpl 2.3.0
 
-  describe('2.3.0', function() {
+  describe('2.3.0', function () {
 
     it('support for 8 bit, ISO-8859-1 charset in shorthand names', function () {
       expect(render('{ neón: 1 }')).to.be('neón')
@@ -298,6 +298,7 @@ describe('riot-tmpl', function () {
 
     it('does not wrap global and window object names', function () {
       var gw = typeof window === 'object' ? 'window' : 'global'
+
       expect(render('{ ' + gw + '.globalVar }')).to.be(5)
       data.Date = '{}'
       expect(render('{ +new ' + gw + '.Date() }')).to.be.a('number')
@@ -306,9 +307,10 @@ describe('riot-tmpl', function () {
 
     it('unwrapped keywords: Infinity, isFinite, isNaN, Date, RegExp and Math', function () {
       var i, a = ['isFinite', 'isNaN', 'Date', 'RegExp', 'Math']
-      for (i = 0; i < a.length; ++i)
-        data[a[i]] = 0
 
+      for (i = 0; i < a.length; ++i) {
+        data[a[i]] = 0
+      }
       expect(render('{ Infinity }')).to.be.a('number')
       expect(render('{ isFinite(1) }')).to.be(true)
       expect(render('{ isNaN({}) }')).to.be(true)
@@ -316,8 +318,9 @@ describe('riot-tmpl', function () {
       expect(render('{ RegExp.$1 }')).to.be.a('string')
       expect(render('{ Math.floor(0) }')).to.be.a('number')
 
-      for (i = 0; i < a.length; ++i)
+      for (i = 0; i < a.length; ++i) {
         delete data[a[i]]
+      }
     })
 
     describe('support for comments has been dropped', function () {
@@ -364,7 +367,8 @@ describe('riot-tmpl', function () {
       after(clearHandler)
 
       it('using a custom function', function () {
-        var result, err
+        var err
+
         tmpl.errorHandler = function (e) { err = e }
         // je, tmpl({x}, NaN) does not generate error... bug or danling var?
         //console.error('========== >>>> x: ' + x)        // error here
@@ -372,28 +376,29 @@ describe('riot-tmpl', function () {
         err = 0
         expect(tmpl('{x[0]}'), {}).to.be(undefined)       // empty data
         expect(err instanceof Error).to.be(true)
-        expect(err.riotData).to.eql({tagName: undefined, _riot_id: undefined})
+        expect(err.riotData).to.eql({ tagName: undefined, _riot_id: undefined })
         // undefined as parameter for Function.call(`this`) defaults to global
         err = 0
         expect(tmpl('{x[0]}')).to.be(undefined)
         expect(err instanceof Error).to.be(true)
-        expect(err.riotData).to.eql({tagName: undefined, _riot_id: undefined})
+        expect(err.riotData).to.eql({ tagName: undefined, _riot_id: undefined })
       })
 
       it('GOTCHA: null as param for call([this]) defaults to global too', function () {
-        var result, err
+        var err
+
         tmpl.errorHandler = function (e) { err = e }
         err = 0
         expect(tmpl('{x[0]}', null)).to.be(undefined)
         expect(err instanceof Error).to.be(true)
-        expect(err.riotData).to.eql({tagName: undefined, _riot_id: undefined})
+        expect(err.riotData).to.eql({ tagName: undefined, _riot_id: undefined })
       })
 
       it('catching reading property of an undefined variable', function () {
         var result, err
 
         tmpl.errorHandler = function (e) { err = e }
-        data.root = {tagName: 'DIV'}
+        data.root = { tagName: 'DIV' }
         data._riot_id = 1
         result = render('{ undefinedVar.property }')    // render as normal
         delete data._riot_id
@@ -401,7 +406,7 @@ describe('riot-tmpl', function () {
 
         expect(result).to.be(undefined)
         expect(err instanceof Error).to.be(true)
-        expect(err.riotData).to.eql({tagName: 'DIV', _riot_id: 1})
+        expect(err.riotData).to.eql({ tagName: 'DIV', _riot_id: 1 })
       })
 
       it('top level undefined variables (properties) can\'t be catched', function () {
@@ -430,18 +435,19 @@ describe('riot-tmpl', function () {
     describe('new helper functions', function () {
 
       it('tmpl.loopKeys: extract keys from the value (for `each`)', function () {
-        var i, s,
+        var i,
           atest = [
-            '{ studio in studios["Nearby Locations"] }', {key: 'studio', pos: undefined, val: '{studios["Nearby Locations"]}'},
-            '{k,i in item}', {key: 'k', pos: 'i', val: '{item}'},
-            '{ k in i }', {key: 'k', pos: undefined, val: '{i}'},
-            '{^ item in i }', {key: 'item', pos: undefined, val: '{i}'},
-            '{^item,idx in items } ', {key: 'item', pos: 'idx', val: '{items}'},
-            '{ item}  ', {val: '{ item}'},
-            '{item', {val: '{item'},    // val is expected
-            '{}', {val: '{}'},
-            '0', {val: '0'}
+            '{ studio in studios["Nearby Locations"] }', { key: 'studio', pos: undefined, val: '{studios["Nearby Locations"]}' },
+            '{k,i in item}', { key: 'k', pos: 'i', val: '{item}' },
+            '{ k in i }', { key: 'k', pos: undefined, val: '{i}' },
+            '{^ item in i }', { key: 'item', pos: undefined, val: '{i}' },
+            '{^item,idx in items } ', { key: 'item', pos: 'idx', val: '{items}' },
+            '{ item}  ', { val: '{ item}' },
+            '{item', { val: '{item' },    // val is expected
+            '{}', { val: '{}' },
+            '0', { val: '0' }
           ]
+
         for (i = 0; i < atest.length; i += 2) {
           expect(tmpl.loopKeys(atest[i])).to.eql(atest[i + 1])
         }
@@ -449,17 +455,18 @@ describe('riot-tmpl', function () {
 
       it('tmpl.loopKeys with custom brackets', function () {
         brackets.set('{{ }}')
-        var i, s,
+        var i,
           atest = [
-            '{{k,i in item}}', {key: 'k', pos: 'i', val: '{{item}}'},
-            '{{ k in i }}', {key: 'k', pos: undefined, val: '{{i}}'},
-            '{{^ item in i }}', {key: 'item', pos: undefined, val: '{{i}}'},
-            '{{^item,idx in items }} ', {key: 'item', pos: 'idx', val: '{{items}}'},
-            '{{ item}}  ', {val: '{{ item}}'},
-            '{{item', {val: '{{item'},    // val is expected
-            '{{}}', {val: '{{}}'},
-            '0', {val: '0'}
+            '{{k,i in item}}', { key: 'k', pos: 'i', val: '{{item}}' },
+            '{{ k in i }}', { key: 'k', pos: undefined, val: '{{i}}' },
+            '{{^ item in i }}', { key: 'item', pos: undefined, val: '{{i}}' },
+            '{{^item,idx in items }} ', { key: 'item', pos: 'idx', val: '{{items}}' },
+            '{{ item}}  ', { val: '{{ item}}' },
+            '{{item', { val: '{{item' },    // val is expected
+            '{{}}', { val: '{{}}' },
+            '0', { val: '0' }
           ]
+
         for (i = 0; i < atest.length; i += 2) {
           expect(tmpl.loopKeys(atest[i])).to.eql(atest[i + 1])
         }
@@ -477,26 +484,20 @@ describe('riot-tmpl', function () {
         expect(tmpl.hasExpr(' }{ ')).to.be(false)
       })
 
-      it('tmpl.isRaw: test for raw html flag in expression (v2.3.14)', function () {
-        expect(tmpl.isRaw('{' + RAW_FLAG + ' "<br>" }')).to.be(true)
-        expect(tmpl.isRaw('{ ' + RAW_FLAG + ' "<br>" }')).to.be(false)
-        expect(tmpl.isRaw('{ "<br>" } ')).to.be(false)
-      })
+      //it('tmpl.haveRaw: test for raw html flag in a template (v2.3.14)', function () {
+      //  expect(tmpl.haveRaw('{' + RAW_FLAG + ' "<br>" }')).to.be(true)
+      //  expect(tmpl.haveRaw('{ ' + RAW_FLAG + ' "<br>" }')).to.be(false)
+      //  expect(tmpl.haveRaw('\\{= "<br>" } ')).to.be(false)
+      //  expect(tmpl.haveRaw(' {' + RAW_FLAG + ' "<br>" }')).to.be(true)
+      //  expect(tmpl.haveRaw(' { ' + RAW_FLAG + ' "<br>" }')).to.be(false)
+      //  expect(tmpl.haveRaw(' \\{= "<br>" } ')).to.be(false)
+      //})
 
-      it('tmpl.haveRaw: test for raw html flag in a template (v2.3.14)', function () {
-        expect(tmpl.haveRaw('{' + RAW_FLAG + ' "<br>" }')).to.be(true)
-        expect(tmpl.haveRaw('{ ' + RAW_FLAG + ' "<br>" }')).to.be(false)
-        expect(tmpl.haveRaw('\\{= "<br>" } ')).to.be(false)
-        expect(tmpl.haveRaw(' {' + RAW_FLAG + ' "<br>" }')).to.be(true)
-        expect(tmpl.haveRaw(' { ' + RAW_FLAG + ' "<br>" }')).to.be(false)
-        expect(tmpl.haveRaw(' \\{= "<br>" } ')).to.be(false)
-      })
-
-      it('the raw html is removed before evaluation (v2.3.14)', function () {
-        expect(render('{' + RAW_FLAG + ' "<br>" }')).to.be('<br>')
-        expect(render(' {' + RAW_FLAG + ' "<br>" }')).to.be(' <br>')
-        expect(render('{' + RAW_FLAG + ' "<" + str + ">" }')).to.be('<x>')
-      })
+      //it('the raw html is removed before evaluation (v2.3.14)', function () {
+      //  expect(render('{' + RAW_FLAG + ' "<br>" }')).to.be('<br>')
+      //  expect(render(' {' + RAW_FLAG + ' "<br>" }')).to.be(' <br>')
+      //  expect(render('{' + RAW_FLAG + ' "<" + str + ">" }')).to.be('<x>')
+      //})
 
     })
 

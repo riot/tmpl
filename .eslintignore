@@ -1,2 +1,3 @@
-**/coverage/**
-**/dist/**
+**/coverage/
+**/cover-int/
+**/dist/

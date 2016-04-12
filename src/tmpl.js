@@ -147,7 +147,7 @@ var tmpl = (function () {
 //#endif
 /* eslint-disable */
 //#if CSP
-    return safeEval.Function('E', expr + ';')
+    return safeEval.func('E', expr + ';')
 //#else
     // Now, we can create the function to return by calling the Function constructor.
     // The parameter `E` is the error handler for runtime only.

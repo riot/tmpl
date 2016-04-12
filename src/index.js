@@ -1,6 +1,6 @@
 //#if CSP
-  //eslint-disable-next-line no-unused-vars
-  import safeEval from 'notevil'
+  // note that the path must be relative to the dist/ folder
+  import safeEval from '../src/notevil' //eslint-disable-line no-unused-vars
 //#endif
 
 //#if 0

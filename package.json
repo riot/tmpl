@@ -30,7 +30,9 @@
   "devDependencies": {
     "coveralls": "^2.11.9",
     "eslint": "^2.7.0",
+    "esprima": "^2.7.2",
     "expect.js": "^0.3.1",
+    "hoister": "0.0.2",
     "istanbul": "^0.4.3",
     "jspreproc": "^0.2.7",
     "karma": "^0.13.22",
@@ -39,7 +41,6 @@
     "karma-mocha": "^0.2.2",
     "karma-phantomjs-launcher": "^1.0.0",
     "mocha": "^2.4.5",
-    "notevil": "^1.0.0",
     "phantomjs-prebuilt": "^2.1.7",
     "riot-bump": "^1.0.0",
     "rollup": "^0.25.8",
@@ -51,5 +52,6 @@
   "bugs": {
     "url": "https://github.com/riot/tmpl/issues"
   },
-  "homepage": "https://github.com/riot/tmpl#readme"
+  "homepage": "https://github.com/riot/tmpl#readme",
+  "dependencies": {}
 }

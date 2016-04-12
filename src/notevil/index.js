@@ -1,11 +1,11 @@
-var parse = require('esprima').parse
-var hoist = require('hoister')
-
 import InfiniteChecker from './lib/infinite-checker'
 import Primitives from './lib/primitives'
 import { getGlobal } from './helpers'
+import esprima from 'esprima'
+import hoist from 'hoister'
 
-var maxIterations = 1000000
+var maxIterations = 1000000,
+  parse = esprima.parse
 
 // 'eval' with a controlled environment
 function safeEval(src, parentContext){
@@ -70,13 +70,16 @@ function evaluateAst(tree, context){
     switch (node.type) {
 
       case 'Program':
-        return walkAll(node.body)
+        return walkAll(node.body )
 
       case 'BlockStatement':
         enterBlock()
         var result = walkAll(node.body)
         leaveBlock()
         return result
+
+      case 'SequenceExpression':
+        return walkAll(node.expressions)
 
       case 'FunctionDeclaration':
         var params = node.params.map(getName)
@@ -303,7 +306,7 @@ function evaluateAst(tree, context){
           case '|':   return l | r
           case '&':   return l & r
           case '^':   return l ^ r
-          case 'in':   return l in r
+          case 'in':  return l in r
           case 'instanceof': return l instanceof r
           default: return unsupportedExpression(node)
         }
@@ -328,6 +331,7 @@ function evaluateAst(tree, context){
         }
 
       case 'CallExpression':
+
         var args = node.arguments.map(function(arg){
           return walk(arg)
         })

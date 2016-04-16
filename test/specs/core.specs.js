@@ -85,6 +85,7 @@ describe('riot-tmpl', function () {
     //// expressions
 
     it('expressions are just regular JavaScript', function () {
+      console.log('exp')
       expect(render('{ obj.val }')).to.be(2)
       expect(render('{ obj["val"] }')).to.be(2)
       expect(render('{ arr[0] }')).to.be(2)

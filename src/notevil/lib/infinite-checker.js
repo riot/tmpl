@@ -1,6 +1,6 @@
 
-function InfiniteChecker(maxIterations){
-  if (this instanceof InfiniteChecker){
+function InfiniteChecker (maxIterations) {
+  if (this instanceof InfiniteChecker) {
     this.maxIterations = maxIterations
     this.count = 0
   } else {
@@ -8,9 +8,9 @@ function InfiniteChecker(maxIterations){
   }
 }
 
-InfiniteChecker.prototype.check = function(){
+InfiniteChecker.prototype.check = function () {
   this.count += 1
-  if (this.count > this.maxIterations){
+  if (this.count > this.maxIterations) {
     throw new Error('Infinite loop detected - reached max iterations')
   }
 }

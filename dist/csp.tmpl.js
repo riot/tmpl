@@ -4,8 +4,8 @@
   var __commonjs_global = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : this;
   function __commonjs(fn, module) { return module = { exports: {} }, fn(module, module.exports, __commonjs_global), module.exports; }
 
-  function InfiniteChecker(maxIterations){
-    if (this instanceof InfiniteChecker){
+  function InfiniteChecker (maxIterations) {
+    if (this instanceof InfiniteChecker) {
       this.maxIterations = maxIterations
       this.count = 0
     } else {
@@ -13,9 +13,9 @@
     }
   }
 
-  InfiniteChecker.prototype.check = function(){
+  InfiniteChecker.prototype.check = function () {
     this.count += 1
-    if (this.count > this.maxIterations){
+    if (this.count > this.maxIterations) {
       throw new Error('Infinite loop detected - reached max iterations')
     }
   }
@@ -26,16 +26,16 @@
   }
 
   var names = ['Object', 'String', 'Boolean', 'Number', 'RegExp', 'Date', 'Array']
-  var immutable = {string: 'String', boolean: 'Boolean', number: 'Number' }
+  var immutable = { string: 'String', boolean: 'Boolean', number: 'Number' }
 
   var primitives = names.map(getGlobal)
   var protos = primitives.map(getProto)
 
-  function Primitives(context){
-    if (this instanceof Primitives){
+  function Primitives (context) {
+    if (this instanceof Primitives) {
       this.context = context
-      for (var i=0;i<names.length;i++){
-        if (!this.context[names[i]]){
+      for (var i = 0; i < names.length; i++) {
+        if (!this.context[names[i]]) {
           this.context[names[i]] = wrap(primitives[i])
         }
       }
@@ -44,86 +44,95 @@
     }
   }
 
-  Primitives.prototype.replace = function(value){
-    var primIndex = primitives.indexOf(value)
-    var protoIndex = protos.indexOf(value)
+  Primitives.prototype.replace = function (value) {
+    var primIndex = primitives.indexOf(value),
+      protoIndex = protos.indexOf(value),
+      name
 
-    if (~primIndex){
-      var name = names[primIndex]
+    if (~primIndex) {
+      name = names[primIndex]
       return this.context[name]
     } else if (~protoIndex) {
-      var name = names[protoIndex]
+      name = names[protoIndex]
       return this.context[name].prototype
-    } else  {
-      return value
     }
+
+    return value
   }
 
-  Primitives.prototype.getPropertyObject = function(object, property){
-    if (immutable[typeof object]){
+  Primitives.prototype.getPropertyObject = function (object, property) {
+    if (immutable[typeof object]) {
       return this.getPrototypeOf(object)
     }
     return object
   }
 
-  Primitives.prototype.isPrimitive = function(value){
+  Primitives.prototype.isPrimitive = function (value) {
     return !!~primitives.indexOf(value) || !!~protos.indexOf(value)
   }
 
-  Primitives.prototype.getPrototypeOf = function(value){
-    if (value == null){ // handle null and undefined
+  Primitives.prototype.getPrototypeOf = function (value) {
+    if (value == null) { // handle null and undefined
       return value
     }
 
-    var immutableType = immutable[typeof value]
-    if (immutableType){
-      var proto = this.context[immutableType].prototype
+    var immutableType = immutable[typeof value],
+      proto
+
+    if (immutableType) {
+      proto = this.context[immutableType].prototype
     } else {
-      var proto = Object.getPrototypeOf(value)
+      proto = Object.getPrototypeOf(value)
     }
 
-    if (!proto || proto === Object.prototype){
+    if (!proto || proto === Object.prototype) {
       return null
-    } else {
-      var replacement = this.replace(proto)
-      if (replacement === value){
-        replacement = this.replace(Object.prototype)
-      }
-      return replacement
     }
+
+    var replacement = this.replace(proto)
+
+    if (replacement === value) {
+      replacement = this.replace(Object.prototype)
+    }
+    return replacement
+
   }
 
-  Primitives.prototype.applyNew = function(func, args){
-    if (func.wrapped){
+  Primitives.prototype.applyNew = function (func, args) {
+    if (func.wrapped) {
       var prim = Object.getPrototypeOf(func)
       var instance = new (Function.prototype.bind.apply(prim, arguments))
+
       setProto(instance, func.prototype)
       return instance
-    } else {
-      return new (Function.prototype.bind.apply(func, arguments))
     }
+
+    return new (Function.prototype.bind.apply(func, arguments))
+
   }
 
-  function getProto(func) {
+  function getProto (func) {
     return func.prototype
   }
 
-  function setProto(obj, proto){
-    obj.__proto__ = proto
+  function setProto (obj, proto) {
+    obj.__proto__ = proto // eslint-disable-line
   }
 
-  function wrap(prim){
+  function wrap (prim) {
     var proto = Object.create(prim.prototype)
 
-    var result = function() {
-      if (this instanceof result){
+    var result = function () {
+      if (this instanceof result) {
         prim.apply(this, arguments)
       } else {
         var instance = prim.apply(null, arguments)
+
         setProto(instance, proto)
         return instance
       }
     }
+
     setProto(result, prim)
     result.prototype = proto
     result.wrapped = true
@@ -6046,6 +6055,7 @@
     // recursively evalutate the node of an AST
     function walk(node){
       if (!node) return
+
       switch (node.type) {
 
         case 'Program':
@@ -6236,6 +6246,7 @@
             case '-': return -val
             case '~': return ~val
             case '!': return !val
+            case 'void': return void val
             case 'typeof': return typeof val
             default: return unsupportedExpression(node)
           }
@@ -6456,8 +6467,12 @@
   // generate a function with specified context
   function getFunction(body, params, parentContext){
     return function(){
-      var context = Object.create(parentContext)
-      if (this == getGlobal()) {
+      var context = Object.create(parentContext),
+        g = getGlobal()
+
+      context['window'] = context['global'] = g
+
+      if (this == g) {
         context['this'] = null
       } else {
         context['this'] = this

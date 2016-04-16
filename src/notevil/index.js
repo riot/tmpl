@@ -67,6 +67,7 @@ function evaluateAst(tree, context){
   // recursively evalutate the node of an AST
   function walk(node){
     if (!node) return
+
     switch (node.type) {
 
       case 'Program':
@@ -257,6 +258,7 @@ function evaluateAst(tree, context){
           case '-': return -val
           case '~': return ~val
           case '!': return !val
+          case 'void': return void val
           case 'typeof': return typeof val
           default: return unsupportedExpression(node)
         }
@@ -477,8 +479,12 @@ function canSetProperty(object, property, primitives){
 // generate a function with specified context
 function getFunction(body, params, parentContext){
   return function(){
-    var context = Object.create(parentContext)
-    if (this == getGlobal()) {
+    var context = Object.create(parentContext),
+      g = getGlobal()
+
+    context['window'] = context['global'] = g
+
+    if (this == g) {
       context['this'] = null
     } else {
       context['this'] = this

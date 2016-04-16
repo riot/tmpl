@@ -26,7 +26,7 @@ function FunctionFactory(parentContext){
     args = args.slice(0,-1)
     if (typeof src === 'string'){
       //HACK: esprima doesn't like returns outside functions
-      src = parse('function a(){' + src + '}').body[0].body
+      src = parse('function a(){ ' + src + '}').body[0].body
     }
     var tree = prepareAst(src)
     return getFunction(tree, args, context)

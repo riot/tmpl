@@ -11,5 +11,5 @@ export default {
       include: './node_modules/**'
     })
   ],
-  format: 'iife'
+  format: 'umd'
 }

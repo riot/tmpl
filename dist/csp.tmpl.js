@@ -1,5 +1,8 @@
-(function (exports) {
-  'use strict';
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (factory((global.cspTmpl = global.cspTmpl || {})));
+}(this, function (exports) { 'use strict';
 
   var __commonjs_global = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : this;
   function __commonjs(fn, module) { return module = { exports: {} }, fn(module, module.exports, __commonjs_global), module.exports; }
@@ -6938,4 +6941,4 @@
   exports.brackets = brackets;
   exports.tmpl = tmpl;
 
-}((this.cspTmpl = this.cspTmpl || {})));
+}));

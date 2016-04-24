@@ -29,7 +29,7 @@
   ],
   "devDependencies": {
     "coveralls": "^2.11.9",
-    "eslint": "^2.7.0",
+    "eslint": "^2.8.0",
     "esprima": "^2.7.2",
     "expect.js": "^0.3.1",
     "hoister": "0.0.2",
@@ -43,7 +43,7 @@
     "mocha": "^2.4.5",
     "phantomjs-prebuilt": "^2.1.7",
     "riot-bump": "^1.0.0",
-    "rollup": "^0.25.8",
+    "rollup": "^0.26.0",
     "rollup-plugin-commonjs": "^2.2.1",
     "rollup-plugin-node-resolve": "^1.5.0"
   },

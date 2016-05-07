@@ -1,4 +1,5 @@
-/* riot-tmpl WIP, @license MIT, (c) 2015 Muut Inc. + contributors */
+
+/* riot-tmpl v2.4.0, @license MIT, (c) 2015 Muut Inc. + contributors */
 ;(function (window) {     // eslint-disable-line no-extra-semi
   'use strict'
   /**
@@ -63,7 +64,7 @@
 
       var arr = pair.split(' ')
 
-      if (arr.length !== 2 || /[\x00-\x1F<>a-zA-Z0-9'",;\\]/.test(pair)) {
+      if (arr.length !== 2 || /[\x00-\x1F<>a-zA-Z0-9'",;\\]/.test(pair)) { // eslint-disable-line
         throw new Error('Unsupported brackets "' + pair + '"')
       }
       arr = arr.concat(pair.replace(/(?=[[\]()*+?.^$|])/g, '\\').split(' '))
@@ -415,7 +416,7 @@
 
   })()
 
-  tmpl.version = brackets.version = 'v2.3.21'
+  tmpl.version = brackets.version = 'v2.4.0'
 
   /* istanbul ignore else */
   if (typeof module === 'object' && module.exports) {

@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version v2.3.21
+ * @version v2.4.0
  */
 /**
  * riot.util.brackets
@@ -65,7 +65,7 @@ var brackets = (function (UNDEF) {
 
     var arr = pair.split(' ')
 
-    if (arr.length !== 2 || /[\x00-\x1F<>a-zA-Z0-9'",;\\]/.test(pair)) {
+    if (arr.length !== 2 || /[\x00-\x1F<>a-zA-Z0-9'",;\\]/.test(pair)) { // eslint-disable-line
       throw new Error('Unsupported brackets "' + pair + '"')
     }
     arr = arr.concat(pair.replace(/(?=[[\]()*+?.^$|])/g, '\\').split(' '))
@@ -413,7 +413,7 @@ var tmpl = (function () {
   // istanbul ignore next: compatibility fix for beta versions
   _tmpl.parse = function (s) { return s }
 
-  _tmpl.version = brackets.version = 'v2.3.21'
+  _tmpl.version = brackets.version = 'v2.4.0'
 
   return _tmpl
 

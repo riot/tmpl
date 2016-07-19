@@ -90,6 +90,14 @@ var tmpl = (function () {
   _tmpl.loopKeys = brackets.loopKeys
 
   /**
+   * Clears the internal cache of compiled expressions.
+   *
+   * @function
+   */
+  // istanbul ignore next
+  _tmpl.clearCache = function () { _cache = {} }
+
+  /**
    * Holds a custom function to handle evaluation errors.
    *
    * This property allows to detect errors _in the evaluation_, by setting its value to a
@@ -145,15 +153,13 @@ var tmpl = (function () {
 //#elif LIST_GETTERS
     //console.log(' In: `%s`\nOUT: `%s`', str, expr)
 //#endif
-/* eslint-disable */
-//#if CSP
+/*#if CSP
     return safeEval.func('E', expr + ';')
-//#else
+#else*/
     // Now, we can create the function to return by calling the Function constructor.
     // The parameter `E` is the error handler for runtime only.
-    return new Function('E', expr + ';')
+    return new Function('E', expr + ';')    // eslint-disable-line no-new-func
 //#endif
-/* eslint-enable */
   }
 
   //
@@ -390,9 +396,6 @@ var tmpl = (function () {
 
     return expr
   }
-
-  // istanbul ignore next: compatibility fix for beta versions
-  _tmpl.parse = function (s) { return s }
 
   //#if !NODE
   _tmpl.version = brackets.version = 'WIP'

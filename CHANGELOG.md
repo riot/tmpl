@@ -1,5 +1,8 @@
 # riot-tmpl Changes
 
+### v2.4.1
+- Added function to clear the internal expressions cache.
+
 ### v2.4.0
 - It closes [riot#1076](https://github.com/riot/riot/issues/1076) using a fork of [notevil](https://github.com/mmckegg/notevil)
 

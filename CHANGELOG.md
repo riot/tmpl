@@ -1,6 +1,7 @@
 # riot-tmpl Changes
 
 ### v2.4.1
+- Fix [riot#1916](https://github.com/riot/riot/issues/1916) : Can't access variable without this in riot 2.5
 - Added function to clear the internal expressions cache.
 
 ### v2.4.0

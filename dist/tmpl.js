@@ -24,6 +24,10 @@
         /(?:\breturn\s+|(?:[$\w\)\]]|\+\+|--)\s*(\/)(?![*\/]))/.source + '|' +
         /\/(?=[^*\/])[^[\/\\]*(?:(?:\[(?:\\.|[^\]\\]*)*\]|\\.)[^[\/\\]*)*?(\/)[gim]*/.source,
 
+      UNSUPPORTED = RegExp('[\\' + 'x00-\\x1F<>a-zA-Z0-9\'",;\\\\]'),
+
+      NEED_ESCAPE = /(?=[[\]()*+?.^$|])/g,
+
       FINDBRACES = {
         '(': RegExp('([()])|'   + S_QBLOCKS, REGLOB),
         '[': RegExp('([[\\]])|' + S_QBLOCKS, REGLOB),
@@ -64,10 +68,10 @@
 
       var arr = pair.split(' ')
 
-      if (arr.length !== 2 || /[\x00-\x1F<>a-zA-Z0-9'",;\\]/.test(pair)) {
+      if (arr.length !== 2 || UNSUPPORTED.test(pair)) {
         throw new Error('Unsupported brackets "' + pair + '"')
       }
-      arr = arr.concat(pair.replace(/(?=[[\]()*+?.^$|])/g, '\\').split(' '))
+      arr = arr.concat(pair.replace(NEED_ESCAPE, '\\').split(' '))
 
       arr[4] = _rewrite(arr[1].length > 1 ? /{[\S\s]*?}/ : _pairs[4], arr)
       arr[5] = _rewrite(pair.length > 3 ? /\\({|})/g : _pairs[5], arr)
@@ -227,6 +231,9 @@
 
     _tmpl.loopKeys = brackets.loopKeys
 
+    // istanbul ignore next
+    _tmpl.clearCache = function () { _cache = {} }
+
     _tmpl.errorHandler = null
 
     function _logErr (err, ctx) {
@@ -246,10 +253,7 @@
 
       if (expr.slice(0, 11) !== 'try{return ') expr = 'return ' + expr
 
-  /* eslint-disable */
-
-      return new Function('E', expr + ';')
-  /* eslint-enable */
+      return new Function('E', expr + ';')    // eslint-disable-line no-new-func
     }
 
     var
@@ -369,7 +373,7 @@
     // istanbul ignore next: not both
     var // eslint-disable-next-line max-len
       JS_CONTEXT = '"in this?this:' + (typeof window !== 'object' ? 'global' : 'window') + ').',
-      JS_VARNAME = /[,{][$\w]+:|(^ *|[^$\w\.])(?!(?:typeof|true|false|null|undefined|in|instanceof|is(?:Finite|NaN)|void|NaN|new|Date|RegExp|Math)(?![$\w]))([$_A-Za-z][$\w]*)/g,
+      JS_VARNAME = /[,{][$\w]+(?=:)|(^ *|[^$\w\.])(?!(?:typeof|true|false|null|undefined|in|instanceof|is(?:Finite|NaN)|void|NaN|new|Date|RegExp|Math)(?![$\w]))([$_A-Za-z][$\w]*)/g,
       JS_NOPROPS = /^(?=(\.[$\w]+))\1(?:[^.[(]|$)/
 
     function _wrapExpr (expr, asText, key) {
@@ -408,9 +412,6 @@
 
       return expr
     }
-
-    // istanbul ignore next: compatibility fix for beta versions
-    _tmpl.parse = function (s) { return s }
 
     return _tmpl
 

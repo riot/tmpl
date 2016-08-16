@@ -46,6 +46,12 @@ out/
 .settings/
 
 # --------------------
+# VS Code
+# --------------------
+.vscode/
+/jsconfig.json
+
+# --------------------
 # App Files
 # --------------------
 node_modules

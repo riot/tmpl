@@ -14,11 +14,12 @@ var data = {
   $a: 0,
   $b: 1,
   esc: '\'\n\\',
+  abc: { def: 'abc' },
   fn: function (s) { return ['hi', s].join(' ') },
   _debug_: 0
 }
 
-var RAW_FLAG = '='
+//var RAW_FLAG = '='
 
 // send 1 or 2 in 'err' to enable internal information
 function render (str, dbg) {
@@ -184,10 +185,18 @@ describe('riot-tmpl', function () {
       data.$a = 0
       data.$b = 0
       data.parent = { selectedId: 0 }
+
+      //eslint-disable-next-line no-unused-vars
+      data.translate = function (k, v) { return v.value }
+
       // FIX #784 - The shorthand syntax for class names doesn't support parentheses
       expect(render('{ primary: (parent.selectedId === $a)  }')).to.be('primary')
       // a bit more of complexity. note: using the comma operator requires parentheses
       expect(render('{ ok: ($b++, ($a > 0) || ($b & 1)) }')).to.be('ok')
+      // FIX #1916 - Can't access variable without this in riot 2.5
+      expect(render("{translate('key', {value: abc.def})}", 1)).to.be('abc')
+
+      delete data.translate
     })
 
     it('unwrapped keywords void, window and global, in addition to `this`', function () {

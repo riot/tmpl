@@ -76,6 +76,20 @@ var brackets = (function (UNDEF) {
       /\/(?=[^*\/])[^[\/\\]*(?:(?:\[(?:\\.|[^\]\\]*)*\]|\\.)[^[\/\\]*)*?(\/)[gim]*/.source,
 
     /**
+     * Characters not supported by the expression parser.
+     * @const {RegExp}
+     * @static
+     */
+    UNSUPPORTED = RegExp('[\\' + 'x00-\\x1F<>a-zA-Z0-9\'",;\\\\]'),
+
+    /**
+     * These characters have to be escaped - Note that '{}' is not in this list.
+     * @const {RegExp}
+     * @static
+     */
+    NEED_ESCAPE = /(?=[[\]()*+?.^$|])/g,
+
+    /**
      * Hash of regexes for matching JavaScript brackets out of quoted strings and literal
      * regexes. Used by {@link module:brackets.split|split}, these are heavy, but their
      * performance is acceptable.
@@ -160,10 +174,10 @@ var brackets = (function (UNDEF) {
 
     var arr = pair.split(' ')
 
-    if (arr.length !== 2 || /[\x00-\x1F<>a-zA-Z0-9'",;\\]/.test(pair)) {
+    if (arr.length !== 2 || UNSUPPORTED.test(pair)) {
       throw new Error('Unsupported brackets "' + pair + '"')
     }
-    arr = arr.concat(pair.replace(/(?=[[\]()*+?.^$|])/g, '\\').split(' '))
+    arr = arr.concat(pair.replace(NEED_ESCAPE, '\\').split(' '))
 
     arr[$_RIX_TEST] = _rewrite(arr[1].length > 1 ? /{[\S\s]*?}/ : _pairs[$_RIX_TEST], arr)
     arr[$_RIX_ESC] = _rewrite(pair.length > 3 ? /\\({|})/g : _pairs[$_RIX_ESC], arr)

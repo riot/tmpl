@@ -1,6 +1,6 @@
 {
   "name": "riot-tmpl",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "description": "The riot template engine",
   "main": "dist/tmpl.js",
   "jsnext:main": "dist/es6.tmpl.js",
@@ -33,7 +33,7 @@
     "esprima": "^2.7.2",
     "expect.js": "^0.3.1",
     "hoister": "0.0.2",
-    "istanbul": "^0.4.4",
+    "istanbul": "^0.4.5",
     "jspreproc": "^0.2.7",
     "karma": "^1.2.0",
     "karma-browserstack-launcher": "^1.0.1",
@@ -47,7 +47,14 @@
     "rollup-plugin-commonjs": "^3.3.1",
     "rollup-plugin-node-resolve": "^2.0.0"
   },
-  "author": "Muut, Inc. and other contributors",
+  "author": "Riot maintainers team + smart people from all over the world",
+  "contributors": [
+    "Richard Bondi https://github.com/rsbondi",
+    "Gianluca Guarini https://github.com/GianlucaGuarini",
+    "Tsutomu Kawamura https://github.com/cognitom",
+    "Alberto Martínez https://github.com/aMarCruz",
+    "Tero Piirainen  https://github.com/tipiirai"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/riot/tmpl/issues"

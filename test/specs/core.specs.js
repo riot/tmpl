@@ -1,6 +1,5 @@
-/*eslint-env mocha */
 /*eslint camelcase: 0, max-len: 0 */
-/*global tmpl, brackets, expect, globalVar:true */
+/*global globalVar:true */
 
 globalVar = 5
 

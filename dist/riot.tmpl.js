@@ -258,7 +258,7 @@ var tmpl = (function () {
   }
 
   var
-    CH_IDEXPR = '\u2057',
+    CH_IDEXPR = String.fromCharCode(0x2057),
     RE_CSNAME = /^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\u2057(\d+)~):/,
     RE_QBLOCK = RegExp(brackets.S_QBLOCKS, 'g'),
     RE_DQUOTE = /\u2057/g,

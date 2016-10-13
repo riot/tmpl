@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version WIP
+ * @version v2.4.2
  */
 /**
  * riot.util.brackets
@@ -414,7 +414,7 @@ var tmpl = (function () {
     return expr
   }
 
-  _tmpl.version = brackets.version = 'WIP'
+  _tmpl.version = brackets.version = 'v2.4.2'
 
   return _tmpl
 

@@ -1,6 +1,5 @@
-/*eslint-env mocha */
 /*eslint camelcase: 0, max-len: 0 */
-/*global tmpl, brackets, expect, globalVar:true */
+/*global globalVar:true */
 
 globalVar = 5
 
@@ -330,6 +329,16 @@ describe('riot-tmpl', function () {
       for (i = 0; i < a.length; ++i) {
         delete data[a[i]]
       }
+    })
+
+    it('Fix riot#2002 issue with the `JS_VARNAME` regex failing in iOS 9.3.0', function () {
+      data.t = function (s, o) { return s.replace('__storeCount__', o.storeCount) }
+      data.storeCount = 1
+      var result = render("{ t('Please choose from the __storeCount__ stores available', {storeCount: this.storeCount}) }", 1)
+
+      expect(result).to.be('Please choose from the 1 stores available')
+      delete data.t
+      delete data.storeCount
     })
 
     describe('support for comments has been dropped', function () {

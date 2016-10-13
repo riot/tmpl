@@ -1,5 +1,9 @@
 # riot-tmpl Changes
 
+### v2.4.2
+- Fix [riot#2002](https://github.com/riot/riot/issues/2002) : getting `Unexpected token '('. Expected a property name.` inside riot.js code (bug present in iOS 9.3.0)
+- Fix [riot#1588](https://github.com/riot/riot/issues/1588) : Syntax Error: Invalid character \0129 (riot+compiler.min)
+
 ### v2.4.1
 - Fix [riot#1916](https://github.com/riot/riot/issues/1916) : Can't access variable without this in riot 2.5
 - Added function to clear the internal expressions cache.

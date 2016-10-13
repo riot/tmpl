@@ -168,7 +168,7 @@ var tmpl = (function () {
 
   // Regexes for `_getTmpl` and `_parseExpr`
   var
-    CH_IDEXPR = '\u2057',
+    CH_IDEXPR = String.fromCharCode(0x2057),
     RE_CSNAME = /^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\u2057(\d+)~):/,
     RE_QBLOCK = RegExp(brackets.S_QBLOCKS, 'g'),
     RE_DQUOTE = /\u2057/g,
@@ -334,7 +334,7 @@ var tmpl = (function () {
   // istanbul ignore next: not both
   var // eslint-disable-next-line max-len
     JS_CONTEXT = '"in this?this:' + (typeof window !== 'object' ? 'global' : 'window') + ').',
-    JS_VARNAME = /[,{][$\w]+(?=:)|(^ *|[^$\w\.])(?!(?:typeof|true|false|null|undefined|in|instanceof|is(?:Finite|NaN)|void|NaN|new|Date|RegExp|Math)(?![$\w]))([$_A-Za-z][$\w]*)/g,
+    JS_VARNAME = /[,{][\$\w]+(?=:)|(^ *|[^$\w\.{])(?!(?:typeof|true|false|null|undefined|in|instanceof|is(?:Finite|NaN)|void|NaN|new|Date|RegExp|Math)(?![$\w]))([$_A-Za-z][$\w]*)/g,
     JS_NOPROPS = /^(?=(\.[$\w]+))\1(?:[^.[(]|$)/
 
   /**

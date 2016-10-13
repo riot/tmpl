@@ -19,9 +19,7 @@ npm install riot-tmpl --save
 
 ### Bower
 
-```sh
-$ bower install riot-tmpl --save
-```
+From v2.4.2, bower is not supported.
 
 ## Documentation
 
@@ -30,13 +28,13 @@ $ bower install riot-tmpl --save
 
 Three ways:
 
-- Expressions: `tmpl('{ value }', data)`.  
+- Expressions: `tmpl('{ value }', data)`.
   Returns the result of evaluated expression as a raw object.
 
-- Templates: `tmpl('Hi { name } { surname }', data)`.  
+- Templates: `tmpl('Hi { name } { surname }', data)`.
   Returns a string with evaluated expressions.
 
-- Filters: `tmpl('{ show: !done, highlight: active }', data)`.  
+- Filters: `tmpl('{ show: !done, highlight: active }', data)`.
   Returns a space separated list of trueish keys (mainly used for setting html classes), e.g. "show highlight".
 
 
@@ -71,7 +69,6 @@ tmpl('{ 0 }', {})          // 0
 * Brackets can not contain characters in the set `[\x00-\x1F<>a-zA-Z0-9'",;\\]`
 * No comments in expressions, the compiler is the only that strip comments
 * Attributes with expressions containing `>` must be quoted
-* The new `brackets.set` function avoids direct assignment to `riot.settings.brackets`
 
 See [API](doc/API.md) and [CHANGES](doc/CHANGES.md) for details.
 

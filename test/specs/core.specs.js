@@ -331,6 +331,16 @@ describe('riot-tmpl', function () {
       }
     })
 
+    it('Fix riot#2002 issue with the `JS_VARNAME` regex failing in iOS 9.3.0', function () {
+      data.t = function (s, o) { return s.replace('__storeCount__', o.storeCount) }
+      data.storeCount = 1
+      var result = render("{ t('Please choose from the __storeCount__ stores available', {storeCount: this.storeCount}) }", 1)
+
+      expect(result).to.be('Please choose from the 1 stores available')
+      delete data.t
+      delete data.storeCount
+    })
+
     describe('support for comments has been dropped', function () {
       // comments within expresions are converted to spaces, in concordance with js specs
       it('if included, the expression may work, but...', function () {

@@ -3,6 +3,7 @@
   "version": "2.4.2",
   "description": "The riot template engine",
   "main": "dist/tmpl.js",
+  "module": "dist/es6.tmpl.js",
   "jsnext:main": "dist/es6.tmpl.js",
   "directories": {
     "doc": "doc"
@@ -29,7 +30,7 @@
   ],
   "devDependencies": {
     "coveralls": "^2.11.12",
-    "eslint": "^3.3.1",
+    "eslint": "^3.4.0",
     "esprima": "^2.7.2",
     "expect.js": "^0.3.1",
     "hoister": "0.0.2",
@@ -39,12 +40,12 @@
     "karma-browserstack-launcher": "^1.0.1",
     "karma-coverage": "^1.1.1",
     "karma-mocha": "^1.1.1",
-    "karma-phantomjs-launcher": "^1.0.1",
+    "karma-phantomjs-launcher": "^1.0.2",
     "mocha": "^3.0.2",
     "phantomjs-prebuilt": "^2.1.12",
     "riot-bump": "^1.0.0",
-    "rollup": "^0.34.10",
-    "rollup-plugin-commonjs": "^3.3.1",
+    "rollup": "^0.36.3",
+    "rollup-plugin-commonjs": "^5.0.5",
     "rollup-plugin-node-resolve": "^2.0.0"
   },
   "author": "Riot maintainers team + smart people from all over the world",

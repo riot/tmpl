@@ -1,6 +1,5 @@
 # jspreproc flags
 JSPP_FLAGS = -F istanbul -F eslint --custom-filter "\s@(module|version)\b" --headers ""
-JSPP_RIOT_FLAGS = $(JSPP_FLAGS) -D RIOT
 JSPP_ES6_FLAGS  = $(JSPP_FLAGS) -D ES6
 JSPP_CSP_FLAGS  = $(JSPP_FLAGS) -D CSP -D ES6
 JSPP_NODE_FLAGS = $(JSPP_FLAGS) -D NODE --indent 2
@@ -25,7 +24,6 @@ test: build test-mocha test-karma
 build: eslint
 	# rebuild all
 	@ mkdir -p $(DIST)
-	@ $(JSPP) $(JSPP_RIOT_FLAGS) src/index.js > $(DIST)riot.tmpl.js
 	@ $(JSPP) $(JSPP_ES6_FLAGS)  src/index.js > $(DIST)es6.tmpl.js
 	@ $(JSPP) $(JSPP_NODE_FLAGS) src/index.js > $(DIST)tmpl.js
 	# build the csp version

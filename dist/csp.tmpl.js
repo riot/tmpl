@@ -1477,7 +1477,6 @@ var esprima = createCommonjsModule(function (module, exports) {
         try {
             return new RegExp(pattern, flags);
         } catch (exception) {
-            /* istanbul ignore next */
             return null;
         }
     }
@@ -1674,7 +1673,7 @@ var esprima = createCommonjsModule(function (module, exports) {
             return value && (value.length > 1) && (value[0] >= 'a') && (value[0] <= 'z');
         }
 
-        previous = extra.tokenValues[extra.tokenValues.length - 1];
+        previous = extra.tokenValues[extra.tokens.length - 1];
         regex = (previous !== null);
 
         switch (previous) {
@@ -5860,7 +5859,7 @@ var esprima = createCommonjsModule(function (module, exports) {
     }
 
     // Sync with *.json manifests.
-    exports.version = '2.7.3';
+    exports.version = '2.7.2';
 
     exports.tokenize = tokenize;
 
@@ -6754,8 +6753,6 @@ var tmpl = (function () {
     return (_cache[str] || (_cache[str] = _create(str))).call(data, _logErr)
   }
 
-  _tmpl.haveRaw = brackets.hasRaw
-
   _tmpl.hasExpr = brackets.hasExpr
 
   _tmpl.loopKeys = brackets.loopKeys
@@ -6767,13 +6764,21 @@ var tmpl = (function () {
 
   function _logErr (err, ctx) {
 
-    if (_tmpl.errorHandler) {
+    err.riotData = {
+      tagName: ctx && ctx.root && ctx.root.tagName,
+      _riot_id: ctx && ctx._riot_id  //eslint-disable-line camelcase
+    }
 
-      err.riotData = {
-        tagName: ctx && ctx.root && ctx.root.tagName,
-        _riot_id: ctx && ctx._riot_id  //eslint-disable-line camelcase
+    if (_tmpl.errorHandler) _tmpl.errorHandler(err)
+
+    if (
+      typeof console !== 'undefined' &&
+      typeof console.error === 'function'
+    ) {
+      if (err.riotData.tagName) {
+        console.error('Riot template error thrown in the <%s> tag', err.riotData.tagName)
       }
-      _tmpl.errorHandler(err)
+      console.error(err)
     }
   }
 

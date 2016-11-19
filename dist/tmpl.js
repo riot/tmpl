@@ -225,8 +225,6 @@
       return (_cache[str] || (_cache[str] = _create(str))).call(data, _logErr)
     }
 
-    _tmpl.haveRaw = brackets.hasRaw
-
     _tmpl.hasExpr = brackets.hasExpr
 
     _tmpl.loopKeys = brackets.loopKeys
@@ -238,13 +236,21 @@
 
     function _logErr (err, ctx) {
 
-      if (_tmpl.errorHandler) {
+      err.riotData = {
+        tagName: ctx && ctx.root && ctx.root.tagName,
+        _riot_id: ctx && ctx._riot_id  //eslint-disable-line camelcase
+      }
 
-        err.riotData = {
-          tagName: ctx && ctx.root && ctx.root.tagName,
-          _riot_id: ctx && ctx._riot_id  //eslint-disable-line camelcase
+      if (_tmpl.errorHandler) _tmpl.errorHandler(err)
+
+      if (
+        typeof console !== 'undefined' &&
+        typeof console.error === 'function'
+      ) {
+        if (err.riotData.tagName) {
+          console.error('Riot template error thrown in the <%s> tag', err.riotData.tagName)
         }
-        _tmpl.errorHandler(err)
+        console.error(err)
       }
     }
 

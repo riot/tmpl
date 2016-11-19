@@ -18,7 +18,8 @@ var data = {
   _debug_: 0
 }
 
-//var RAW_FLAG = '='
+// avoid to output the console errors
+console.error = function () { /* noop */ } // eslint-disable-line
 
 // send 1 or 2 in 'err' to enable internal information
 function render (str, dbg) {
@@ -501,22 +502,6 @@ describe('riot-tmpl', function () {
         expect(tmpl.hasExpr(' \\{}')).to.be(true)
         expect(tmpl.hasExpr(' }{ ')).to.be(false)
       })
-
-      //it('tmpl.haveRaw: test for raw html flag in a template (v2.3.14)', function () {
-      //  expect(tmpl.haveRaw('{' + RAW_FLAG + ' "<br>" }')).to.be(true)
-      //  expect(tmpl.haveRaw('{ ' + RAW_FLAG + ' "<br>" }')).to.be(false)
-      //  expect(tmpl.haveRaw('\\{= "<br>" } ')).to.be(false)
-      //  expect(tmpl.haveRaw(' {' + RAW_FLAG + ' "<br>" }')).to.be(true)
-      //  expect(tmpl.haveRaw(' { ' + RAW_FLAG + ' "<br>" }')).to.be(false)
-      //  expect(tmpl.haveRaw(' \\{= "<br>" } ')).to.be(false)
-      //})
-
-      //it('the raw html is removed before evaluation (v2.3.14)', function () {
-      //  expect(render('{' + RAW_FLAG + ' "<br>" }')).to.be('<br>')
-      //  expect(render(' {' + RAW_FLAG + ' "<br>" }')).to.be(' <br>')
-      //  expect(render('{' + RAW_FLAG + ' "<" + str + ">" }')).to.be('<x>')
-      //})
-
     })
 
   })

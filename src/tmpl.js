@@ -122,8 +122,7 @@ var tmpl = (function () {
 
     // user error handler
     if (_tmpl.errorHandler) _tmpl.errorHandler(err)
-
-    if (
+    else if (
       typeof console !== 'undefined' &&
       typeof console.error === 'function'
     ) {

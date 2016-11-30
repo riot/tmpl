@@ -437,6 +437,25 @@ describe('riot-tmpl', function () {
         expect(err).to.be.a('number')
       })
 
+      it('errors only in the user defined error handler (riot/2108)', function () {
+        var result, userErrOutput, defaultErrOutput
+
+        tmpl.errorHandler = function (e) { userErrOutput = e }
+        console.error = function (e) { defaultErrOutput = e }
+
+        data.root = { tagName: 'DIV' }
+        data._riot_id = 1
+        result = render('{ undefinedVar.property }')    // render as normal
+        delete data._riot_id
+        delete data.root
+
+        console.error = function () { /* noop */ } // eslint-disable-line
+        expect(result).to.be(undefined)
+        expect(userErrOutput instanceof Error).to.be(true)
+        expect(userErrOutput.riotData).to.eql({ tagName: 'DIV', _riot_id: 1 })
+        expect(defaultErrOutput).to.be(undefined)
+      })
+
       it('errors on instantiation of the getter always throws', function () {
         expect(render).withArgs('{ a: } }').to.throwError()  // SintaxError
         expect(render).withArgs('{ d c:1 }').to.throwError()

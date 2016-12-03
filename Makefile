@@ -19,7 +19,7 @@ TESTCOVER = $(TRAVIS_BRANCH) $(TRAVIS_NODE_VERSION)
 # folders
 DIST = "./dist/"
 
-test: build test-mocha test-karma
+test: build test-mocha test-karma test-csp-mocha test-csp-karma
 
 build: eslint
 	# rebuild all
@@ -44,6 +44,13 @@ test-browsers:
 
 test-mocha:
 	@ $(ISTANBUL) cover --dir ./coverage/ist $(MOCHA) -- test/runner.js
+
+test-csp-karma:
+	# test for csp version
+	@ CSP_TEST_FLAG=1 $(KARMA) start test/karma.conf.js
+
+test-csp-mocha:
+	@ CSP_TEST_FLAG=1 $(MOCHA) test/runner.js
 
 send-coverage:
 	@ RIOT_COV=1 cat ./coverage/ist/lcov.info ./coverage/report-lcov/lcov.info | $(COVERALLS)

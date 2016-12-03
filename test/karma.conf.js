@@ -23,7 +23,7 @@ module.exports = function (config) {
 
     files: [
       '../node_modules/expect.js/index.js',
-      '../dist/tmpl.js',
+      process.env.CSP_TEST_FLAG ? '../dist/csp.tmpl.js' : '../dist/tmpl.js',
       'specs/core.specs.js',
       'specs/brackets.specs.js'
     ],

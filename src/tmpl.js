@@ -127,7 +127,7 @@ var tmpl = (function () {
       typeof console.error === 'function'
     ) {
       if (err.riotData.tagName) {
-        console.error('Riot template error thrown in the <%s> tag', err.riotData.tagName)
+        console.error('Riot template error thrown in the <%s> tag', err.riotData.tagName.toLowerCase())
       }
       console.error(err)
     }

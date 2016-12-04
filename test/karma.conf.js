@@ -7,9 +7,9 @@ module.exports = function (config) {
     customLaunchers = require('./browsers')
     browsers = Object.keys(customLaunchers)
     browsers.forEach(function (browser) { customLaunchers[browser].base = 'BrowserStack' })
-  }
-  else
+  } else {
     browsers = ['PhantomJS']
+  }
 
   config.set({
     basePath: '',

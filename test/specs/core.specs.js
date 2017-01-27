@@ -417,7 +417,7 @@ describe('riot-tmpl', function () {
         var result, err
 
         tmpl.errorHandler = function (e) { err = e }
-        data.root = { tagName: 'DIV' }
+        data.__ = { tagName: 'DIV' }
         data._riot_id = 1
         result = render('{ undefinedVar.property }')    // render as normal
         delete data._riot_id
@@ -443,7 +443,7 @@ describe('riot-tmpl', function () {
         tmpl.errorHandler = function (e) { userErrOutput = e }
         console.error = function (e) { defaultErrOutput = e }
 
-        data.root = { tagName: 'DIV' }
+        data.__ = { tagName: 'DIV' }
         data._riot_id = 1
         result = render('{ undefinedVar.property }')    // render as normal
         delete data._riot_id

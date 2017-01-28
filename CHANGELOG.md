@@ -1,5 +1,8 @@
 # riot-tmpl Changes
 
+### v3.0.2
+- Change the way of detecting the tag names in case of errors
+
 ### v3.0.1
 - Change Avoid to use `console.error` if a user has defined already a custom error function
 - Change prefer lowercase to debug tags names

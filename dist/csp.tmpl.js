@@ -6526,7 +6526,7 @@ function ReturnValue(type, value){
 
 /**
  * The riot template engine
- * @version v3.0.1
+ * @version v3.0.2
  */
 /**
  * riot.util.brackets
@@ -6765,7 +6765,7 @@ var tmpl = (function () {
   function _logErr (err, ctx) {
 
     err.riotData = {
-      tagName: ctx && ctx.root && ctx.root.tagName,
+      tagName: ctx && ctx.__ && ctx.__.tagName,
       _riot_id: ctx && ctx._riot_id  //eslint-disable-line camelcase
     }
 
@@ -6775,7 +6775,7 @@ var tmpl = (function () {
       typeof console.error === 'function'
     ) {
       if (err.riotData.tagName) {
-        console.error('Riot template error thrown in the <%s> tag', err.riotData.tagName.toLowerCase())
+        console.error('Riot template error thrown in the <%s> tag', err.riotData.tagName)
       }
       console.error(err)
     }
@@ -6946,7 +6946,7 @@ var tmpl = (function () {
     return expr
   }
 
-  _tmpl.version = brackets.version = 'v3.0.1'
+  _tmpl.version = brackets.version = 'v3.0.2'
 
   return _tmpl
 

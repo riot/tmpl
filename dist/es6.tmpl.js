@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version v3.0.2
+ * @version v3.0.3
  */
 /**
  * riot.util.brackets
@@ -22,7 +22,7 @@ var brackets = (function (UNDEF) {
 
     R_MLCOMMS = /\/\*[^*]*\*+(?:[^*\/][^*]*\*+)*\//g,
 
-    R_STRINGS = /"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'/g,
+    R_STRINGS = /"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|`[^`\\]*(?:\\[\S\s][^`\\]*)*`/g,
 
     S_QBLOCKS = R_STRINGS.source + '|' +
       /(?:\breturn\s+|(?:[$\w\)\]]|\+\+|--)\s*(\/)(?![*\/]))/.source + '|' +
@@ -423,7 +423,7 @@ var tmpl = (function () {
     return expr
   }
 
-  _tmpl.version = brackets.version = 'v3.0.2'
+  _tmpl.version = brackets.version = 'v3.0.3'
 
   return _tmpl
 

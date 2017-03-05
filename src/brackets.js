@@ -60,7 +60,7 @@ var brackets = (function (UNDEF) {
      * @const {RegExp}
      * @static
      */
-    R_STRINGS = /"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'/g,
+    R_STRINGS = /"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|`[^`\\]*(?:\\[\S\s][^`\\]*)*`/g,
 
     /**
      * For use with the RegExp constructor. Combines the

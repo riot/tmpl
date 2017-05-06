@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version v3.0.3
+ * @version WIP
  */
 /**
  * riot.util.brackets
@@ -227,7 +227,12 @@ var tmpl = (function () {
   function _tmpl (str, data) {
     if (!str) return str
 
-    return (_cache[str] || (_cache[str] = _create(str))).call(data, _logErr)
+    return (_cache[str] || (_cache[str] = _create(str))).call(
+      data, _logErr.bind({
+        data: data,
+        tmpl: str
+      })
+    )
   }
 
   _tmpl.hasExpr = brackets.hasExpr
@@ -251,10 +256,9 @@ var tmpl = (function () {
       typeof console !== 'undefined' &&
       typeof console.error === 'function'
     ) {
-      if (err.riotData.tagName) {
-        console.error('Riot template error thrown in the <%s> tag', err.riotData.tagName)
-      }
-      console.error(err)
+      console.error(err.message)
+      console.log('<%s> %s', err.riotData.tagName || 'Unknown tag', this.tmpl) // eslint-disable-line
+      console.log(this.data) // eslint-disable-line
     }
   }
 
@@ -423,7 +427,7 @@ var tmpl = (function () {
     return expr
   }
 
-  _tmpl.version = brackets.version = 'v3.0.3'
+  _tmpl.version = brackets.version = 'WIP'
 
   return _tmpl
 

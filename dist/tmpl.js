@@ -1,5 +1,5 @@
 
-/* riot-tmpl v3.0.3, @license MIT, (c) 2015 Muut Inc. + contributors */
+/* riot-tmpl WIP, @license MIT, (c) 2015 Muut Inc. + contributors */
 ;(function (window) {     // eslint-disable-line no-extra-semi
   'use strict'
   /**
@@ -222,7 +222,12 @@
     function _tmpl (str, data) {
       if (!str) return str
 
-      return (_cache[str] || (_cache[str] = _create(str))).call(data, _logErr)
+      return (_cache[str] || (_cache[str] = _create(str))).call(
+        data, _logErr.bind({
+          data: data,
+          tmpl: str
+        })
+      )
     }
 
     _tmpl.hasExpr = brackets.hasExpr
@@ -246,10 +251,9 @@
         typeof console !== 'undefined' &&
         typeof console.error === 'function'
       ) {
-        if (err.riotData.tagName) {
-          console.error('Riot template error thrown in the <%s> tag', err.riotData.tagName)
-        }
-        console.error(err)
+        console.error(err.message)
+        console.log('<%s> %s', err.riotData.tagName || 'Unknown tag', this.tmpl) // eslint-disable-line
+        console.log(this.data) // eslint-disable-line
       }
     }
 
@@ -422,7 +426,7 @@
 
   })()
 
-  tmpl.version = brackets.version = 'v3.0.3'
+  tmpl.version = brackets.version = 'WIP'
 
   /* istanbul ignore else */
   if (typeof module === 'object' && module.exports) {

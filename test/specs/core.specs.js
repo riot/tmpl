@@ -19,7 +19,7 @@ var data = {
 }
 
 // avoid to output the console errors
-console.error = function () { /* noop */ } // eslint-disable-line
+console.error = console.log = function () { /* noop */ } // eslint-disable-line
 
 // send 1 or 2 in 'err' to enable internal information
 function render (str, dbg) {

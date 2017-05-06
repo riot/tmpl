@@ -55,7 +55,12 @@ var tmpl = (function () {
     // the function (if it is not in the cache) and call it to replace expressions with
     // their values. data (`this`) is a Tag instance, _logErr is the error handler.
 
-    return (_cache[str] || (_cache[str] = _create(str))).call(data, _logErr)
+    return (_cache[str] || (_cache[str] = _create(str))).call(
+      data, _logErr.bind({
+        data: data,
+        tmpl: str
+      })
+    )
   }
 
   /**
@@ -126,10 +131,9 @@ var tmpl = (function () {
       typeof console !== 'undefined' &&
       typeof console.error === 'function'
     ) {
-      if (err.riotData.tagName) {
-        console.error('Riot template error thrown in the <%s> tag', err.riotData.tagName)
-      }
-      console.error(err)
+      console.error(err.message)
+      console.log('<%s> %s', err.riotData.tagName || 'Unknown tag', this.tmpl) // eslint-disable-line
+      console.log(this.data) // eslint-disable-line
     }
   }
 

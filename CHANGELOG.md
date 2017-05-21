@@ -1,5 +1,8 @@
 # riot-tmpl Changes
 
+### v3.0.5
+- Fix [riot#2361](https://github.com/riot/riot/issues/2361)
+
 ### v3.0.4
 - Add better error reporting messages [tmpl#21](https://github.com/riot/tmpl/pull/21)
 - Add our official eslint-config file to lint the source code

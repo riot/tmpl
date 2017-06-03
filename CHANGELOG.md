@@ -1,5 +1,8 @@
 # riot-tmpl Changes
 
+### v3.0.2
+- Fix [riot#2361](https://github.com/riot/riot/issues/2002) : `'}'` in output when expression contains `')/'` (falsy regex detection).
+
 ### v3.0.1
 - Change Avoid to use `console.error` if a user has defined already a custom error function
 - Change prefer lowercase to debug tags names

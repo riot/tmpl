@@ -8,11 +8,11 @@
  */
 //#if 0 // only in the unprocessed source
 /* eslint no-unused-vars: [2, {args: "after-used", varsIgnorePattern: "^brackets$"}] */
+/* global skipRegex */
 //#endif
 
 //#if ES6
 /* global riot */
-
 export
 //#endif
 var brackets = (function (UNDEF) {
@@ -35,6 +35,8 @@ var brackets = (function (UNDEF) {
     $_RIX_PAIR  = 8,
     $_RIX_LOOP  = 9
   //#endif
+
+  //#include skip-regex
 
   var
     REGLOB = 'g',
@@ -251,13 +253,17 @@ var brackets = (function (UNDEF) {
         // $1: optional escape character,
         // $2: opening js bracket `{[(`,
         // $3: closing riot bracket,
-        // $4 & $5: qblocks
+        // $4 & $5: slashes ($5 is regex)
 
         if (match[2]) {                     // if have a javascript opening bracket,
           re.lastIndex = skipBraces(str, match[2], re.lastIndex)
           continue                          // skip the bracketed block and loop
         }
         if (!match[3]) {                    // if don't have a closing bracket
+          if (match[5]) {
+            // ensure this is a regex (riot# 2361)
+            re.lastIndex = skipRegex(str, match.index + 1)
+          }
           continue                          // search again
         }
       }

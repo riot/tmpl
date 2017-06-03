@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version v3.0.1
+ * @version WIP
  */
 /**
  * riot.util.brackets
@@ -13,9 +13,87 @@
  */
 
 /* global riot */
-
 export
 var brackets = (function (UNDEF) {
+
+var skipRegex = (function () {
+
+  var beforeReChars = '[{(,;:?=|&!^~>%*/'
+
+  var beforeReWords = [
+    'case',
+    'default',
+    'do',
+    'else',
+    'in',
+    'instanceof',
+    'prefix',
+    'return',
+    'typeof',
+    'void',
+    'yield'
+  ]
+
+  var RE_REGEX = /^\/(?=[^*>/])[^[/\\]*(?:\\.|(?:\[(?:\\.|[^\]\\]*)*\])[^[\\/]*)*?\/(?=[gimuy]+|[^/\*]|$)/
+  var RE_VARCHAR = /[$\w]/
+
+  function prev (code, pos) {
+    while (--pos >= 0 && /\s/.test(code[pos]));
+    return pos
+  }
+
+  function _skipRegex (code, start) {
+
+    var re = /.*/g
+    var pos = re.lastIndex = start - 1
+    var match = re.exec(code)[0].match(RE_REGEX)
+
+    if (match) {
+      var next = pos + match[0].length
+
+      pos = prev(code, pos)
+      var c = code[pos]
+
+      if (pos < 0 || ~beforeReChars.indexOf(c)) {
+        return next
+      }
+
+      // istanbul ignore next: This is for ES6
+      if (c === '.') {
+
+        if (code[pos - 1] === '.') {
+          start = next
+        }
+
+      } else if (c === '+' || c === '-') {
+
+        if (code[--pos] !== c ||
+            (pos = prev(code, pos)) < 0 ||
+            !RE_VARCHAR.test(code[pos])) {
+          start = next
+        }
+
+      } else if (/[a-z]/.test(c)) {
+
+        ++pos
+        for (var i = 0; i < beforeReWords.length; i++) {
+          var kw = beforeReWords[i]
+          var nn = pos - kw.length
+
+          if (nn >= 0 && code.slice(nn, pos) === kw && !RE_VARCHAR.test(code[nn - 1])) {
+            start = next
+            break
+          }
+        }
+      }
+    }
+
+    return start
+  }
+
+  return _skipRegex
+
+})()
 
   var
     REGLOB = 'g',
@@ -114,6 +192,10 @@ var brackets = (function (UNDEF) {
           continue
         }
         if (!match[3]) {
+          if (match[5]) {
+
+            re.lastIndex = skipRegex(str, match.index + 1)
+          }
           continue
         }
       }
@@ -242,7 +324,7 @@ var tmpl = (function () {
   function _logErr (err, ctx) {
 
     err.riotData = {
-      tagName: ctx && ctx.root && ctx.root.tagName,
+      tagName: ctx && ctx.__ && ctx.__.tagName,
       _riot_id: ctx && ctx._riot_id  //eslint-disable-line camelcase
     }
 
@@ -252,7 +334,8 @@ var tmpl = (function () {
       typeof console.error === 'function'
     ) {
       if (err.riotData.tagName) {
-        console.error('Riot template error thrown in the <%s> tag', err.riotData.tagName.toLowerCase())
+        // istanbul ignore next
+        console.error('Riot template error thrown in the <%s> tag', err.riotData.tagName)
       }
       console.error(err)
     }
@@ -423,7 +506,7 @@ var tmpl = (function () {
     return expr
   }
 
-  _tmpl.version = brackets.version = 'v3.0.1'
+  _tmpl.version = brackets.version = 'WIP'
 
   return _tmpl
 

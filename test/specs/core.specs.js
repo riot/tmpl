@@ -211,7 +211,7 @@ describe('riot-tmpl', function () {
     })
 
     //// Better recognition of literal regexps inside template and expressions.
-    it('better recognition of literal regexps', function () {
+    it('better recognition of literal regexes', function () {
       expect(render('{ /{}\\/\\n/.source }')).to.be('{}\\/\\n')
       expect(render('{ ok: /{}\\/\\n/.test("{}\\/\\n") }')).to.be('ok')
       // handling quotes in regexp is not so complicated :)
@@ -226,6 +226,9 @@ describe('riot-tmpl', function () {
       expect(render('{ x /2+"abc".search(/c/) }')).to.be(3)
       // in expressions, there's no ASI
       expect(render('{ x\n /2+x/ 1 }')).to.be(3)
+      // Fix riot#2361
+      expect(render('<div>{ (2+3)/2 }</div>')).to.be('<div>2.5</div>')
+      expect(render('{ 5+/./.lastIndex }')).to.be(5)
     })
 
     it('in quoted text, only openning riot brackets need to be escaped!', function () {

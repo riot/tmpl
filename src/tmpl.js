@@ -127,6 +127,7 @@ var tmpl = (function () {
       typeof console.error === 'function'
     ) {
       if (err.riotData.tagName) {
+        // istanbul ignore next
         console.error('Riot template error thrown in the <%s> tag', err.riotData.tagName)
       }
       console.error(err)

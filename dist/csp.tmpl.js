@@ -7173,7 +7173,7 @@ function ReturnValue(type, value){
 
 /**
  * The riot template engine
- * @version WIP
+ * @version v3.0.6
  */
 
 var skipRegex = (function () {
@@ -7699,7 +7699,7 @@ var tmpl = (function () {
     return expr
   }
 
-  _tmpl.version = brackets.version = 'WIP';
+  _tmpl.version = brackets.version = 'v3.0.6';
 
   return _tmpl
 

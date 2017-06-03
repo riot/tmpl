@@ -1,6 +1,11 @@
 # riot-tmpl Changes
 
-### v3.0.6
+### v3.0.7
+- Fix issues with serving to the compiler in the browser.
+- Fix [riot#2361](https://github.com/riot/riot/issues/2361) with a new method.
+- Refactorization of the spliter (`brackets.split`).
+
+### v3.0.6 (UNPUBLISHED)
 - Fix [riot#2361](https://github.com/riot/riot/issues/2361) with a new method.
 - Refactorization of the spliter (`brackets.split`).
 

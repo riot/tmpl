@@ -318,9 +318,20 @@ describe('brackets', function () {
         expect(a[1]).to.be(' a ')
         expect(a[3]).to.be('a<1')
         expect(a[5]).to.be('a>2')
-        expect(a[6]).to.be('>\n{') // '>\n\\{' was for the compiler, not used
+        expect(a[6]).to.be('>\n\\{')
         expect(a[7]).to.be('body')
         expect(a[8]).to.be('}\r\n</tag>\n')
+      })
+
+      it('serve unescaped template to the tmpl module', function () {
+        var
+          str = '<tag att="{ a }" expr1={a<1} expr2={a>2}>\n\\{{body}}\r\n</tag>\n'
+
+        resetBrackets()
+        var a = brackets.split(str, true)
+
+        expect(a).to.have.length(9)
+        expect(a[6]).to.be('>\n{')
       })
 
       it('handle single or double quotes inside quoted expressions', function () {
@@ -328,7 +339,7 @@ describe('brackets', function () {
           str = '<tag att1="{"a"}" att2={"a"} att3={\'a\'}>\'{\'a\'}\'</tag>'
 
         resetBrackets()
-        var a = brackets.split(str)
+        var a = brackets.split(str, true)
         var b = a.qblocks
 
         expect(a).to.have.length(9)
@@ -368,7 +379,7 @@ describe('brackets', function () {
 
         for (n = 0; n < atest.length; ++n) {
           var a, t = atest[n]
-          a = brackets.split(t.join(''))
+          a = brackets.split(t.join(''), 1)
           expect(a).to.have.length(t.length)
           expect(a[0]).to.be(unq(t[0]))
           expect(a.qblocks[0]).to.be(qblocks[n])

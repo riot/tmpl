@@ -215,12 +215,13 @@ var brackets = (function (UNDEF) {
    *
    * _For internal use by tmpl and the riot-compiler._
    * @param   {string} str    - Template source to split, can be one expression
+   * @param   {number} [tmpl] - 1 if called from `tmpl()`
    * @param   {Array}  [_bp]  - Info of custom brackets to use
    * @returns {Array} - Array containing template text and expressions.
    *   If str was one unique expression, returns two elements: ["", expression].
    * @private
    */
-  _brackets.split = function split (str, _bp) {
+  _brackets.split = function split (str, tmpl, _bp) {
     // istanbul ignore next: _bp is for the compiler
     if (!_bp) _bp = _cache
 
@@ -315,7 +316,11 @@ var brackets = (function (UNDEF) {
         s = prevStr + s
         prevStr = ''
       }
-      parts.push(s && s.replace(_bp[$_RIX_ESC], '$1'))
+      if (tmpl || isexpr) {
+        parts.push(s && s.replace(_bp[$_RIX_ESC], '$1'))
+      } else {
+        parts.push(s)
+      }
     }
 
     // Find the js closing bracket for the current block.
@@ -325,7 +330,7 @@ var brackets = (function (UNDEF) {
         _lastIndex = skipRegex(str, _pos)
       }
       // do not save empty strings or non-regex slashes
-      if (_lastIndex > _pos + 2) {
+      if (tmpl && _lastIndex > _pos + 2) {
         mark = '\u2057' + qblocks.length + '~'
         qblocks.push(str.slice(_pos, _lastIndex))
         prevStr += str.slice(start, _pos) + mark

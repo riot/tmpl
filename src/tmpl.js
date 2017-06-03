@@ -182,7 +182,7 @@ var tmpl = (function () {
    * @private
    */
   function _getTmpl (str) {
-    var parts = brackets.split(str.replace(RE_DQUOTE, '"'))   // get text/expr parts
+    var parts = brackets.split(str.replace(RE_DQUOTE, '"'), 1)// get text/expr parts
     var qstr = parts.qblocks                                  // hidden qblocks
     var expr
 

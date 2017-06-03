@@ -1,5 +1,5 @@
 
-/* riot-tmpl v3.0.6, @license MIT, (c) 2015 Muut Inc. + contributors */
+/* riot-tmpl v3.0.7, @license MIT, (c) 2015 Muut Inc. + contributors */
 ;(function (window) {     // eslint-disable-line no-extra-semi
   'use strict'
 
@@ -170,7 +170,7 @@
       return reOrIdx instanceof RegExp ? _regex(reOrIdx) : _cache[reOrIdx]
     }
 
-    _brackets.split = function split (str, _bp) {
+    _brackets.split = function split (str, tmpl, _bp) {
       // istanbul ignore next: _bp is for the compiler
       if (!_bp) _bp = _cache
 
@@ -241,7 +241,11 @@
           s = prevStr + s
           prevStr = ''
         }
-        parts.push(s && s.replace(_bp[5], '$1'))
+        if (tmpl || isexpr) {
+          parts.push(s && s.replace(_bp[5], '$1'))
+        } else {
+          parts.push(s)
+        }
       }
 
       function pushQBlock(_pos, _lastIndex, slash) { //eslint-disable-line
@@ -249,7 +253,7 @@
           _lastIndex = skipRegex(str, _pos)
         }
 
-        if (_lastIndex > _pos + 2) {
+        if (tmpl && _lastIndex > _pos + 2) {
           mark = '\u2057' + qblocks.length + '~'
           qblocks.push(str.slice(_pos, _lastIndex))
           prevStr += str.slice(start, _pos) + mark
@@ -378,7 +382,7 @@
     var RE_QBMARK = /\u2057(\d+)~/g
 
     function _getTmpl (str) {
-      var parts = brackets.split(str.replace(RE_DQUOTE, '"'))
+      var parts = brackets.split(str.replace(RE_DQUOTE, '"'), 1)
       var qstr = parts.qblocks
       var expr
 
@@ -528,7 +532,7 @@
 
   })()
 
-  tmpl.version = brackets.version = 'v3.0.6'
+  tmpl.version = brackets.version = 'v3.0.7'
 
   /* istanbul ignore else */
   if (typeof module === 'object' && module.exports) {

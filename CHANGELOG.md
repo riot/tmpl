@@ -1,5 +1,9 @@
 # riot-tmpl Changes
 
+### v3.0.6
+- Fix [riot#2361](https://github.com/riot/riot/issues/2361) with a new method.
+- Refactorization of the spliter (`brackets.split`).
+
 ### v3.0.5
 - Fix [riot#2361](https://github.com/riot/riot/issues/2361)
 

@@ -170,12 +170,8 @@ var tmpl = (function () {
   // --------------------------------------------------------------------------
 
   // Regexes for `_getTmpl` and `_parseExpr`
-  var
-    CH_IDEXPR = String.fromCharCode(0x2057),
-    RE_CSNAME = /^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\u2057(\d+)~):/,
-    RE_QBLOCK = RegExp(brackets.S_QBLOCKS, 'g'),
-    RE_DQUOTE = /\u2057/g,
-    RE_QBMARK = /\u2057(\d+)~/g     // string or regex marker, $1: array index
+  var RE_DQUOTE = /\u2057/g
+  var RE_QBMARK = /\u2057(\d+)~/g     // string or regex marker, $1: array index
 
   /**
    * Parses an expression or template with zero or more expressions enclosed with
@@ -186,10 +182,9 @@ var tmpl = (function () {
    * @private
    */
   function _getTmpl (str) {
-    var
-      qstr = [],                      // hidden qblocks
-      expr,
-      parts = brackets.split(str.replace(RE_DQUOTE, '"'), 1)  // get text/expr parts
+    var parts = brackets.split(str.replace(RE_DQUOTE, '"'))   // get text/expr parts
+    var qstr = parts.qblocks                                  // hidden qblocks
+    var expr
 
     // We can have almost anything as expressions, except comments... hope
     if (parts.length > 2 || parts[0]) {
@@ -222,7 +217,7 @@ var tmpl = (function () {
     }
 
     // Restore quoted strings and regexes
-    if (qstr[0]) {
+    if (qstr.length) {
       expr = expr.replace(RE_QBMARK, function (_, pos) {
         return qstr[pos]
           .replace(/\r/g, '\\r')
@@ -232,6 +227,7 @@ var tmpl = (function () {
     return expr
   }
 
+  var RE_CSNAME = /^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\u2057(\d+)~):/
   var
     RE_BREND = {
       '(': /[()]/g,
@@ -261,24 +257,20 @@ var tmpl = (function () {
    */
   function _parseExpr (expr, asText, qstr) {
 
-    // Replace non-empty qstrings with a marker that includes its index into the array
-    // of replaced qstrings (by hiding regexes and strings here we avoid complications
-    // through all the code without affecting the logic).
+    // Non-empty quoted strings and literal regexes are hidden at this point.
     //
-    // Also, converts whitespace into compacted spaces and trims surrounding spaces
-    // and some inner tokens, mainly brackets and separators.
-    // We need convert embedded `\r` and `\n` as these chars break the evaluation.
+    // Now, this function converts whitespace into compacted spaces and trims
+    // surrounding spaces and some inner tokens, mainly brackets and separators.
+    // We need to convert embedded `\r` and `\n` as these characters breaks
+    // the evaluation.
     //
     // WARNING:
     //   Trim and compact is not strictly necessary, but it allows optimized regexes.
     //   Do not touch the next block until you know how/which regexes are affected.
 
     expr = expr
-          .replace(RE_QBLOCK, function (s, div) {   // hide strings & regexes
-            return s.length > 2 && !div ? CH_IDEXPR + (qstr.push(s) - 1) + '~' : s
-          })
-          .replace(/\s+/g, ' ').trim()
-          .replace(/\ ?([[\({},?\.:])\ ?/g, '$1')
+      .replace(/\s+/g, ' ').trim()
+      .replace(/\ ?([[\({},?\.:])\ ?/g, '$1')
 
     if (expr) {
       var

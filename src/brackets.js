@@ -8,6 +8,7 @@
  */
 //#if 0 // only in the unprocessed source
 /* eslint no-unused-vars: [2, {args: "after-used", varsIgnorePattern: "^brackets$"}] */
+/* global skipRegex */
 //#endif
 
 //#if ES6
@@ -75,6 +76,8 @@ var brackets = (function (UNDEF) {
       /(?:\breturn\s+|(?:[$\w\)\]]|\+\+|--)\s*(\/)(?![*\/]))/.source + '|' +
       /\/(?=[^*\/])[^[\/\\]*(?:(?:\[(?:\\.|[^\]\\]*)*\]|\\.)[^[\/\\]*)*?([^<]\/)[gim]*/.source,
 
+    S_QBLOCK2 = R_STRINGS.source + '|' + /(\/)(?![*\/])/.source,
+
     /**
      * Characters not supported by the expression parser.
      * @const {RegExp}
@@ -97,9 +100,9 @@ var brackets = (function (UNDEF) {
      * @private
      */
     FINDBRACES = {
-      '(': RegExp('([()])|'   + S_QBLOCKS, REGLOB),
-      '[': RegExp('([[\\]])|' + S_QBLOCKS, REGLOB),
-      '{': RegExp('([{}])|'   + S_QBLOCKS, REGLOB)
+      '(': RegExp('([()])|'   + S_QBLOCK2, REGLOB),
+      '[': RegExp('([[\\]])|' + S_QBLOCK2, REGLOB),
+      '{': RegExp('([{}])|'   + S_QBLOCK2, REGLOB)
     },
 
     /**
@@ -116,7 +119,7 @@ var brackets = (function (UNDEF) {
     /{[^}]*}/,                  // $_RIX_TEST
     /\\([{}])/g,                // $_RIX_ESC
     /\\({)|{/g,                 // $_RIX_OPEN
-    RegExp('\\\\(})|([[({])|(})|' + S_QBLOCKS, REGLOB),       // $_RIX_CLOSE
+    RegExp('\\\\(})|([[({])|(})|' + S_QBLOCK2, REGLOB),       // $_RIX_CLOSE
     DEFAULT,                    // $_RIX_PAIR
     /^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S.*)\s*}/, // $_RIX_LOOP
     /(^|[^\\]){=[\S\s]*?}/      // $_RIX_RAW
@@ -182,7 +185,7 @@ var brackets = (function (UNDEF) {
     arr[$_RIX_TEST] = _rewrite(arr[1].length > 1 ? /{[\S\s]*?}/ : _pairs[$_RIX_TEST], arr)
     arr[$_RIX_ESC] = _rewrite(pair.length > 3 ? /\\({|})/g : _pairs[$_RIX_ESC], arr)
     arr[$_RIX_OPEN] = _rewrite(_pairs[$_RIX_OPEN], arr) // for _split()
-    arr[$_RIX_CLOSE] = RegExp('\\\\(' + arr[3] + ')|([[({])|(' + arr[3] + ')|' + S_QBLOCKS, REGLOB)
+    arr[$_RIX_CLOSE] = RegExp('\\\\(' + arr[3] + ')|([[({])|(' + arr[3] + ')|' + S_QBLOCK2, REGLOB)
     arr[$_RIX_PAIR] = pair
     return arr
   }
@@ -212,13 +215,12 @@ var brackets = (function (UNDEF) {
    *
    * _For internal use by tmpl and the riot-compiler._
    * @param   {string} str    - Template source to split, can be one expression
-   * @param   {number} [tmpl] - 1 if called from `tmpl()`
    * @param   {Array}  [_bp]  - Info of custom brackets to use
    * @returns {Array} - Array containing template text and expressions.
    *   If str was one unique expression, returns two elements: ["", expression].
    * @private
    */
-  _brackets.split = function split (str, tmpl, _bp) {
+  _brackets.split = function split (str, _bp) {
     // istanbul ignore next: _bp is for the compiler
     if (!_bp) _bp = _cache
 
@@ -241,23 +243,44 @@ var brackets = (function (UNDEF) {
       pos,                        // current position (exec() result)
       re = _bp[$_RIX_OPEN]        // start with *updated* opening bracket
 
+    var qblocks = []              // quoted strings and regexes
+    var prevStr = ''
+    var mark, lastIndex
+
     isexpr = start = re.lastIndex = 0       // re is reused, we must reset lastIndex
 
     while ((match = re.exec(str))) {
 
+      lastIndex = re.lastIndex
       pos = match.index
 
       if (isexpr) {
         // $1: optional escape character,
         // $2: opening js bracket `{[(`,
         // $3: closing riot bracket,
-        // $4 & $5: qblocks
+        // $4: opening slashes of regex
 
         if (match[2]) {                     // if have a javascript opening bracket,
-          re.lastIndex = skipBraces(str, match[2], re.lastIndex)
+          //re.lastIndex = skipBraces(str, match[2], re.lastIndex)
+          var ch = match[2]
+          var rech = FINDBRACES[ch]
+          var ix = 1
+
+          rech.lastIndex = lastIndex
+          while ((match = rech.exec(str))) {
+            if (match[1]) {
+              if (match[1] === ch) ++ix
+              else if (!--ix) break
+            } else {
+              rech.lastIndex = pushQBlock(match.index, rech.lastIndex, match[2])
+            }
+          }
+          re.lastIndex = ix ? str.length : rech.lastIndex
           continue                          // skip the bracketed block and loop
         }
+
         if (!match[3]) {                    // if don't have a closing bracket
+          re.lastIndex = pushQBlock(pos, lastIndex, match[4])
           continue                          // search again
         }
       }
@@ -277,6 +300,9 @@ var brackets = (function (UNDEF) {
       unescapeStr(str.slice(start))
     }
 
+    // send the literal strings as an array property
+    parts.qblocks = qblocks
+
     return parts
 
     // Inner Helpers for _split() -----
@@ -285,27 +311,27 @@ var brackets = (function (UNDEF) {
     // Unescape escaped brackets from expressions and, if we are called from
     // tmpl, from the HTML part too.
     function unescapeStr (s) {
-      if (tmpl || isexpr) {
-        parts.push(s && s.replace(_bp[$_RIX_ESC], '$1'))
-      } else {
-        parts.push(s)
+      if (prevStr) {
+        s = prevStr + s
+        prevStr = ''
       }
+      parts.push(s && s.replace(_bp[$_RIX_ESC], '$1'))
     }
 
     // Find the js closing bracket for the current block.
     // Skips strings, regexes, and other inner blocks.
-    function skipBraces (s, ch, ix) {
-      var
-        match,
-        recch = FINDBRACES[ch]
-
-      recch.lastIndex = ix
-      ix = 1
-      while ((match = recch.exec(s))) {
-        if (match[1] &&
-          !(match[1] === ch ? ++ix : --ix)) break
+    function pushQBlock(_pos, _lastIndex, slash) { //eslint-disable-line
+      if (slash) {
+        _lastIndex = skipRegex(str, _pos)
       }
-      return ix ? s.length : recch.lastIndex
+      // do not save empty strings or non-regex slashes
+      if (_lastIndex > _pos + 2) {
+        mark = '\u2057' + qblocks.length + '~'
+        qblocks.push(str.slice(_pos, _lastIndex))
+        prevStr += str.slice(start, _pos) + mark
+        start = _lastIndex
+      }
+      return _lastIndex
     }
   }
 
@@ -387,6 +413,7 @@ var brackets = (function (UNDEF) {
   _brackets.R_STRINGS = R_STRINGS
   _brackets.R_MLCOMMS = R_MLCOMMS
   _brackets.S_QBLOCKS = S_QBLOCKS
+  _brackets.S_QBLOCK2 = S_QBLOCK2
 
   return _brackets
 

@@ -19,6 +19,9 @@ import safeEval from '../src/notevil' //eslint-disable-line no-unused-vars
  * @version WIP
  */
 //#endif
+
+  //#include skip-regex
+
   //#include brackets
 
   //#include tmpl

@@ -27,7 +27,7 @@ var skipRegex = (function () {
   ]
 
   // The string to test can't include line-endings
-  var RE_REGEX = /^\/(?=[^*>/])[^[/\\]*(?:\\.|(?:\[(?:\\.|[^\]\\]*)*\])[^[\\/]*)*?\/(?=[gimuy]+|[^/\*]|$)/
+  var RE_REGEX = /^\/(?=[^*>/])[^[/\\]*(?:\\.|(?:\[(?:\\.|[^\]\\]*)*\])[^[\\/]*)*?\/[gimuy]*/
   var RE_VARCHAR = /[$\w]/
 
   // Searches the position of the previous non-blank character inside `code`,
@@ -64,7 +64,7 @@ var skipRegex = (function () {
       }
 
       // from here, `pos` is >= 0 and `c` is code[pos]
-      // istanbul ignore next: This is for ES6
+      // is-tanbul ignore next: This is for ES6
       if (c === '.') {
         // can be `...` or something silly like 5./2
         if (code[pos - 1] === '.') {

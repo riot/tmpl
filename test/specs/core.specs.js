@@ -19,7 +19,7 @@ var data = {
 }
 
 // avoid to output the console errors
-console.error = function () { /* noop */ } // eslint-disable-line
+function noop() { /* noop */ }
 
 // send 1 or 2 in 'err' to enable internal information
 function render (str, dbg) {
@@ -70,10 +70,12 @@ describe('riot-tmpl', function () {
     it('undefined vars are catched in expressions and returns undefined', function () {
       expect(render('{ nonExistingVar }')).to.be(undefined)
       data.parent = undefined
+      tmpl.errorHandler = noop
       expect(render('{ parent.some.thing }')).to.be(undefined)
       expect(render('{ !nonExistingVar }')).to.equal(true)
       expect(render('{ nonExistingVar ? "yes" : "no" }')).to.equal('no')
       expect(render('{ !nonExistingVar ? "yes" : "no" }')).to.equal('yes')
+      tmpl.errorHandler = null
       delete data.parent
     })
 
@@ -154,7 +156,9 @@ describe('riot-tmpl', function () {
       })
 
       it('errors in expressions are catched silently', function () {
+        tmpl.errorHandler = noop
         expect(render('{ loading: !nonExistingVar.length }')).to.equal('')
+        tmpl.errorHandler = null
       })
 
       it('expressions are just regular JavaScript', function () {
@@ -226,9 +230,6 @@ describe('riot-tmpl', function () {
       expect(render('{ x /2+"abc".search(/c/) }')).to.be(3)
       // in expressions, there's no ASI
       expect(render('{ x\n /2+x/ 1 }')).to.be(3)
-      // Fix riot#2361
-      expect(render('<div>{ (2+3)/2 }</div>')).to.be('<div>2.5</div>')
-      expect(render('{ 5+/./.lastIndex }')).to.be(5)
     })
 
     it('in quoted text, only openning riot brackets need to be escaped!', function () {
@@ -259,10 +260,11 @@ describe('riot-tmpl', function () {
     //// Consistency?
 
     it('main inconsistence between expressions and class shorthands are gone', function () {
+      tmpl.errorHandler = noop
       expect(render('{ !nonExistingVar.foo ? "ok" : "" }')).to.equal(undefined) // ok
       expect(render('{ !nonExistingVar.foo ? "ok" : "" } ')).to.equal(' ')      // ok
-    //expect(render('{ ok: !nonExistingVar.foo }')).to.equal('ok')              // what?
       expect(render('{ ok: !nonExistingVar.foo }')).to.equal('')                // ok ;)
+      tmpl.errorHandler = null
     })
 
     //// Mac/Win EOL's normalization avoids unexpected results with some editors.
@@ -528,5 +530,20 @@ describe('riot-tmpl', function () {
 
   })
   // end of tmpl 2.3.0
+
+  describe('tmpl 3.x', function () {
+
+    it('has beter support for regexes', function () {
+      data.i = { x: 1 }
+      expect(render('<a>{ typeof /5/ }</a>')).to.be('<a>object</a>')
+      expect(render('<a>{ 5*5 /i.x }</a>')).to.be('<a>25</a>')
+      expect(render('<a>{ 5*5 /i.x/1 }</a>')).to.be('<a>25</a>')
+      expect(render('{ 5+/./.lastIndex }')).to.be(5)
+    })
+
+    it('fixes riot#2361', function () {
+      expect(render('<div>{ (2+3)/2 }</div>')).to.be('<div>2.5</div>')
+    })
+  })
 
 })

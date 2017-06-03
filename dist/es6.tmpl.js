@@ -3,18 +3,6 @@
  * The riot template engine
  * @version WIP
  */
-/**
- * riot.util.brackets
- *
- * - `brackets    ` - Returns a string or regex based on its parameter
- * - `brackets.set` - Change the current riot brackets
- *
- * @module
- */
-
-/* global riot */
-export
-var brackets = (function (UNDEF) {
 
 var skipRegex = (function () {
 
@@ -34,7 +22,7 @@ var skipRegex = (function () {
     'yield'
   ]
 
-  var RE_REGEX = /^\/(?=[^*>/])[^[/\\]*(?:\\.|(?:\[(?:\\.|[^\]\\]*)*\])[^[\\/]*)*?\/(?=[gimuy]+|[^/\*]|$)/
+  var RE_REGEX = /^\/(?=[^*>/])[^[/\\]*(?:\\.|(?:\[(?:\\.|[^\]\\]*)*\])[^[\\/]*)*?\/[gimuy]*/
   var RE_VARCHAR = /[$\w]/
 
   function prev (code, pos) {
@@ -58,7 +46,6 @@ var skipRegex = (function () {
         return next
       }
 
-      // istanbul ignore next: This is for ES6
       if (c === '.') {
 
         if (code[pos - 1] === '.') {
@@ -95,25 +82,41 @@ var skipRegex = (function () {
 
 })()
 
+/**
+ * riot.util.brackets
+ *
+ * - `brackets    ` - Returns a string or regex based on its parameter
+ * - `brackets.set` - Change the current riot brackets
+ *
+ * @module
+ */
+
+/* global riot */
+
+export
+var brackets = (function (UNDEF) {
+
   var
     REGLOB = 'g',
 
     R_MLCOMMS = /\/\*[^*]*\*+(?:[^*\/][^*]*\*+)*\//g,
 
-    R_STRINGS = /"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'/g,
+    R_STRINGS = /"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|`[^`\\]*(?:\\[\S\s][^`\\]*)*`/g,
 
     S_QBLOCKS = R_STRINGS.source + '|' +
       /(?:\breturn\s+|(?:[$\w\)\]]|\+\+|--)\s*(\/)(?![*\/]))/.source + '|' +
       /\/(?=[^*\/])[^[\/\\]*(?:(?:\[(?:\\.|[^\]\\]*)*\]|\\.)[^[\/\\]*)*?(\/)[gim]*/.source,
+
+    S_QBLOCK2 = R_STRINGS.source + '|' + /(\/)(?![*\/])/.source,
 
     UNSUPPORTED = RegExp('[\\' + 'x00-\\x1F<>a-zA-Z0-9\'",;\\\\]'),
 
     NEED_ESCAPE = /(?=[[\]()*+?.^$|])/g,
 
     FINDBRACES = {
-      '(': RegExp('([()])|'   + S_QBLOCKS, REGLOB),
-      '[': RegExp('([[\\]])|' + S_QBLOCKS, REGLOB),
-      '{': RegExp('([{}])|'   + S_QBLOCKS, REGLOB)
+      '(': RegExp('([()])|'   + S_QBLOCK2, REGLOB),
+      '[': RegExp('([[\\]])|' + S_QBLOCK2, REGLOB),
+      '{': RegExp('([{}])|'   + S_QBLOCK2, REGLOB)
     },
 
     DEFAULT = '{ }'
@@ -124,7 +127,7 @@ var skipRegex = (function () {
     /{[^}]*}/,
     /\\([{}])/g,
     /\\({)|{/g,
-    RegExp('\\\\(})|([[({])|(})|' + S_QBLOCKS, REGLOB),
+    RegExp('\\\\(})|([[({])|(})|' + S_QBLOCK2, REGLOB),
     DEFAULT,
     /^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S.*)\s*}/,
     /(^|[^\\]){=[\S\s]*?}/
@@ -158,7 +161,7 @@ var skipRegex = (function () {
     arr[4] = _rewrite(arr[1].length > 1 ? /{[\S\s]*?}/ : _pairs[4], arr)
     arr[5] = _rewrite(pair.length > 3 ? /\\({|})/g : _pairs[5], arr)
     arr[6] = _rewrite(_pairs[6], arr)
-    arr[7] = RegExp('\\\\(' + arr[3] + ')|([[({])|(' + arr[3] + ')|' + S_QBLOCKS, REGLOB)
+    arr[7] = RegExp('\\\\(' + arr[3] + ')|([[({])|(' + arr[3] + ')|' + S_QBLOCK2, REGLOB)
     arr[8] = pair
     return arr
   }
@@ -167,7 +170,7 @@ var skipRegex = (function () {
     return reOrIdx instanceof RegExp ? _regex(reOrIdx) : _cache[reOrIdx]
   }
 
-  _brackets.split = function split (str, tmpl, _bp) {
+  _brackets.split = function split (str, _bp) {
     // istanbul ignore next: _bp is for the compiler
     if (!_bp) _bp = _cache
 
@@ -179,23 +182,40 @@ var skipRegex = (function () {
       pos,
       re = _bp[6]
 
+    var qblocks = []
+    var prevStr = ''
+    var mark, lastIndex
+
     isexpr = start = re.lastIndex = 0
 
     while ((match = re.exec(str))) {
 
+      lastIndex = re.lastIndex
       pos = match.index
 
       if (isexpr) {
 
         if (match[2]) {
-          re.lastIndex = skipBraces(str, match[2], re.lastIndex)
+
+          var ch = match[2]
+          var rech = FINDBRACES[ch]
+          var ix = 1
+
+          rech.lastIndex = lastIndex
+          while ((match = rech.exec(str))) {
+            if (match[1]) {
+              ix += match[1] === ch ? 1 : -1
+              if (!ix) break
+            } else {
+              rech.lastIndex = pushQBlock(match.index, rech.lastIndex, match[2])
+            }
+          }
+          re.lastIndex = ix ? str.length : rech.lastIndex
           continue
         }
-        if (!match[3]) {
-          if (match[5]) {
 
-            re.lastIndex = skipRegex(str, match.index + 1)
-          }
+        if (!match[3]) {
+          re.lastIndex = pushQBlock(pos, lastIndex, match[4])
           continue
         }
       }
@@ -212,28 +232,30 @@ var skipRegex = (function () {
       unescapeStr(str.slice(start))
     }
 
+    parts.qblocks = qblocks
+
     return parts
 
     function unescapeStr (s) {
-      if (tmpl || isexpr) {
-        parts.push(s && s.replace(_bp[5], '$1'))
-      } else {
-        parts.push(s)
+      if (prevStr) {
+        s = prevStr + s
+        prevStr = ''
       }
+      parts.push(s && s.replace(_bp[5], '$1'))
     }
 
-    function skipBraces (s, ch, ix) {
-      var
-        match,
-        recch = FINDBRACES[ch]
-
-      recch.lastIndex = ix
-      ix = 1
-      while ((match = recch.exec(s))) {
-        if (match[1] &&
-          !(match[1] === ch ? ++ix : --ix)) break
+    function pushQBlock(_pos, _lastIndex, slash) { //eslint-disable-line
+      if (slash) {
+        _lastIndex = skipRegex(str, _pos + 1)
       }
-      return ix ? s.length : recch.lastIndex
+
+      if (_lastIndex > _pos + 2) {
+        mark = '\u2057' + qblocks.length + '~'
+        qblocks.push(str.slice(_pos, _lastIndex))
+        prevStr += str.slice(start, _pos) + mark
+        start = _lastIndex
+      }
+      return _lastIndex
     }
   }
 
@@ -288,6 +310,7 @@ var skipRegex = (function () {
   _brackets.R_STRINGS = R_STRINGS
   _brackets.R_MLCOMMS = R_MLCOMMS
   _brackets.S_QBLOCKS = S_QBLOCKS
+  _brackets.S_QBLOCK2 = S_QBLOCK2
 
   return _brackets
 
@@ -309,7 +332,12 @@ var tmpl = (function () {
   function _tmpl (str, data) {
     if (!str) return str
 
-    return (_cache[str] || (_cache[str] = _create(str))).call(data, _logErr)
+    return (_cache[str] || (_cache[str] = _create(str))).call(
+      data, _logErr.bind({
+        data: data,
+        tmpl: str
+      })
+    )
   }
 
   _tmpl.hasExpr = brackets.hasExpr
@@ -333,11 +361,9 @@ var tmpl = (function () {
       typeof console !== 'undefined' &&
       typeof console.error === 'function'
     ) {
-      if (err.riotData.tagName) {
-        // istanbul ignore next
-        console.error('Riot template error thrown in the <%s> tag', err.riotData.tagName)
-      }
-      console.error(err)
+      console.error(err.message)
+      console.log('<%s> %s', err.riotData.tagName || 'Unknown tag', this.tmpl) // eslint-disable-line
+      console.log(this.data) // eslint-disable-line
     }
   }
 
@@ -351,16 +377,14 @@ var tmpl = (function () {
 
   var
     CH_IDEXPR = String.fromCharCode(0x2057),
-    RE_CSNAME = /^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\u2057(\d+)~):/,
-    RE_QBLOCK = RegExp(brackets.S_QBLOCKS, 'g'),
+    RE_QBLOCK = RegExp(brackets.S_QBLOCK2, 'g'),
     RE_DQUOTE = /\u2057/g,
     RE_QBMARK = /\u2057(\d+)~/g
 
   function _getTmpl (str) {
-    var
-      qstr = [],
-      expr,
-      parts = brackets.split(str.replace(RE_DQUOTE, '"'), 1)
+    var parts = brackets.split(str.replace(RE_DQUOTE, '"'))
+    var qstr = parts.qblocks
+    var expr
 
     if (parts.length > 2 || parts[0]) {
       var i, j, list = []
@@ -391,7 +415,7 @@ var tmpl = (function () {
       expr = _parseExpr(parts[1], 0, qstr)
     }
 
-    if (qstr[0]) {
+    if (qstr.length) {
       expr = expr.replace(RE_QBMARK, function (_, pos) {
         return qstr[pos]
           .replace(/\r/g, '\\r')
@@ -401,6 +425,7 @@ var tmpl = (function () {
     return expr
   }
 
+  var RE_CSNAME = /^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\u2057(\d+)~):/
   var
     RE_BREND = {
       '(': /[()]/g,
@@ -408,12 +433,29 @@ var tmpl = (function () {
       '{': /[{}]/g
     }
 
+  function pushQBlocks(expr, qstr) {
+    var re = RE_QBLOCK
+    var match
+    re.lastIndex = 0
+    while (match = re.exec(expr)) {
+
+      var str = match[0]
+      var pos = match.index + 1
+      if (match[1]) {
+        str = expr.slice(pos - 1, re.lastIndex = skipRegex(expr, pos))
+      }
+      if (str.length > 1) {
+        var mark = CH_IDEXPR + (qstr.push(str) - 1) + '~'
+        expr = expr.slice(0, pos - 1) + mark + expr.slice(re.lastIndex)
+        re.lastIndex = pos + mark.length
+      }
+    }
+    return expr
+  }
+
   function _parseExpr (expr, asText, qstr) {
 
-    expr = expr
-          .replace(RE_QBLOCK, function (s, div) {
-            return s.length > 2 && !div ? CH_IDEXPR + (qstr.push(s) - 1) + '~' : s
-          })
+    expr = pushQBlocks(expr, qstr)
           .replace(/\s+/g, ' ').trim()
           .replace(/\ ?([[\({},?\.:])\ ?/g, '$1')
 

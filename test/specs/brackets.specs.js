@@ -318,59 +318,61 @@ describe('brackets', function () {
         expect(a[1]).to.be(' a ')
         expect(a[3]).to.be('a<1')
         expect(a[5]).to.be('a>2')
-        expect(a[6]).to.be('>\n\\{')
+        expect(a[6]).to.be('>\n{') // '>\n\\{' was for the compiler, not used
         expect(a[7]).to.be('body')
         expect(a[8]).to.be('}\r\n</tag>\n')
       })
 
-      it('serve unescaped template to the tmpl module', function () {
-        var
-          str = '<tag att="{ a }" expr1={a<1} expr2={a>2}>\n\\{{body}}\r\n</tag>\n'
-
-        resetBrackets()
-        var a = brackets.split(str, true)
-
-        expect(a).to.have.length(9)
-        expect(a[6]).to.be('>\n{')
-      })
-
       it('handle single or double quotes inside quoted expressions', function () {
         var
-          str = '<tag att1="{"a"}" att2={"a"} att3={\'a\'}>\'{\'a\'}\'</tag>',
-          a
+          str = '<tag att1="{"a"}" att2={"a"} att3={\'a\'}>\'{\'a\'}\'</tag>'
+
         resetBrackets()
-        a = brackets.split(str)
+        var a = brackets.split(str)
+        var b = a.qblocks
 
         expect(a).to.have.length(9)
-        expect(a[1]).to.be('"a"')
-        expect(a[3]).to.be('"a"')
-        expect(a[5]).to.be("'a'")
-        expect(a[7]).to.be("'a'")
+        expect(a[0]).to.be('<tag att1="')
         expect(a[8]).to.be('\'</tag>')
+
+        expect(b).to.have.length(4)
+        expect(b[0]).to.be('"a"')
+        expect(b[1]).to.be('"a"')
+        expect(b[2]).to.be("'a'")
+        expect(b[3]).to.be("'a'")
       })
 
       it('recognizes difficult literal regexes', function () {
-        var n, i, p1 = '<p a="', p2 = '">'
+        var n, p1 = '<p a="', p2 = '">'
         var atest = [
           [p1, '{5+3/ /}/}',          p2],  // <p a="{a+5/ /}/}">  : regex: /}/  (ok, `5+3/ re` == NaN)
           [p1, '{/[///[]}/}',         p2],  // <p a="{/[///[]}/}"> : regex: /[///[]}/
           [p1, '{/\\/[}\\]]/}',       p2],  // <p a="{/\/[}\]]/}"> : regex: /\/[}\]]/
           [p1, '{x/y}', '', '{x/g}',  p2],  // <p a="{x/y}{x/g}">  : NOT regex: /y}{x/g
           [p1, '{a++/b}', '', '{/i}', p2],  // <p a="{a++/b}{/i}"> : NOT regex: /b}{/i
-          [p1, '{\'\'+/b}{/i}',       p2],  // <p a="{""+/b}{/i}"> : regex:     /b}{/i
+          [p1, "{''+/b}{/i}",         p2],  // <p a="{''+/b}{/i}"> : regex:     /b}{/i
           [p1, '{a==/b}{/i}',         p2],  // <p a="{a==/b}{/i">  : regex:     /b}{/i
           [p1, '{a=/{}}}}/}',         p2]   // <p a="{a=/{}}}}/">  : regex:     /{}}}}/
+        ]
+        var qblocks = [
+          '/}/',
+          '/[///[]}/',
+          '/\\/[}\\]]/',
+          undefined,
+          undefined,
+          '/b}{/i',
+          '/b}{/i',
+          '/{}}}}/',
         ]
         resetBrackets()
 
         for (n = 0; n < atest.length; ++n) {
-          var a, t
-          t = atest[n]
+          var a, t = atest[n]
           a = brackets.split(t.join(''))
           expect(a).to.have.length(t.length)
-          for (i = 0; i < t.length; ++i) {
-            expect(a[i]).to.be(unq(t[i]))
-          }
+          expect(a[0]).to.be(unq(t[0]))
+          expect(a.qblocks[0]).to.be(qblocks[n])
+          expect(a[2]).to.be(unq(t[2]))
         }
 
         function unq (s) { return /^{.*}$/.test(s) ? s.slice(1, -1) : s }

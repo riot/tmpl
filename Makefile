@@ -34,7 +34,7 @@ build: eslint
 
 eslint:
 	# check code style
-	@ $(ESLINT) -c ./.eslintrc.yml src
+	@ $(ESLINT) -c ./.eslintrc.json src
 
 test-karma:
 	@ $(KARMA) start test/karma.conf.js

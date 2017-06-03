@@ -1,7 +1,18 @@
 # riot-tmpl Changes
 
+### v3.0.6
+- Fix [riot#2361](https://github.com/riot/riot/issues/2361) with a new method.
+- Refactorization of the spliter (`brackets.split`).
+
+### v3.0.5
+- Fix [riot#2361](https://github.com/riot/riot/issues/2361)
+
+### v3.0.4
+- Add better error reporting messages [tmpl#21](https://github.com/riot/tmpl/pull/21)
+- Add our official eslint-config file to lint the source code
+
 ### v3.0.2
-- Fix [riot#2361](https://github.com/riot/riot/issues/2002) : `'}'` in output when expression contains `')/'` (falsy regex detection).
+- Change the way of detecting the tag names in case of errors
 
 ### v3.0.1
 - Change Avoid to use `console.error` if a user has defined already a custom error function

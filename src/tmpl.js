@@ -7,7 +7,7 @@
  */
 //#if 0 // only in the unprocessed source
 /* eslint no-unused-vars: [2, {args: "after-used", varsIgnorePattern: "tmpl"}] */
-/* global brackets, skipRegex, riot */
+/* global brackets, riot */
 //#endif
 //#define LIST_GETTERS 0
 
@@ -170,11 +170,8 @@ var tmpl = (function () {
   // --------------------------------------------------------------------------
 
   // Regexes for `_getTmpl` and `_parseExpr`
-  var
-    CH_IDEXPR = String.fromCharCode(0x2057),
-    RE_QBLOCK = RegExp(brackets.S_QBLOCK2, 'g'),
-    RE_DQUOTE = /\u2057/g,
-    RE_QBMARK = /\u2057(\d+)~/g     // string or regex marker, $1: array index
+  var RE_DQUOTE = /\u2057/g
+  var RE_QBMARK = /\u2057(\d+)~/g     // string or regex marker, $1: array index
 
   /**
    * Parses an expression or template with zero or more expressions enclosed with
@@ -238,26 +235,6 @@ var tmpl = (function () {
       '{': /[{}]/g
     }
 
-  function pushQBlocks(expr, qstr) {
-    var re = RE_QBLOCK
-    var match
-    re.lastIndex = 0
-    while (match = re.exec(expr)) {
-      //debugger
-      var str = match[0]
-      var pos = match.index + 1
-      if (match[1]) {
-        str = expr.slice(pos - 1, re.lastIndex = skipRegex(expr, pos))
-      }
-      if (str.length > 1) {
-        var mark = CH_IDEXPR + (qstr.push(str) - 1) + '~'
-        expr = expr.slice(0, pos - 1) + mark + expr.slice(re.lastIndex)
-        re.lastIndex = pos + mark.length
-      }
-    }
-    return expr
-  }
-
   /**
    * Parses an individual expression `{expression}` or shorthand `{name: expression, ...}`
    *
@@ -291,9 +268,9 @@ var tmpl = (function () {
     //   Trim and compact is not strictly necessary, but it allows optimized regexes.
     //   Do not touch the next block until you know how/which regexes are affected.
 
-    expr = pushQBlocks(expr, qstr)          // hide strings & regexes
-          .replace(/\s+/g, ' ').trim()
-          .replace(/\ ?([[\({},?\.:])\ ?/g, '$1')
+    expr = expr
+      .replace(/\s+/g, ' ').trim()
+      .replace(/\ ?([[\({},?\.:])\ ?/g, '$1')
 
     if (expr) {
       var

@@ -26,6 +26,10 @@ var skipRegex = (function () {
     'yield'
   ]
 
+  var beforeWordChars = beforeReWords.reduce(function (s, w) {
+    return s + w.slice(-1)
+  }, '')
+
   // The string to test can't include line-endings
   var RE_REGEX = /^\/(?=[^*>/])[^[/\\]*(?:\\.|(?:\[(?:\\.|[^\]\\]*)*\])[^[\\/]*)*?\/[gimuy]*/
   var RE_VARCHAR = /[$\w]/
@@ -41,7 +45,7 @@ var skipRegex = (function () {
    * Check if the code in the `start` position can be a regex.
    *
    * @param   {string} code  - Buffer to test in
-   * @param   {number} start - Position following the slash inside `code`
+   * @param   {number} start - Position the first slash inside `code`
    * @returns {number} position of the char following the regex.
    */
   function _skipRegex (code, start) {
@@ -49,7 +53,7 @@ var skipRegex = (function () {
     // `exec()` will extract from the slash to the end of line and the
     // chained `match()` will match the possible regex.
     var re = /.*/g
-    var pos = re.lastIndex = start - 1
+    var pos = re.lastIndex = start++
     var match = re.exec(code)[0].match(RE_REGEX)
 
     if (match) {
@@ -79,7 +83,7 @@ var skipRegex = (function () {
           start = next
         }
 
-      } else if (/[a-z]/.test(c)) {
+      } else if (~beforeWordChars.indexOf(c)) {
         // keyword?
         ++pos
         for (var i = 0; i < beforeReWords.length; i++) {

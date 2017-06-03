@@ -269,8 +269,8 @@ var brackets = (function (UNDEF) {
           rech.lastIndex = lastIndex
           while ((match = rech.exec(str))) {
             if (match[1]) {
-              ix += match[1] === ch ? 1 : -1
-              if (!ix) break
+              if (match[1] === ch) ++ix
+              else if (!--ix) break
             } else {
               rech.lastIndex = pushQBlock(match.index, rech.lastIndex, match[2])
             }
@@ -322,7 +322,7 @@ var brackets = (function (UNDEF) {
     // Skips strings, regexes, and other inner blocks.
     function pushQBlock(_pos, _lastIndex, slash) { //eslint-disable-line
       if (slash) {
-        _lastIndex = skipRegex(str, _pos + 1)
+        _lastIndex = skipRegex(str, _pos)
       }
       // do not save empty strings or non-regex slashes
       if (_lastIndex > _pos + 2) {

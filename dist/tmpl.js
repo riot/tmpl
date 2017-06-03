@@ -21,6 +21,10 @@
       'yield'
     ]
 
+    var beforeWordChars = beforeReWords.reduce(function (s, w) {
+      return s + w.slice(-1)
+    }, '')
+
     var RE_REGEX = /^\/(?=[^*>/])[^[/\\]*(?:\\.|(?:\[(?:\\.|[^\]\\]*)*\])[^[\\/]*)*?\/[gimuy]*/
     var RE_VARCHAR = /[$\w]/
 
@@ -32,7 +36,7 @@
     function _skipRegex (code, start) {
 
       var re = /.*/g
-      var pos = re.lastIndex = start - 1
+      var pos = re.lastIndex = start++
       var match = re.exec(code)[0].match(RE_REGEX)
 
       if (match) {
@@ -59,7 +63,7 @@
             start = next
           }
 
-        } else if (/[a-z]/.test(c)) {
+        } else if (~beforeWordChars.indexOf(c)) {
 
           ++pos
           for (var i = 0; i < beforeReWords.length; i++) {
@@ -200,8 +204,8 @@
             rech.lastIndex = lastIndex
             while ((match = rech.exec(str))) {
               if (match[1]) {
-                ix += match[1] === ch ? 1 : -1
-                if (!ix) break
+                if (match[1] === ch) ++ix
+                else if (!--ix) break
               } else {
                 rech.lastIndex = pushQBlock(match.index, rech.lastIndex, match[2])
               }
@@ -242,7 +246,7 @@
 
       function pushQBlock(_pos, _lastIndex, slash) { //eslint-disable-line
         if (slash) {
-          _lastIndex = skipRegex(str, _pos + 1)
+          _lastIndex = skipRegex(str, _pos)
         }
 
         if (_lastIndex > _pos + 2) {
@@ -370,11 +374,8 @@
       return new Function('E', expr + ';')    // eslint-disable-line no-new-func
     }
 
-    var
-      CH_IDEXPR = String.fromCharCode(0x2057),
-      RE_QBLOCK = RegExp(brackets.S_QBLOCK2, 'g'),
-      RE_DQUOTE = /\u2057/g,
-      RE_QBMARK = /\u2057(\d+)~/g
+    var RE_DQUOTE = /\u2057/g
+    var RE_QBMARK = /\u2057(\d+)~/g
 
     function _getTmpl (str) {
       var parts = brackets.split(str.replace(RE_DQUOTE, '"'))
@@ -428,31 +429,11 @@
         '{': /[{}]/g
       }
 
-    function pushQBlocks(expr, qstr) {
-      var re = RE_QBLOCK
-      var match
-      re.lastIndex = 0
-      while (match = re.exec(expr)) {
-
-        var str = match[0]
-        var pos = match.index + 1
-        if (match[1]) {
-          str = expr.slice(pos - 1, re.lastIndex = skipRegex(expr, pos))
-        }
-        if (str.length > 1) {
-          var mark = CH_IDEXPR + (qstr.push(str) - 1) + '~'
-          expr = expr.slice(0, pos - 1) + mark + expr.slice(re.lastIndex)
-          re.lastIndex = pos + mark.length
-        }
-      }
-      return expr
-    }
-
     function _parseExpr (expr, asText, qstr) {
 
-      expr = pushQBlocks(expr, qstr)
-            .replace(/\s+/g, ' ').trim()
-            .replace(/\ ?([[\({},?\.:])\ ?/g, '$1')
+      expr = expr
+        .replace(/\s+/g, ' ').trim()
+        .replace(/\ ?([[\({},?\.:])\ ?/g, '$1')
 
       if (expr) {
         var

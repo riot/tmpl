@@ -1,10 +1,10 @@
 
 /**
  * The riot template engine
- * @version v3.0.7
+ * @version WIP
  */
 
-var skipRegex = (function () {
+var skipRegex = (function () { //eslint-disable-line no-unused-vars
 
   var beforeReChars = '[{(,;:?=|&!^~>%*/'
 
@@ -22,12 +22,12 @@ var skipRegex = (function () {
     'yield'
   ]
 
-  var beforeWordChars = beforeReWords.reduce(function (s, w) {
+  var wordsLastChar = beforeReWords.reduce(function (s, w) {
     return s + w.slice(-1)
   }, '')
 
-  var RE_REGEX = /^\/(?=[^*>/])[^[/\\]*(?:\\.|(?:\[(?:\\.|[^\]\\]*)*\])[^[\\/]*)*?\/[gimuy]*/
-  var RE_VARCHAR = /[$\w]/
+  var RE_REGEX = /^\/(?=[^*>/])[^[/\\]*(?:(?:\\.|\[(?:\\.|[^\]\\]*)*\])[^[\\/]*)*?\/[gimuy]*/
+  var RE_VN_CHAR = /[$\w]/
 
   function prev (code, pos) {
     while (--pos >= 0 && /\s/.test(code[pos]));
@@ -60,21 +60,17 @@ var skipRegex = (function () {
 
         if (code[--pos] !== c ||
             (pos = prev(code, pos)) < 0 ||
-            !RE_VARCHAR.test(code[pos])) {
+            !RE_VN_CHAR.test(code[pos])) {
           start = next
         }
 
-      } else if (~beforeWordChars.indexOf(c)) {
+      } else if (~wordsLastChar.indexOf(c)) {
 
-        ++pos
-        for (var i = 0; i < beforeReWords.length; i++) {
-          var kw = beforeReWords[i]
-          var nn = pos - kw.length
+        var end = pos + 1
 
-          if (nn >= 0 && code.slice(nn, pos) === kw && !RE_VARCHAR.test(code[nn - 1])) {
-            start = next
-            break
-          }
+        while (--pos >= 0 && RE_VN_CHAR.test(code[pos]));
+        if (~beforeReWords.indexOf(code.slice(pos + 1, end))) {
+          start = next
         }
       }
     }
@@ -111,11 +107,11 @@ var brackets = (function (UNDEF) {
       /(?:\breturn\s+|(?:[$\w\)\]]|\+\+|--)\s*(\/)(?![*\/]))/.source + '|' +
       /\/(?=[^*\/])[^[\/\\]*(?:(?:\[(?:\\.|[^\]\\]*)*\]|\\.)[^[\/\\]*)*?([^<]\/)[gim]*/.source,
 
-    S_QBLOCK2 = R_STRINGS.source + '|' + /(\/)(?![*\/])/.source,
-
     UNSUPPORTED = RegExp('[\\' + 'x00-\\x1F<>a-zA-Z0-9\'",;\\\\]'),
 
     NEED_ESCAPE = /(?=[[\]()*+?.^$|])/g,
+
+    S_QBLOCK2 = R_STRINGS.source + '|' + /(\/)(?![*\/])/.source,
 
     FINDBRACES = {
       '(': RegExp('([()])|'   + S_QBLOCK2, REGLOB),
@@ -314,6 +310,7 @@ var brackets = (function (UNDEF) {
   /* istanbul ignore next: in the browser riot is always in the scope */
   _brackets.settings = typeof riot !== 'undefined' && riot.settings || {}
   _brackets.set = _reset
+  _brackets.skipRegex = skipRegex
 
   _brackets.R_STRINGS = R_STRINGS
   _brackets.R_MLCOMMS = R_MLCOMMS
@@ -533,7 +530,7 @@ var tmpl = (function () {
     return expr
   }
 
-  _tmpl.version = brackets.version = 'v3.0.7'
+  _tmpl.version = brackets.version = 'WIP'
 
   return _tmpl
 

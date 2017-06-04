@@ -103,6 +103,7 @@ describe('riot-tmpl', function () {
       expect(render('{ typeof Math.random() }')).to.be('number')
       expect(render('{ fn("there") }')).to.be('hi there')
       expect(render('{ str == "x" }')).to.be(true)
+      debugger
       expect(render('{ /x/.test(str) }')).to.be(true)
       expect(render('{ true ? "a b c" : "foo" }')).to.be('a b c')
       expect(render('{ true ? "a \\"b\\" c" : "foo" }')).to.be('a "b" c')

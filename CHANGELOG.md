@@ -1,5 +1,9 @@
 # riot-tmpl Changes
 
+### v3.0.8
+- Using shared regex parser for browser and server versions.
+- Fix to incorrect regex that matches literal regexes.
+
 ### v3.0.7
 - Fix issues with serving to the compiler in the browser.
 - Fix [riot#2361](https://github.com/riot/riot/issues/2361) with a new method.

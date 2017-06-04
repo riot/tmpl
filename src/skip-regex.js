@@ -3,10 +3,7 @@
   From: https://github.com/riot/parser/blob/master/src/skip-regex.js
 */
 
-//#if 0
-/* eslint no-unused-vars: [2, {args: "after-used", varsIgnorePattern: "^skipRegex"}] */
-//#endif
-var skipRegex = (function () {
+var skipRegex = (function () { //eslint-disable-line no-unused-vars
 
   // safe characters to precced a regex (including `=>`, `**`, and `...`)
   var beforeReChars = '[{(,;:?=|&!^~>%*/'
@@ -26,13 +23,13 @@ var skipRegex = (function () {
     'yield'
   ]
 
-  var beforeWordChars = beforeReWords.reduce(function (s, w) {
+  var wordsLastChar = beforeReWords.reduce(function (s, w) {
     return s + w.slice(-1)
   }, '')
 
   // The string to test can't include line-endings
-  var RE_REGEX = /^\/(?=[^*>/])[^[/\\]*(?:\\.|(?:\[(?:\\.|[^\]\\]*)*\])[^[\\/]*)*?\/[gimuy]*/
-  var RE_VARCHAR = /[$\w]/
+  var RE_REGEX = /^\/(?=[^*>/])[^[/\\]*(?:(?:\\.|\[(?:\\.|[^\]\\]*)*\])[^[\\/]*)*?\/[gimuy]*/
+  var RE_VN_CHAR = /[$\w]/
 
   // Searches the position of the previous non-blank character inside `code`,
   // starting with `pos - 1`.
@@ -76,24 +73,20 @@ var skipRegex = (function () {
         }
 
       } else if (c === '+' || c === '-') {
-        // tricky case, with a sigle + or -  operator
-        if (code[--pos] !== c ||              // single operator, always regex
-            (pos = prev(code, pos)) < 0 ||    // no previous token, always regex
-            !RE_VARCHAR.test(code[pos])) {    // previous token can't be a JS var or number
-          start = next
+        // tricky case
+        if (code[--pos] !== c ||              // if have a single operator or
+            (pos = prev(code, pos)) < 0 ||    // ...have `++` and no previous token or
+            !RE_VN_CHAR.test(code[pos])) {    // ...the token is not a JS var/number
+          start = next                        // ...this is a regex
         }
 
-      } else if (~beforeWordChars.indexOf(c)) {
+      } else if (~wordsLastChar.indexOf(c)) {
         // keyword?
-        ++pos
-        for (var i = 0; i < beforeReWords.length; i++) {
-          var kw = beforeReWords[i]
-          var nn = pos - kw.length
+        var end = pos + 1
 
-          if (nn >= 0 && code.slice(nn, pos) === kw && !RE_VARCHAR.test(code[nn - 1])) {
-            start = next
-            break
-          }
+        while (--pos >= 0 && RE_VN_CHAR.test(code[pos]));
+        if (~beforeReWords.indexOf(code.slice(pos + 1, end))) {
+          start = next
         }
       }
     }

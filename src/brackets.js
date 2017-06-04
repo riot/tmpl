@@ -76,8 +76,6 @@ var brackets = (function (UNDEF) {
       /(?:\breturn\s+|(?:[$\w\)\]]|\+\+|--)\s*(\/)(?![*\/]))/.source + '|' +
       /\/(?=[^*\/])[^[\/\\]*(?:(?:\[(?:\\.|[^\]\\]*)*\]|\\.)[^[\/\\]*)*?([^<]\/)[gim]*/.source,
 
-    S_QBLOCK2 = R_STRINGS.source + '|' + /(\/)(?![*\/])/.source,
-
     /**
      * Characters not supported by the expression parser.
      * @const {RegExp}
@@ -91,6 +89,11 @@ var brackets = (function (UNDEF) {
      * @static
      */
     NEED_ESCAPE = /(?=[[\]()*+?.^$|])/g,
+
+    /*
+      JS/ES6 quoted strings and start of regex (basic ES6 does not supports nested backquotes).
+    */
+    S_QBLOCK2 = R_STRINGS.source + '|' + /(\/)(?![*\/])/.source,
 
     /**
      * Hash of regexes for matching JavaScript brackets out of quoted strings and literal
@@ -413,6 +416,7 @@ var brackets = (function (UNDEF) {
   /* istanbul ignore next: in the browser riot is always in the scope */
   _brackets.settings = typeof riot !== 'undefined' && riot.settings || {}
   _brackets.set = _reset
+  _brackets.skipRegex = skipRegex
 
   // Public properties, shared with `tmpl`
   _brackets.R_STRINGS = R_STRINGS

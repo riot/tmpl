@@ -491,19 +491,33 @@
     function _wrapExpr (expr, asText, key) {
       var tb
 
-      expr = expr.replace(JS_VARNAME, function (match, p, mvar, pos, s) {
-        if (mvar) {
-          pos = tb ? 0 : pos + match.length
-
-          if (mvar !== 'this' && mvar !== 'global' && mvar !== 'window') {
-            match = p + '("' + mvar + JS_CONTEXT + mvar
-            if (pos) tb = (s = s[pos]) === '.' || s === '(' || s === '['
-          } else if (pos) {
-            tb = !JS_NOPROPS.test(s.slice(pos))
-          }
+      if (expr.includes('=>')) {
+        try {
+          const match = expr.match(/(?<pre>.*)(?<args>(\((.*)))(=>)(?<body>(.*))\)/)
+          let { pre, args, body } = match.groups;
+          body = body.replace(/[{}\s]|(return)/g, '')
+          expr = `${pre}function${args}{return ${body}})`
+        } catch (error) {
+          console.error('Failed to transform arrow function in expression:', expr, error);
         }
-        return match
-      })
+
+      }
+
+      if (!expr.includes('(function(')) {
+        expr = expr.replace(JS_VARNAME, function (match, p, mvar, pos, s) {
+          if (mvar) {
+            pos = tb ? 0 : pos + match.length
+
+            if (mvar !== 'this' && mvar !== 'global' && mvar !== 'window') {
+              match = p + '("' + mvar + JS_CONTEXT + mvar
+              if (pos) tb = (s = s[pos]) === '.' || s === '(' || s === '['
+            } else if (pos) {
+              tb = !JS_NOPROPS.test(s.slice(pos))
+            }
+          }
+          return match
+        })
+      }
 
       if (tb) {
         expr = 'try{return ' + expr + '}catch(e){E(e,this)}'

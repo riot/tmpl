@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version v3.0.8
+ * @version WIP
  */
 
 var skipRegex = (function () { //eslint-disable-line no-unused-vars
@@ -496,19 +496,31 @@ var tmpl = (function () {
   function _wrapExpr (expr, asText, key) {
     var tb
 
-    expr = expr.replace(JS_VARNAME, function (match, p, mvar, pos, s) {
-      if (mvar) {
-        pos = tb ? 0 : pos + match.length
-
-        if (mvar !== 'this' && mvar !== 'global' && mvar !== 'window') {
-          match = p + '("' + mvar + JS_CONTEXT + mvar
-          if (pos) tb = (s = s[pos]) === '.' || s === '(' || s === '['
-        } else if (pos) {
-          tb = !JS_NOPROPS.test(s.slice(pos))
-        }
+    if (expr.match(/=>/)) {
+      try {
+        var match = expr.match(/(.*)((\((.*)))(=>)((.*))\)/)
+        var body = match[6].replace(/[{}\s]|(return)/g, '')
+        expr = match[1] + 'function' + match[2] + '{return ' + body + '})'
+      } catch(error) {
+        console.error('Failed to transform arrow function in expression:', expr, error)
       }
-      return match
-    })
+    }
+
+    if (!expr.match(/\(function\(/)) {
+      expr = expr.replace(JS_VARNAME, function (match, p, mvar, pos, s) {
+        if (mvar) {
+          pos = tb ? 0 : pos + match.length
+
+          if (mvar !== 'this' && mvar !== 'global' && mvar !== 'window') {
+            match = p + '("' + mvar + JS_CONTEXT + mvar
+            if (pos) tb = (s = s[pos]) === '.' || s === '(' || s === '['
+          } else if (pos) {
+            tb = !JS_NOPROPS.test(s.slice(pos))
+          }
+        }
+        return match
+      })
+    }
 
     if (tb) {
       expr = 'try{return ' + expr + '}catch(e){E(e,this)}'
@@ -530,7 +542,7 @@ var tmpl = (function () {
     return expr
   }
 
-  _tmpl.version = brackets.version = 'v3.0.8'
+  _tmpl.version = brackets.version = 'WIP'
 
   return _tmpl
 

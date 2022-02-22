@@ -99,11 +99,11 @@ describe('riot-tmpl', function () {
       expect(render('{ false || null || !no && yes }')).to.be(true)
       expect(render('{ !no ? "yes" : "no" }')).to.be('yes')
       expect(render('{ !yes ? "yes" : "no" }')).to.be('no')
-      expect(render('{ /^14/.test(+new Date()) }')).to.be(true)
+      // expect(render('{ /^14/.test(+new Date()) }')).to.be(true)
       expect(render('{ typeof Math.random() }')).to.be('number')
       expect(render('{ fn("there") }')).to.be('hi there')
       expect(render('{ str == "x" }')).to.be(true)
-      debugger
+      // debugger
       expect(render('{ /x/.test(str) }')).to.be(true)
       expect(render('{ true ? "a b c" : "foo" }')).to.be('a b c')
       expect(render('{ true ? "a \\"b\\" c" : "foo" }')).to.be('a "b" c')
@@ -545,6 +545,57 @@ describe('riot-tmpl', function () {
 
     it('fixes riot#2361', function () {
       expect(render('<div>{ (2+3)/2 }</div>')).to.be('<div>2.5</div>')
+    })
+  })
+
+  describe('anonymous and arrow callbacks', function () {
+
+    var setBrackets = function () { brackets.set('{{ }}') }
+    var clearBrackets = function () { brackets.set(null) }
+
+    before(setBrackets)
+    after(clearBrackets)
+
+    it('evaluate sum of integers', function () {
+      const evaluated = render('{{ 1 + 2 }}')
+      expect(evaluated).eql(3)
+    })
+  
+    it('evaluate array method with same-line anonymous callback', function () {
+      const evaluated = render('{{ [1, 2, 3].filter(function (v) { return v > 2 }) }}')
+      expect(evaluated).eql([3])
+    })
+  
+    it('evaluate array method with single-line anonymous callback', function () {
+      const evaluated = render('{{ [1, 2, 3].filter(function (v) {\
+        return v > 2\
+      }) }}')
+      expect(evaluated).eql([3])
+    })
+  
+    it('evaluate array method with multi-line anonymous callback', function () {
+      const evaluated = render('{{ [1, 2, 3].filter(function (v) {\
+        const a = 1;\
+        return v > 2\
+      }) }}')
+      expect(evaluated).eql([3])
+    })
+  
+    it('evaluate array method with same-line arrow callback, unbracketed return', function () {
+      const evaluated = render('{{ [1, 2, 3].filter((v) => v > 2) }}')
+      expect(evaluated).eql([3])
+    })
+  
+    it('evaluate array method with single-line anonymous callback, bracketed return', function () {
+      const evaluated = render('{{ [1, 2, 3].filter((v) => { return v > 2 }) }}')
+      expect(evaluated).eql([3])
+    })
+  
+    it('evaluate array method with single-line arrow callback', function () {
+      const evaluated = render('{{ [1, 2, 3].filter((v) => {\
+        return v > 2\
+      }) }}')
+      expect(evaluated).eql([3])
     })
   })
 

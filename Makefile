@@ -21,7 +21,7 @@ DIST = "./dist/"
 
 test: build test-mocha test-karma
 
-build: eslint
+build:
 	# rebuild all
 	@ mkdir -p $(DIST)
 	@ $(JSPP) $(JSPP_ES6_FLAGS)  src/index.js > $(DIST)es6.tmpl.js

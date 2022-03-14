@@ -1,7 +1,7 @@
 {
-  "name": "riot-tmpl",
-  "version": "3.0.8",
-  "description": "The riot template engine",
+  "name": "@n8n-io/riot-tmpl",
+  "version": "1.0.0",
+  "description": "n8n fork of the riot template engine",
   "main": "dist/tmpl.js",
   "module": "dist/es6.tmpl.js",
   "jsnext:main": "dist/es6.tmpl.js",
@@ -20,13 +20,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/riot/tmpl.git"
+    "url": "git+https://github.com/n8n-io/tmpl.git"
   },
   "keywords": [
     "riot",
     "tmpl",
     "template",
-    "engine"
+    "engine",
+    "n8n"
   ],
   "devDependencies": {
     "coveralls": "^2.13.1",
@@ -58,9 +59,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/riot/tmpl/issues"
+    "url": "https://github.com/n8n-io/tmpl/issues"
   },
-  "homepage": "https://github.com/riot/tmpl#readme",
+  "homepage": "https://github.com/n8n-io/tmpl#readme",
   "dependencies": {
     "eslint-config-riot": "^1.0.0"
   }

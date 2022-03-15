@@ -1,7 +1,7 @@
 
 /**
  * The riot template engine
- * @version WIP
+ * @version v1.0.0
  */
 
 var skipRegex = (function () { //eslint-disable-line no-unused-vars
@@ -542,7 +542,7 @@ var tmpl = (function () {
     return expr
   }
 
-  _tmpl.version = brackets.version = 'WIP'
+  _tmpl.version = brackets.version = 'v1.0.0'
 
   return _tmpl
 

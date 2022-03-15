@@ -1,5 +1,5 @@
 {
-  "name": "@n8n-io/riot-tmpl",
+  "name": "@n8n_io/riot-tmpl",
   "version": "1.0.0",
   "description": "n8n fork of the riot template engine",
   "main": "dist/tmpl.js",

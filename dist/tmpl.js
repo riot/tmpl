@@ -1,5 +1,5 @@
 
-/* riot-tmpl v1.0.0, @license MIT, (c) 2015 Muut Inc. + contributors */
+/* riot-tmpl WIP, @license MIT, (c) 2015 Muut Inc. + contributors */
 ;(function (window) {     // eslint-disable-line no-extra-semi
   'use strict'
 
@@ -332,6 +332,9 @@
     function _tmpl (str, data) {
       if (!str) return str
 
+      console.log('DATAAA')
+      console.log(data)
+
       return (_cache[str] || (_cache[str] = _create(str))).call(
         data, _logErr.bind({
           data: data,
@@ -541,7 +544,7 @@
 
   })()
 
-  tmpl.version = brackets.version = 'v1.0.0'
+  tmpl.version = brackets.version = 'WIP'
 
   /* istanbul ignore else */
   if (typeof module === 'object' && module.exports) {

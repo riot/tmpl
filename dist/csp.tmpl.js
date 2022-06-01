@@ -7547,6 +7547,8 @@ var tmpl = (function () {
 
     if (expr.slice(0, 11) !== 'try{return ') expr = 'return ' + expr;
 
+    expr = 'var ' + (typeof window !== 'object' ? 'global' : 'window') + ' = {}; ' + expr;
+
     return safeEval.func('E', expr + ';')
   }
 
@@ -7640,6 +7642,7 @@ var tmpl = (function () {
       expr = !cnt ? _wrapExpr(expr, asText)
            : cnt > 1 ? '[' + list.join(',') + '].join(" ").trim()' : list[0];
     }
+
     return expr
 
     function skipBraces (ch, re) {

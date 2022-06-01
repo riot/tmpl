@@ -2,7 +2,7 @@
 
 describe('brackets', function () {
 
-  var data = { x: 2, str: 'x' }
+  var data = { x: 2, str: 'x', JSON: JSON }
 
   // send 1 or 2 in 'err' to enable internal information
   function render (str, dbg) {
